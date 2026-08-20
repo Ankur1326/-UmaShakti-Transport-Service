@@ -4,7 +4,8 @@ import {
     HiOutlineHome,
     HiOutlineUser,
     HiOutlineUserGroup,
-    HiOutlineBell
+    HiOutlineBell,
+    HiOutlineDocumentText
 } from 'react-icons/hi';
 import { FiCircle } from 'react-icons/fi';
 import { MdOutlineFeedback } from 'react-icons/md';
@@ -52,6 +53,17 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                         title: 'My Profile',
                         icon: <HiOutlineUser className="text-[#66B788] w-5 h-5" />,
                         route: '/user/profile',
+                    },
+                ]
+            },
+            {
+                name: 'Billing',
+                items: [
+                    {
+                        id: 'billing-new',
+                        title: 'New Consignment Note',
+                        icon: <HiOutlineDocumentText className="text-[#66B788] w-5 h-5" />,
+                        route: '/admin/billing/new',
                     },
                 ]
             },

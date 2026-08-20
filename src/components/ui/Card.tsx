@@ -8,16 +8,16 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const paddingClasses = {
   none: "",
-  sm: "p-4",
+  sm: "p-3",
   md: "p-6",
   lg: "p-8",
 };
 
-export function Card({ className, interactive = false, padding = "md", ...props }: CardProps) {
+export function Card({ className, interactive = false, padding = "sm", ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-neutral-200 bg-white shadow-card",
+        "border border-neutral-200 bg-white",
         paddingClasses[padding],
         interactive && "transition-all hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-card-hover",
         className
@@ -32,13 +32,13 @@ export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDiv
 }
 
 export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn("text-h4 font-semibold text-neutral-900", className)} {...props} />;
+  return <h3 className={cn("text-[15px] font-semibold text-neutral-900", className)} {...props} />;
 }
 
 export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("mt-1 text-body-sm text-neutral-500", className)} {...props} />;
+  return <p className={cn("text-[12px] text-neutral-500", className)} {...props} />;
 }
 
 export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("mt-4 flex items-center gap-3", className)} {...props} />;
+  return <div className={cn("flex items-center gap-3", className)} {...props} />;
 }

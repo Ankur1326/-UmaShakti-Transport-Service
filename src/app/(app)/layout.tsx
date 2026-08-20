@@ -78,7 +78,7 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
     }
   };
 
-  console.log("session :::: ", session)
+  // console.log("session :::: ", session)
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
@@ -95,14 +95,16 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex bg-[#f8faf9] dark:bg-gray-900">
       {/* Sidebar - Show sidebar for authenticated users */}
       {session?.user ? (
-        <Sidebar isSidebarOpen={isSidebarOpen} userRole={userRole} />
+        <div className="print:hidden">
+          <Sidebar isSidebarOpen={isSidebarOpen} userRole={userRole} />
+        </div>
       ) : (
         ""
       )}
 
       {/* Content Area */}
       <div className={`flex-1 transition-all duration-300 "md:ml-64"}`}>
-        <header className="flex justify-between h-16 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 items-center fixed top-0 left-0 right-0 z-10 px-4">
+        <header className="flex justify-between h-16 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 items-center fixed top-0 left-0 right-0 z-10 px-4 print:hidden">
           {/* <div className="flex items-center"> */}
           {/* <button
                     className="text-[#66B788] hover:text-[#4a8f65] transition-colors p-2 rounded-md md:hidden"
@@ -154,7 +156,7 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Main content - Full width container */}
-        <main className="mt-16 px-6 py-6 bg-[#f8faf9] dark:bg-gray-900 min-h-screen transition-all duration-300">
+        <main className="mt-16 ml-64 px-2 py-2 bg-[#f8faf9] dark:bg-gray-900 min-h-screen transition-all duration-300">
           {children}
         </main>
       </div>

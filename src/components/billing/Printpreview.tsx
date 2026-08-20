@@ -1,0 +1,1253 @@
+"use client";
+
+import type { ReactNode } from "react";
+import Image from "next/image";
+import { ArrowLeft, Printer } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { computeBillingTotals } from "@/lib/calculations/billing";
+import { amountToWords, formatINR } from "@/lib/numberToWords";
+import { siteConfig } from "@/lib/site-config";
+import type { BillingFormValues } from "@/lib/validations/billing";
+
+interface PrintPreviewProps {
+  values: BillingFormValues;
+  onClose: () => void;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
+
+function text(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+  return String(value);
+}
+
+function formatDate(value?: string) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-GB");
+}
+
+function rupees(value: unknown) {
+  const amount = Number(value || 0);
+  return amount.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* Small Components                                                           */
+/* -------------------------------------------------------------------------- */
+
+function SmallLabel({ children }: { children: ReactNode }) {
+  return <span className="lr-label">{children}</span>;
+}
+
+function LRField({ label, value, className = "" }: { label: string; value?: ReactNode; className?: string }) {
+  return (
+    <div className={`lr-field ${className}`}>
+      <SmallLabel>{label}</SmallLabel>
+      <span className="lr-field-value">{value || ""}</span>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Single Copy                                                                */
+/* -------------------------------------------------------------------------- */
+
+function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: "LORRY COPY" | "CONSIGNEE COPY" }) {
+  const totals = computeBillingTotals(values.charges, values.tax);
+  const segment = String(values.segment);
+
+  return (
+    <div className="lr-page">
+      {/* ================================================================== */}
+      {/* HEADER                                                             */}
+      {/* ================================================================== */}
+      <div className="lr-header">
+        {/* COMPANY INFORMATION */}
+        <div className="lr-company-section">
+          <div className="lr-company-top">
+            <div className="lr-logo">
+              <Image
+                src="/media/logo.jpeg"
+                alt={siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}
+                width={56}
+                height={56}
+                priority
+              />
+            </div>
+            <div className="lr-company-details">
+              <div className="lr-company-name">{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
+              <div className="lr-company-address">{text(siteConfig.address)}</div>
+              <div className="lr-company-contact">
+                {text(siteConfig.phone)}
+                {siteConfig.email ? ` • ${siteConfig.email}` : ""}
+              </div>
+            </div>
+          </div>
+
+          <div className="lr-registration">
+            <div>REG. NO.: 24AAHFU8816H1ZX</div>
+            <div>PAN NO. AAHFU8816H</div>
+            <div>UDYAM-GJ-24-0106951</div>
+          </div>
+
+          <div className="lr-bank-details">
+            <div className="lr-bank-title">BANK DETAILS</div>
+            <div>{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
+            <div>HDFC BANK, Opp. Apollo Tyres, Limda, Waghodia.</div>
+            <div>IFSC Code: HDFC0007181 - A/c. No.: 50200983890449</div>
+          </div>
+        </div>
+
+        {/* FROM / TO */}
+        <div className="lr-route-section relative">
+          <div className="lr-route-row">
+            <div className="lr-route-title">FROM</div>
+            <div className="lr-route-value">{text(values.from.location)}</div>
+          </div>
+
+          <div className="lr-route-row">
+            <div className="lr-route-title">TO</div>
+            <div className="lr-route-value">{text(values.to.location)}</div>
+          </div>
+
+          <div className="lr-delivery-office">
+            <SmallLabel>Address of Delivery Office</SmallLabel>
+            <div className="lr-handwriting">
+              {text(values.to.branch || values.to.location)}
+              {values.to.state ? `, ${text(values.to.state)}` : ""}
+            </div>
+            <div className="lr-mini-row absolute bottom-4 ">
+              <span>State :</span>
+              <span>{text(values.to.state)}</span>
+            </div>
+            <div className="lr-mini-row absolute bottom-1">
+              <span>GSTIN :</span>
+              <span>{text(values.to.gstin)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* SEGMENTS */}
+        <div className="lr-segment-section">
+          <div className="lr-segment-title">SEGMENTS</div>
+
+          <div className="lr-segment-options">
+            <span className={segment === "LTL" ? "active" : ""}>LTL</span>
+            <span className={segment === "SUN" ? "active" : ""}>SUN</span>
+            <span className={segment === "ODC" ? "active" : ""}>ODC</span>
+            <span className={segment === "MM" ? "active" : ""}>MM</span>
+            <span className={segment === "SAARC" ? "active" : ""}>SAARC</span>
+          </div>
+
+          <div className="lr-segment-info">
+            <b>Load Type:</b> {text(values.loadType)}
+          </div>
+          <div className="lr-segment-info">
+            <b>Risk:</b> Owner&apos;s Risk
+          </div>
+          <div className="lr-segment-info">
+            <b>Vehicle:</b> {text(values.vehicleNumber)}
+          </div>
+          <div className="lr-segment-info">
+            <b>Mode:</b> {text(values.vehicle.transportMode)}
+          </div>
+        </div>
+      </div>
+
+      {/* ================================================================== */}
+      {/* MAIN CONTENT                                                       */}
+      {/* ================================================================== */}
+      <div className="lr-content ">
+        {/* LEFT / MAIN AREA */}
+        <div className="lr-main">
+          {/* CONSIGNOR / CONSIGNEE */}
+          <div className="lr-parties">
+            <div className="lr-party">
+              <div className="lr-vertical-title">CONSIGNOR</div>
+              <div className="lr-party-content">
+                <SmallLabel>Address</SmallLabel>
+                <div className="lr-party-name">{text(values.consignor.name)}</div>
+                <div className="lr-party-address">{text(values.consignor.address)}</div>
+                <div className="lr-party-address">
+                  {text(values.consignor.city)}
+                  {values.consignor.state ? `, ${text(values.consignor.state)}` : ""}
+                </div>
+                <div className="lr-party-detail">GSTIN: {text(values.consignor.gstin)}</div>
+                <div className="lr-party-detail">Mobile: {text(values.consignor.mobile)}</div>
+              </div>
+            </div>
+
+            <div className="lr-party">
+              <div className="lr-vertical-title">CONSIGNEE</div>
+              <div className="lr-party-content">
+                <SmallLabel>Address</SmallLabel>
+                <div className="lr-party-name">{text(values.consignee.name)}</div>
+                <div className="lr-party-address">{text(values.consignee.address)}</div>
+                <div className="lr-party-address">
+                  {text(values.consignee.city)}
+                  {values.consignee.state ? `, ${text(values.consignee.state)}` : ""}
+                </div>
+                <div className="lr-party-detail">GSTIN: {text(values.consignee.gstin)}</div>
+                <div className="lr-party-detail">Mobile: {text(values.consignee.mobile)}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* SHIPMENT TABLE */}
+          <div className="lr-shipment">
+            {/* Row 1: Pkgs / Packing / Private Mark / CNS No. / Vehicle No. */}
+            <div className="lr-row-one">
+              <div className="lr-row-one-cell">
+                <LRField label="Pkgs." value={text(values.shipment.packages)} />
+              </div>
+              <div className="lr-row-one-cell">
+                <LRField label="Packing" value={text(values.shipment.packing)} />
+              </div>
+              {/* <div className="lr-row-one-cell">
+                <LRField label="Private Mark" value="" />
+              </div> */}
+
+
+              <div className="lr-cns-cell">
+                <div className="lr-vertical-title lr-cns-label">CNS NO.</div>
+                <strong className="lr-cns-number">{text(values.consignmentNumber)}</strong>
+              </div>
+
+              <div className="flex flex-col justify-center gap-1 lr-date-block">
+                <div className="flex p-1 gap-2 border-b border-b-black" >
+                  <SmallLabel>Booking Date</SmallLabel>
+                  <strong>{formatDate(values.bookingDate)}</strong>
+                </div>
+                <div className="flex p-1 gap-2">
+                  <span className="lr-label">CNS Date</span>
+                  <strong>{formatDate(values.cnsDate)}</strong>
+                </div>
+              </div>
+
+
+              <div className="lr-vehicle-cell">
+
+                <div className="lr-vertical-title lr-cns-label">VEHICLE NO.</div>
+                <strong className="lr-vehicle-number">{text(values.vehicleNumber)}</strong>
+              </div>
+            </div>
+
+            {/* Row 2: Declared Value / Invoice No. / Volume / Invoice Date */}
+            <div className="lr-shipment-row row-two">
+              <LRField label="Declared Value" value={formatINR(values.shipment.declaredValue ?? 0)} />
+              <LRField label="Invoice No." value={text(values.invoiceNumber)} />
+              <LRField label="Volume LxBxH - CFT" value={text(values.shipment.volume)} />
+              <LRField label="Invoice Date" value={formatDate(values.invoiceDate)} />
+            </div>
+
+            {/* Row 3: E-Way Bill / Valid upto / Actual Wt. / Charged Wt. */}
+            <div className="lr-shipment-row row-three">
+              <LRField label="E-Way Bill No." value={text(values.eWayBillNumber)} />
+              <LRField label="Valid upto" value={formatDate(values.validUpTo)} />
+              <LRField label="Actual Wt." value={`${text(values.shipment.actualWeight)} ${text(values.shipment.weightUnit)}`} />
+              <LRField label="Charged Wt." value={`${text(values.shipment.actualWeight)} ${text(values.shipment.weightUnit)}`} />
+            </div>
+
+            {/* Terms / Description / Classification / Acknowledgement */}
+            <div className="lr-bottom-row">
+              <div className="lr-terms-cell">
+                <div className="lr-terms-text">
+                  We hereby confirm that particulars of goods packed &amp; declared in invoice are same. Packing of the
+                  consignment was done under the supervision. We have read the terms &amp; conditions printed on the face
+                  &amp; overleaf of the consignment note.
+                </div>
+                <div className="lr-terms-caption">Description of the goods as declared by Consignor</div>
+                <div className="lr-copy-date">Date: {formatDate(values.vehicle.expectedDeliveryDate)}</div>
+              </div>
+
+              <div className="lr-description-cell">
+                <div className="lr-description-inner">
+                  <SmallLabel>Description of Goods</SmallLabel>
+                  <div className="lr-goods-value">{text(values.shipment.description)}</div>
+                </div>
+                <div className="lr-copy-name-row">
+                  <div className="lr-copy-name">{copyName}</div>
+                </div>
+              </div>
+
+              <div className="lr-classification-cell">
+                <SmallLabel>Classification of Goods</SmallLabel>
+                <div className="lr-goods-value">{text(values.shipment.classification)}</div>
+              </div>
+
+              <div className="lr-ack-cell">
+                <div className="lr-ack-banner">SPACE FOR ACKNOWLEDGEMENT</div>
+                <div className="lr-ack-footer">
+                  <div className="lr-copy-date">Date: {formatDate(values.bookingDate)}</div>
+                  <div className="lr-copy-sign">Signature / Stamp</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT CHARGES */}
+        <div className="lr-charges">
+          <div className="lr-charge-header">
+            <span>Particulars</span>
+            <span>Amount in Rs.</span>
+          </div>
+
+          <div className="lr-charge-row">
+            <span>Freight</span>
+            <span>{rupees(values.charges.freight)}</span>
+          </div>
+          <div className="lr-charge-row">
+            <span>Local Godown Charges</span>
+            <span>{rupees(values.charges.localGodownCharges)}</span>
+          </div>
+          <div className="lr-charge-row">
+            <span>Unloading Charge</span>
+            <span>{rupees(values.charges.unloadingCharge)}</span>
+          </div>
+          <div className="lr-charge-row">
+            <span>Loading Charge</span>
+            <span>{rupees(values.charges.loadingCharge)}</span>
+          </div>
+          <div className="lr-charge-row">
+            <span>COD Charges</span>
+            <span>{rupees(values.charges.codCharges)}</span>
+          </div>
+          <div className="lr-charge-row">
+            <span>Statistical Charges</span>
+            <span>{rupees(values.charges.statisticalCharges)}</span>
+          </div>
+          <div className="lr-charge-row">
+            <span>Local Collection Charges</span>
+            <span>{rupees(values.charges.localCollectionCharges)}</span>
+          </div>
+
+          <div className="lr-charge-row lr-subtotal">
+            <strong>SUB TOTAL</strong>
+            <strong>{rupees(totals.subtotal)}</strong>
+          </div>
+
+          <div className="lr-charge-row">
+            <span>GST Charges @ {totals.gstPercentage}%</span>
+            <span>{rupees(totals.gstAmount)}</span>
+          </div>
+
+          <div className="lr-grand-total">
+            <strong>GRAND TOTAL</strong>
+            <strong>{rupees(totals.grandTotal)}</strong>
+          </div>
+
+          <div className="lr-amount-words">
+            <SmallLabel>Amt. in Words</SmallLabel>
+            <div>{amountToWords(totals.grandTotal)}</div>
+          </div>
+
+          <div className="lr-basis">
+            <SmallLabel>Basis of Booking</SmallLabel>
+            <div className="lr-checkbox-row">
+              <span>{values.payment.type === "To Pay" ? "☑" : "☐"} 1. To Pay</span>
+              <span>{values.payment.type === "TBB" ? "☑" : "☐"} 2. TBB</span>
+            </div>
+            <div className="lr-checkbox-row">
+              <span>{values.payment.type === "Paid" ? "☑" : "☐"} 3. Paid</span>
+              <span>MR No. ____</span>
+            </div>
+          </div>
+
+          <div className="lr-gst-payable">
+            <SmallLabel>GST Payable by</SmallLabel>
+            <div className="lr-checkbox-row">
+              <span>{values.payment.billingParty === "Consignor" ? "☑" : "☐"} Consignor</span>
+              <span>{values.payment.billingParty === "Consignee" ? "☑" : "☐"} Consignee</span>
+              <span>{values.payment.billingParty === "Third Party" ? "☑" : "☐"} UTS</span>
+            </div>
+          </div>
+
+          <div className="lr-authorized">
+            <div className="lr-authorized-space" />
+            <strong>For {siteConfig.name}</strong>
+            <div className="lr-authorized-line" />
+            <span>Authorized Signatory</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ================================================================== */}
+      {/* FOOTER                                                             */}
+      {/* ================================================================== */}
+      <div className="lr-footer">
+        <div className="lr-footer-text">
+          Subject to Vadodara Jurisdiction. Goods carried at owner&apos;s risk unless otherwise agreed. Claims must be made
+          according to the terms and conditions of the company.
+        </div>
+        <strong>{copyName}</strong>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* PRINT PREVIEW                                                              */
+/* -------------------------------------------------------------------------- */
+
+export function PrintPreview({ values, onClose }: PrintPreviewProps) {
+  return (
+    <div className="lr-preview">
+      {/* TOOLBAR — hidden on print */}
+      <div className="lr-toolbar print:hidden">
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to Edit
+        </Button>
+        <Button variant="primary" size="sm" onClick={() => window.print()}>
+          <Printer className="h-4 w-4" aria-hidden="true" />
+          Print / Save as PDF
+        </Button>
+      </div>
+
+      {/* DOCUMENT — two copies, matching the physical Lorry Copy / Consignee Copy pair */}
+      <div className="lr-document">
+        <LorryCopy values={values} copyName="LORRY COPY" />
+        <LorryCopy values={values} copyName="CONSIGNEE COPY" />
+      </div>
+
+      <style jsx global>{`
+        * {
+          box-sizing: border-box;
+        }
+
+        /* ============================================================= */
+        /* PREVIEW SHELL                                                  */
+        /* ============================================================= */
+
+        .lr-preview {
+          min-height: 100vh;
+          background: #e5e7eb;
+          color: #111;
+          font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .lr-toolbar {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          height: 60px;
+          padding: 0 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #fff;
+          border-bottom: 1px solid #d1d5db;
+        }
+
+        .lr-document {
+          padding: 25px;
+        }
+
+        /* ============================================================= */
+        /* PAGE                                                           */
+        /* ============================================================= */
+
+        .lr-page {
+          width: 11.69in;
+          min-height: 8.27in;
+          margin: 0 auto 25px;
+          background: #fff;
+          border: 1.5px solid #16213e;
+          color: #1a1a2e;
+          position: relative;
+          font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+          font-size: 11px;
+          line-height: 1.2;
+          letter-spacing: 0.3px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* ============================================================= */
+        /* HEADER                                                         */
+        /* ============================================================= */
+
+        .lr-header {
+          display: grid;
+          grid-template-columns: 38% 37% 25%;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-company-section {
+          padding: 6px;
+          border-right: 1px solid #111;
+        }
+
+        .lr-company-top {
+          display: flex;
+          gap: 7px;
+          margin-bottom: 4px;
+        }
+
+        .lr-logo {
+          width: 56px;
+          height: 56px;
+          min-width: 56px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #172f57;
+          font-size: 15px;
+          font-weight: 900;
+          overflow: hidden;
+          background: #fff;
+        }
+
+        .lr-logo img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
+        }
+
+        .lr-company-name {
+          color: #b91c1c;
+          font-size: 18px;
+          font-weight: 900;
+          line-height: 1.15;
+          margin-bottom: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+        }
+
+        .lr-company-details {
+          font-size: 10px;
+          line-height: 1.45;
+          color: #3f3f46;
+        }
+
+        .lr-company-address {
+          margin-bottom: 2px;
+        }
+
+        .lr-company-contact {
+          margin-bottom: 4px;
+          color: #16213e;
+          font-weight: 600;
+        }
+
+        .lr-registration {
+          color: #9a1414;
+          font-weight: 700;
+          line-height: 1.4;
+          font-size: 10px;
+          margin-bottom: 5px;
+          letter-spacing: 0.2px;
+        }
+
+        .lr-bank-details {
+          font-size: 10px;
+          line-height: 1.45;
+          border-top: 1.5px solid #16213e;
+          padding-top: 4px;
+          letter-spacing: 0.2px;
+          font-weight: 600;
+          color: #26314a;
+        }
+
+        .lr-bank-title {
+          font-weight: 900;
+          letter-spacing: 0.6px;
+          color: #16213e;
+          margin-bottom: 1px;
+        }
+
+        /* ============================================================= */
+        /* ROUTE                                                          */
+        /* ============================================================= */
+
+        .lr-route-section {
+          border-right: 1px solid #111;
+          font-weight: 600;
+          font-size: 13px;
+        }
+
+        .lr-route-row {
+          height: 32px;
+          display: grid;
+          grid-template-columns: 55px 1fr;
+          border-bottom: 1px solid #111;
+          font-weight: 600;
+          font-size: 13px;
+        }
+
+        .lr-route-title {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-right: 1px solid #111;
+          font-weight: 700;
+          font-size: 12px;
+          letter-spacing: 0.5px;
+          // background: #16213e;
+          color: #000;
+        }
+
+        .lr-route-value {
+          display: flex;
+          align-items: center;
+          padding: 0 8px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #16213e;
+        }
+
+        .lr-delivery-office {
+          padding: 5px 8px;
+        }
+
+        .lr-handwriting {
+          margin-top: 5px;
+          margin-bottom: 4px;
+          font-size: 16px;
+          font-weight: 600;
+          color: #1a1a2e;
+        }
+
+        .lr-mini-row {
+          display: flex;
+          gap: 5px;
+          margin-top: 2px;
+          font-size: 11px;
+          color: #3f3f46;
+        }
+
+        .lr-mini-row span:first-child {
+          font-weight: 700;
+          color: #16213e;
+        }
+
+        /* ============================================================= */
+        /* SEGMENTS                                                       */
+        /* ============================================================= */
+
+        .lr-segment-section {
+          font-size: 10px;
+          color: #26314a;
+        }
+
+        .lr-segment-title {
+          text-align: center;
+          font-weight: 900;
+          padding: 5px;
+          border-bottom: 1px solid #111;
+          background: #16213e;
+          color: #fff;
+          letter-spacing: 0.8px;
+        }
+
+        .lr-segment-options {
+          display: flex;
+          justify-content: space-around;
+          padding: 5px 2px;
+          border-bottom: 1px solid #111;
+          font-weight: 600;
+          color: #6b7280;
+        }
+
+        .lr-segment-options .active {
+          font-weight: 900;
+          text-decoration: underline;
+          color: #b91c1c;
+        }
+
+        .lr-segment-info {
+          padding: 4px 6px;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-segment-info b {
+          color: #16213e;
+        }
+
+        /* ============================================================= */
+        /* MAIN CONTENT                                                   */
+        /* ============================================================= */
+
+        .lr-content {
+          flex: 1;
+          display: grid;
+          grid-template-columns: 75% 25%;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-main {
+          border-right: 1px solid #111;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* ============================================================= */
+        /* PARTIES                                                        */
+        /* ============================================================= */
+
+        .lr-parties {
+          min-height: 1.9in;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .lr-party {
+          display: flex;
+          border-bottom: 1px solid #111;
+          border-right: 1px solid #111;
+        }
+
+        .lr-party:last-child {
+          border-right: 0;
+        }
+
+        .lr-vertical-title {
+          width: 26px;
+          min-width: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          writing-mode: vertical-rl;
+          transform: rotate(180deg);
+          font-size: 10px;
+          font-weight: 900;
+          border-right: 1px solid #111;
+          letter-spacing: 0.5px;
+          background-color: #16213e;
+          color: white;
+        }
+
+        .lr-party-content {
+          padding: 5px 7px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .lr-label {
+          display: block;
+          font-size: 8.5px;
+          color: #6b7280;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 2px;
+        }
+
+        .lr-party-name {
+          font-size: 17px;
+          font-weight: 800;
+          color: #16213e;
+          margin-bottom: 3px;
+        }
+
+        .lr-party-address {
+          font-size: 11px;
+          line-height: 1.35;
+          color: #3f3f46;
+          margin-bottom: 2px;
+        }
+
+        .lr-party-detail {
+          font-size: 10px;
+          margin-top: 3px;
+          color: #26314a;
+          font-weight: 600;
+        }
+
+        /* ============================================================= */
+        /* SHIPMENT                                                       */
+        /* ============================================================= */
+
+        .lr-shipment {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        .lr-shipment-row {
+          display: grid;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-shipment-row > * {
+          border-right: 1px solid #111;
+          padding: 4px 6px;
+        }
+
+        .lr-shipment-row > *:last-child {
+          border-right: 0;
+        }
+
+        .row-two {
+          grid-template-columns: 22% 22% 28% 28%;
+          min-height: 38px;
+        }
+
+        .row-three {
+          grid-template-columns: 25% 18% 28% 29%;
+          min-height: 38px;
+        }
+
+        .lr-field {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .lr-field-value {
+          font-size: 12px;
+          font-weight: 700;
+          color: #16213e;
+          word-break: break-word;
+        }
+
+        /* Row 1: Pkgs / Packing / Private Mark / CNS No. / Vehicle No. */
+        .lr-row-one {
+          display: grid;
+          grid-template-columns: 17% 17% 16% 25% 25%;
+          border-bottom: 1px solid #111;
+          min-height: 48px;
+        }
+
+        .lr-row-one-cell {
+          border-right: 1px solid #111;
+          padding: 4px 6px;
+          display: flex;
+          align-items: center;
+        }
+
+        .lr-cns-cell,
+        .lr-vehicle-cell {
+          border-right: 1px solid #111;
+          position: relative;
+          display: flex;
+          align-items: stretch;
+        }
+
+        .lr-vehicle-cell {
+          border-right: 0;
+        }
+
+        .lr-cns-label {
+          width: 22px;
+          min-width: 22px;
+          font-size: 9px;
+        }
+
+        .lr-cns-number {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #b91c1c;
+          font-size: 19px;
+          font-weight: 900;
+          letter-spacing: 0.5px;
+        }
+
+        .lr-vehicle-number {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          font-weight: 800;
+          color: #16213e;
+          letter-spacing: 0.5px;
+        }
+
+        /* ============================================================= */
+        /* VEHICLE / DATE ROW                                             */
+        /* ============================================================= */
+
+        .lr-vehicle-row {
+          min-height: 34px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-vehicle-row > div {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 4px 6px;
+          border-right: 1px solid #111;
+        }
+
+        .lr-vehicle-row > div:last-child {
+          border-right: 0;
+        }
+
+        .lr-vehicle-row strong {
+          font-size: 12px;
+        }
+
+        .lr-date-block strong {
+          font-size: 11px;
+          color: #16213e;
+          font-weight: 800;
+        }
+
+        /* ============================================================= */
+        /* BOTTOM ROW: TERMS / DESCRIPTION / CLASSIFICATION / ACK         */
+        /* ============================================================= */
+
+        .lr-bottom-row {
+          display: flex;
+          flex: 1;
+          min-height: 100px;
+        }
+
+        .lr-terms-cell {
+          width: 26%;
+          padding: 5px;
+          border-right: 1px solid #111;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .lr-terms-text {
+          font-size: 9px;
+          font-weight: 500;
+          line-height: 1.35;
+          color: #3f3f46;
+        }
+
+        .lr-terms-caption {
+          font-size: 9px;
+          font-weight: 700;
+          color: #16213e;
+        }
+
+        .lr-description-cell {
+          width: 24%;
+          border-right: 1px solid #111;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .lr-description-inner {
+          flex: 1;
+          padding: 5px 7px;
+        }
+
+        .lr-copy-name-row {
+          border-top: 1px solid #111;
+          padding: 4px 7px;
+        }
+
+        .lr-goods-value {
+          margin-top: 6px;
+          font-size: 15px;
+          font-weight: 700;
+          color: #16213e;
+        }
+
+        .lr-classification-cell {
+          width: 20%;
+          padding: 5px 7px;
+          border-right: 1px solid #111;
+        }
+
+        .lr-ack-cell {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .lr-ack-banner {
+          text-align: center;
+          padding: 5px 4px;
+          font-size: 11px;
+          font-weight: 900;
+          color: #fff;
+          background: #16213e;
+          letter-spacing: 0.6px;
+        }
+
+        .lr-ack-footer {
+          flex: 1;
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          padding: 6px 8px;
+          gap: 8px;
+        }
+
+        .lr-copy-name {
+          text-align: center;
+          color: #b91c1c;
+          font-size: 14px;
+          font-weight: 900;
+          letter-spacing: 0.5px;
+        }
+
+        .lr-copy-date,
+        .lr-copy-sign {
+          font-size: 10px;
+          color: #52525b;
+          font-weight: 600;
+        }
+
+        /* ============================================================= */
+        /* CHARGES (RIGHT COLUMN)                                         */
+        /* ============================================================= */
+
+        .lr-charges {
+          font-size: 10px;
+          display: flex;
+          flex-direction: column;
+          color: #26314a;
+        }
+
+        .lr-charge-header {
+          min-height: 28px;
+          display: grid;
+          grid-template-columns: 60% 40%;
+          font-weight: 800;
+          border-bottom: 1px solid #111;
+          background: #16213e;
+          color: #fff;
+          letter-spacing: 0.3px;
+        }
+
+        .lr-charge-header span {
+          display: flex;
+          align-items: center;
+          padding: 4px 6px;
+          border-right: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .lr-charge-header span:last-child {
+          border-right: 0;
+          justify-content: flex-end;
+        }
+
+        .lr-charge-row {
+          min-height: 20px;
+          display: grid;
+          grid-template-columns: 60% 40%;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-charge-row > * {
+          padding: 3px 6px;
+          border-right: 1px solid #111;
+          font-weight: 600;
+        }
+
+        .lr-charge-row > *:last-child {
+          border-right: 0;
+          text-align: right;
+          font-weight: 700;
+          color: #16213e;
+        }
+
+        .lr-subtotal {
+          font-weight: 800;
+          background: #f4f5f7;
+        }
+
+        .lr-subtotal strong {
+          color: #16213e;
+        }
+
+        .lr-grand-total {
+          min-height: 32px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 6px 8px;
+          border-bottom: 1px solid #111;
+          font-size: 13px;
+          color: #fff;
+          background: #b91c1c;
+          letter-spacing: 0.4px;
+        }
+
+        .lr-amount-words {
+          min-height: 54px;
+          padding: 6px;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-amount-words > div:last-child {
+          margin-top: 5px;
+          font-size: 11px;
+          line-height: 1.35;
+          font-weight: 700;
+          color: #16213e;
+        }
+
+        /* ============================================================= */
+        /* PAYMENT                                                        */
+        /* ============================================================= */
+
+        .lr-basis {
+          min-height: 50px;
+          padding: 6px;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-checkbox-row {
+          display: flex;
+          justify-content: space-between;
+          gap: 4px;
+          margin-top: 5px;
+          font-size: 10px;
+          font-weight: 600;
+          color: #26314a;
+        }
+
+        .lr-cod-row {
+          min-height: 26px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 5px;
+          border-bottom: 1px solid #111;
+          font-weight: 700;
+        }
+
+        .lr-gst-payable {
+          min-height: 40px;
+          padding: 6px;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-authorized {
+          flex: 1;
+          padding: 6px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+        }
+
+        .lr-authorized-space {
+          flex: 1;
+          min-height: 20px;
+        }
+
+        .lr-authorized strong {
+          display: block;
+          font-size: 10px;
+          color: #16213e;
+        }
+
+        .lr-authorized-line {
+          width: 80%;
+          margin: 14px auto 3px;
+          border-top: 1px solid #111;
+        }
+
+        .lr-authorized span {
+          font-size: 10px;
+          color: #6b7280;
+        }
+
+        /* ============================================================= */
+        /* FOOTER                                                         */
+        /* ============================================================= */
+
+        .lr-footer {
+          padding: 4px 8px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 15px;
+          font-size: 9px;
+          background: #f7f7f8;
+          border-top: 1px solid #111;
+        }
+
+        .lr-footer-text {
+          max-width: 85%;
+          color: #52525b;
+          font-weight: 500;
+        }
+
+        .lr-footer strong {
+          color: #b91c1c;
+          white-space: nowrap;
+          letter-spacing: 0.4px;
+        }
+
+        /* ============================================================= */
+        /* SCREEN RESPONSIVE                                              */
+        /* ============================================================= */
+
+        @media (max-width: 1200px) {
+          .lr-document {
+            overflow-x: auto;
+          }
+        }
+
+        /* ============================================================= */
+        /* PRINT                                                          */
+        /* ============================================================= */
+
+        @media print {
+          @page {
+            size: A4 landscape;
+            margin: 0;
+          }
+
+          html,
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100%;
+            background: white !important;
+          }
+
+          .lr-preview {
+            background: white !important;
+          }
+
+          .lr-toolbar {
+            display: none !important;
+          }
+
+          .lr-document {
+            padding: 0 !important;
+          }
+
+          .lr-page {
+            width: 11.69in;
+            height: 8.27in;
+            margin: 0 !important;
+            border: 1px solid #111;
+            box-shadow: none !important;
+            page-break-after: always;
+            break-after: page;
+          }
+
+          .lr-page:last-child {
+            page-break-after: auto;
+            break-after: auto;
+          }
+
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}

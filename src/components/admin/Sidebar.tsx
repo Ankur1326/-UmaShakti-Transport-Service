@@ -6,6 +6,7 @@ import { FaAngleDown } from 'react-icons/fa';
 import { NAVIGATION_CONFIG, NavItem, NavigationConfig } from '@/lib/navigationConfig';
 import Image from 'next/image';
 import { Calendar, Shield, GraduationCap, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
+import { siteConfig } from '@/lib/site-config';
 
 type UserRole = 'admin' | 'student' | 'instructor' | 'default';
 
@@ -43,7 +44,7 @@ interface RoleTheme {
 
 const ROLE_THEMES: Record<UserRole, RoleTheme> = {
     admin: {
-        headerAccent: 'bg-red-600 dark:bg-red-700',
+        headerAccent: 'bg-[#FCC605] dark:bg-[#FCC605]',
         activeBg: 'bg-red-50 dark:bg-red-900/20',
         activeText: 'text-red-800 dark:text-red-300',
         activeBorder: 'border-l-red-600 dark:border-l-red-500',
@@ -217,7 +218,7 @@ export default function Sidebar({
                     aria-controls={hasChildren ? `section-${item.route}` : undefined}
                     title={isCollapsed ? item.title : undefined}
                     className={`
-            w-full flex items-center gap-3 rounded-lg cursor-pointer
+            w-full flex items-center gap-3 cursor-pointer
             transition-all duration-150 outline-none focus-visible:ring-2
             focus-visible:ring-offset-1 focus-visible:ring-[#66B788]
             ${isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3 py-2.5 justify-between'}
@@ -331,15 +332,24 @@ export default function Sidebar({
             {/* ── Logo + Role badge ─────────────────────────────────────────────── */}
             <div className="flex items-center justify-center px-3 py-3 border-b border-gray-100 dark:border-gray-800 shrink-0 dark:bg-gray-800">
                 {!isCollapsed ? (
-                    <div className='bg-white px-2 py-1 rounded-md '>
-                        < Image
-                            src="/media/logo/beats-engineer.jpg"
-                            alt="Beats Engineer"
-                            width={110}
-                            height={40}
-                            priority
-                            className="object-contain"
-                        />
+                    <div className="flex items-center gap-2.5 w-full">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-lg">
+                            <Image
+                                src="/media/logo.jpeg"
+                                alt="Mastery Hub"
+                                width={40}
+                                height={40}
+                                priority
+                            />
+                        </span>
+                        <div className="flex-1 min-w-0">
+                            <div className="text-[13px] font-bold text-gray-900 dark:text-white truncate">
+                                Umashakti
+                            </div>
+                            <div className="text-[10px] text-gray-600 dark:text-gray-400 truncate">
+                                Transport
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     // Collapsed: show only the role icon centred
@@ -350,7 +360,7 @@ export default function Sidebar({
             </div>
 
             {/* ── Navigation ────────────────────────────────────────────────────── */}
-            <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-2 space-y-0">
+            <nav className="flex-1 overflow-y-auto overflow-x-hidden py-2 space-y-0">
                 {sidebarConfig?.sections?.map((section: any, index: number) => (
                     <div key={index}>
                         {renderSectionDivider(section.name)}
