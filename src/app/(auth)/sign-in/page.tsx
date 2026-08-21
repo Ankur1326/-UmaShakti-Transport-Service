@@ -164,7 +164,7 @@ export default function Page() {
                             </Button>
 
                             <div className="mt-2 text-center">
-                                <p className="text-sm text-neutral-600">Don't have an account? <Link href="/admin/sign-up" className="text-brand-700 hover:underline">Request access</Link></p>
+                                <p className="text-sm text-neutral-600">Don't have an account? <Link href="/sign-up" className="text-brand-700 hover:underline">Request access</Link></p>
                             </div>
                         </form>
 

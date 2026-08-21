@@ -8,6 +8,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 /**
  * Responsive site navbar: logo, desktop link row with active-link
@@ -16,6 +17,16 @@ import Image from "next/image";
  */
 export function PublicHeader() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+
+  const dashboardHref =
+    session?.user?.role === "admin" || session?.user?.role === "superAdmin"
+      ? "/admin/dashboard"
+      : session?.user
+        ? "/waiting-approval"
+        : "/sign-in";
+
+  const authButtonLabel = session?.user ? "Go to Dashboard" : "Admin Login";
 
   return (
     <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/95 backdrop-blur">
@@ -62,12 +73,20 @@ export function PublicHeader() {
           >
             Get a Quote
           </Link>
-          <Link
-            href="/admin/sign-in"
-            className="focus-ring hidden h-10 items-center justify-center rounded-lg border border-neutral-200 px-4 text-body-sm font-medium text-neutral-700 hover:bg-neutral-50 sm:inline-flex"
-          >
-            Admin Login
-          </Link>
+
+          {status === "loading" ? (
+            <span className="hidden h-10 items-center justify-center rounded-lg border border-neutral-200 px-4 text-body-sm font-medium text-neutral-500 sm:inline-flex">
+              Loading...
+            </span>
+          ) : (
+            <Link
+              href={dashboardHref}
+              className="focus-ring hidden h-10 items-center justify-center rounded-lg border border-neutral-200 px-4 text-body-sm font-medium text-neutral-700 hover:bg-neutral-50 sm:inline-flex"
+            >
+              {authButtonLabel}
+            </Link>
+          )}
+
           <MobileNav />
         </div>
       </Container>

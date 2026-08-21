@@ -13,7 +13,6 @@ import { RootState } from "@/redux/store";
 // import ToastContainer from "@/components/notifications/ToastContainer";
 import Navbar from "@/components/Navbar";
 // import { NotificationProvider } from "@/context/NotificationContext";
-import { Providers } from "../(app)/providers";
 import { Shield, GraduationCap, BookOpen } from 'lucide-react';
 
 type UserRole = 'admin' | 'superAdmin' | 'customer';
@@ -191,5 +190,5 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <Providers><RootLayoutContent>{children}</RootLayoutContent></Providers>;
+  return <RootLayoutContent>{children}</RootLayoutContent>;
 }

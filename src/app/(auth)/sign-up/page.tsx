@@ -93,7 +93,7 @@ export default function Page() {
                 <div className="mb-6 text-center">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h2>
                     <p className="text-gray-600 text-sm">
-                        Already have an account? <Link href="/admin/sign-in" className="text-brand-500 hover:text-brand-700 font-semibold hover:underline transition-colors">Sign in</Link>
+                        Already have an account? <Link href="/sign-in" className="text-brand-500 hover:text-brand-700 font-semibold hover:underline transition-colors">Sign in</Link>
                     </p>
                 </div>
 
