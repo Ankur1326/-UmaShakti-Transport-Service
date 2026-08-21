@@ -6,9 +6,9 @@ import { z } from "zod";
 const gstinSchema = z
   .string()
   .trim()
-  .refine((v) => v === "" || /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(v), {
-    message: "Enter a valid 15-character GSTIN.",
-  })
+  // .refine((v) => v === "" || /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(v), {
+  //   message: "Enter a valid 15-character GSTIN.",
+  // })
   .optional()
   .or(z.literal(""));
 

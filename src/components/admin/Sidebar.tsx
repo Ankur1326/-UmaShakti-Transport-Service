@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { Calendar, Shield, GraduationCap, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 import { siteConfig } from '@/lib/site-config';
 
-type UserRole = 'admin' | 'student' | 'instructor' | 'default';
+type UserRole = 'admin' | 'superAdmin' | 'customer';
 
 interface SidebarProps {
     isSidebarOpen: boolean;
@@ -57,7 +57,7 @@ const ROLE_THEMES: Record<UserRole, RoleTheme> = {
         RoleIcon: Shield,
         roleLabel: 'Admin',
     },
-    instructor: {
+    superAdmin: {
         headerAccent: 'bg-indigo-600 dark:bg-indigo-700',
         activeBg: 'bg-indigo-50 dark:bg-indigo-900/20',
         activeText: 'text-indigo-800 dark:text-indigo-300',
@@ -71,7 +71,7 @@ const ROLE_THEMES: Record<UserRole, RoleTheme> = {
         RoleIcon: BookOpen,
         roleLabel: 'Instructor',
     },
-    student: {
+    customer: {
         headerAccent: 'bg-[#66B788] dark:bg-[#4a8f65]',
         activeBg: 'bg-green-50 dark:bg-green-900/20',
         activeText: 'text-green-800 dark:text-green-300',
@@ -85,27 +85,13 @@ const ROLE_THEMES: Record<UserRole, RoleTheme> = {
         RoleIcon: GraduationCap,
         roleLabel: 'Student',
     },
-    default: {
-        headerAccent: 'bg-[#66B788] dark:bg-[#4a8f65]',
-        activeBg: 'bg-green-50 dark:bg-green-900/20',
-        activeText: 'text-green-800 dark:text-green-300',
-        activeBorder: 'border-l-[#66B788]',
-        hoverBg: 'hover:bg-gray-100 dark:hover:bg-gray-800/60',
-        childActiveBg: 'bg-[#66B788]',
-        sectionColor: 'text-gray-400 dark:text-gray-500',
-        roleBadgeBg: 'bg-green-50 dark:bg-green-900/30',
-        roleBadgeText: 'text-green-700 dark:text-green-300',
-        roleBadgeBorder: 'border-green-200 dark:border-green-700',
-        RoleIcon: GraduationCap,
-        roleLabel: 'User',
-    },
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Sidebar({
     isSidebarOpen,
-    userRole = 'default',
+    userRole = 'admin',
     onCollapsedChange,
 }: SidebarProps) {
     const { data: session } = useSession();
@@ -122,7 +108,7 @@ export default function Sidebar({
 
     const sidebarConfig: NavigationConfig =
         NAVIGATION_CONFIG[userRole] || NAVIGATION_CONFIG.default;
-    const theme = ROLE_THEMES[userRole] || ROLE_THEMES.default;
+    const theme = ROLE_THEMES[userRole] || ROLE_THEMES.admin;
     const { RoleIcon } = theme;
 
     // Auto-expand the section whose child route is currently active.
@@ -317,7 +303,7 @@ export default function Sidebar({
             className={`
         h-screen bg-white dark:bg-gray-900
         border-r border-gray-300 dark:border-gray-700
-        fixed z-40 flex flex-col
+        fixed z-50 flex flex-col
         transition-all duration-300 ease-out
         ${sidebarWidth}
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -393,3 +379,4 @@ export default function Sidebar({
         </aside>
     );
 }
+

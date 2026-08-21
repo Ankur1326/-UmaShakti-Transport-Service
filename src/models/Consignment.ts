@@ -1,0 +1,279 @@
+import mongoose, { model, Schema, Document, Model } from "mongoose";
+import {
+    PACKING_TYPES,
+    VOLUME_UNITS,
+    WEIGHT_UNITS,
+    SEGMENTS,
+    LOAD_TYPES,
+    GST_TYPES,
+    PAYMENT_TYPES,
+    BILLING_PARTIES,
+    PAYMENT_STATUSES,
+} from "@/lib/validations/billing";
+
+// ─── Sub-document interfaces ────────────────────────────────────────────────
+
+export interface IParty {
+    customerId?: string;
+    name: string;
+    address: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+    gstin?: string;
+    mobile: string;
+    email?: string;
+}
+
+export interface ILocation {
+    location: string;
+    branch?: string;
+    state?: string;
+    gstin?: string;
+}
+
+export interface IShipment {
+    packages: number;
+    packing: (typeof PACKING_TYPES)[number];
+    description: string;
+    classification?: string;
+    declaredValue?: number;
+    invoiceNumber?: string;
+    volume?: number;
+    volumeUnit: (typeof VOLUME_UNITS)[number];
+    actualWeight: number;
+    weightUnit: (typeof WEIGHT_UNITS)[number];
+}
+
+export interface IVehicleDetails {
+    driverName?: string;
+    driverMobile?: string;
+    transportMode?: string;
+    branch?: string;
+    deliveryBranch?: string;
+    route?: string;
+    expectedDeliveryDate?: Date | string;
+}
+
+export interface ICharges {
+    freight: number;
+    localGodownCharges: number;
+    unloadingCharge: number;
+    loadingCharge: number;
+    codCharges: number;
+    statisticalCharges: number;
+    localCollectionCharges: number;
+}
+
+export interface ITax {
+    type: (typeof GST_TYPES)[number];
+    percentage: 0 | 5 | 12 | 18 | "custom";
+    customPercentage?: number;
+}
+
+export interface IPayment {
+    type: (typeof PAYMENT_TYPES)[number];
+    billingParty: (typeof BILLING_PARTIES)[number];
+    billingAccount?: string;
+    status: (typeof PAYMENT_STATUSES)[number];
+}
+
+export interface IInsurance {
+    required: boolean;
+    company?: string;
+    policyNumber?: string;
+    amount?: number;
+    date?: Date | string;
+    riskType?: string;
+}
+
+export interface IConsignment extends Document {
+    consignmentNumber: string;
+    bookingDate: Date | string;
+    cnsDate?: Date | string;
+    eWayBillNumber?: string;
+    validUpTo?: Date | string;
+    invoiceNumber?: string;
+    invoiceDate?: Date | string;
+    vehicleNumber: string;
+
+    from: ILocation;
+    to: ILocation;
+
+    consignor: IParty;
+    consignee: IParty;
+
+    shipment: IShipment;
+
+    segment: (typeof SEGMENTS)[number];
+    loadType: (typeof LOAD_TYPES)[number];
+
+    vehicle: IVehicleDetails;
+    charges: ICharges;
+    tax: ITax;
+    payment: IPayment;
+    insurance: IInsurance;
+
+    remarks?: string;
+    internalNotes?: string;
+    specialInstructions?: string;
+
+    createdBy?: mongoose.Types.ObjectId;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+// ─── Sub-schemas ─────────────────────────────────────────────────────────────
+
+const partySchema = new Schema<IParty>(
+    {
+        customerId: { type: String, default: "" },
+        name: { type: String, trim: true },
+        address: { type: String, trim: true },
+        city: { type: String, default: "" },
+        state: { type: String, default: "" },
+        pincode: { type: String, default: "" },
+        gstin: { type: String, default: "" },
+        mobile: { type: String, trim: true },
+        email: { type: String, default: "" },
+    },
+    { _id: false }
+);
+
+const locationSchema = new Schema<ILocation>(
+    {
+        location: { type: String, trim: true },
+        branch: { type: String, default: "" },
+        state: { type: String, default: "" },
+        gstin: { type: String, default: "" },
+    },
+    { _id: false }
+);
+
+const shipmentSchema = new Schema<IShipment>(
+    {
+        packages: { type: Number, min: 1 },
+        packing: { type: String, enum: PACKING_TYPES },
+        description: { type: String, trim: true },
+        classification: { type: String, default: "" },
+        declaredValue: { type: Number, default: 0, min: 0 },
+        invoiceNumber: { type: String, default: "" },
+        volume: { type: Number, default: 0, min: 0 },
+        volumeUnit: { type: String, enum: VOLUME_UNITS},
+        actualWeight: { type: Number, min: 0 },
+        weightUnit: { type: String, enum: WEIGHT_UNITS },
+    },
+    { _id: false }
+);
+
+const vehicleDetailsSchema = new Schema<IVehicleDetails>(
+    {
+        driverName: { type: String, default: "" },
+        driverMobile: { type: String, default: "" },
+        transportMode: { type: String, default: "" },
+        branch: { type: String, default: "" },
+        deliveryBranch: { type: String, default: "" },
+        route: { type: String, default: "" },
+        expectedDeliveryDate: { type: Date },
+    },
+    { _id: false }
+);
+
+const chargesSchema = new Schema<ICharges>(
+    {
+        freight: { type: Number, default: 0, min: 0 },
+        localGodownCharges: { type: Number, default: 0, min: 0 },
+        unloadingCharge: { type: Number, default: 0, min: 0 },
+        loadingCharge: { type: Number, default: 0, min: 0 },
+        codCharges: { type: Number, default: 0, min: 0 },
+        statisticalCharges: { type: Number, default: 0, min: 0 },
+        localCollectionCharges: { type: Number, default: 0, min: 0 },
+    },
+    { _id: false }
+);
+
+const taxSchema = new Schema<ITax>(
+    {
+        type: { type: String, enum: GST_TYPES },
+        percentage: { type: Schema.Types.Mixed },
+        customPercentage: { type: Number, min: 0, max: 100 },
+    },
+    { _id: false }
+);
+
+const paymentSchema = new Schema<IPayment>(
+    {
+        type: { type: String, enum: PAYMENT_TYPES, },
+        billingParty: { type: String, enum: BILLING_PARTIES },
+        billingAccount: { type: String, default: "" },
+        status: { type: String, enum: PAYMENT_STATUSES, default: "Pending" },
+    },
+    { _id: false }
+);
+
+const insuranceSchema = new Schema<IInsurance>(
+    {
+        required: { type: Boolean, default: false },
+        company: { type: String, default: "" },
+        policyNumber: { type: String, default: "" },
+        amount: { type: Number, default: 0, min: 0 },
+        date: { type: Date },
+        riskType: { type: String, default: "" },
+    },
+    { _id: false }
+);
+
+// ─── Main schema ─────────────────────────────────────────────────────────────
+
+const consignmentSchema = new Schema<IConsignment>(
+    {
+        consignmentNumber: {
+            type: String,
+            required: [true, "Consignment number is required"],
+            unique: true,
+            trim: true,
+            index: true,
+        },
+        bookingDate: { type: Date },
+        cnsDate: { type: Date },
+        eWayBillNumber: { type: String, default: "" },
+        validUpTo: { type: Date },
+        invoiceNumber: { type: String, default: "" },
+        invoiceDate: { type: Date },
+        vehicleNumber: { type: String, trim: true, index: true },
+
+        from: { type: locationSchema },
+        to: { type: locationSchema },
+
+        consignor: { type: partySchema },
+        consignee: { type: partySchema },
+
+        shipment: { type: shipmentSchema },
+
+        segment: { type: String, enum: SEGMENTS },
+        loadType: { type: String, enum: LOAD_TYPES },
+
+        vehicle: { type: vehicleDetailsSchema, default: () => ({}) },
+        charges: { type: chargesSchema, default: () => ({}) },
+        tax: { type: taxSchema },
+        payment: { type: paymentSchema },
+        insurance: { type: insuranceSchema, default: () => ({}) },
+
+        remarks: { type: String, default: "" },
+        internalNotes: { type: String, default: "" },
+        specialInstructions: { type: String, default: "" },
+
+        createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+    },
+    { timestamps: true }
+);
+
+consignmentSchema.index({ "consignor.name": 1 });
+consignmentSchema.index({ "consignee.name": 1 });
+consignmentSchema.index({ createdAt: -1 });
+
+const ConsignmentModel: Model<IConsignment> =
+    (mongoose?.models?.Consignment as Model<IConsignment>) ||
+    model<IConsignment>("Consignment", consignmentSchema);
+
+export default ConsignmentModel;

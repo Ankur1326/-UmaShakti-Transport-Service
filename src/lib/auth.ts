@@ -20,7 +20,9 @@ function getSecret(): string {
 
 /** Sign a short-lived JWT for an authenticated admin. */
 export function signAdminToken(payload: AdminTokenPayload): string {
-  return jwt.sign(payload, getSecret(), { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, getSecret() as jwt.Secret, {
+    expiresIn: JWT_EXPIRES_IN as jwt.SignOptions["expiresIn"],
+  });
 }
 
 /** Verify and decode an admin JWT. Throws if invalid/expired. */

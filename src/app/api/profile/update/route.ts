@@ -1,5 +1,5 @@
-import dbConnect from "@/lib/dbConnect";
-import UserModel from '@/model/User';
+import dbConnect from "@/lib/db";
+import UserModel from '@/models/User';
 
 export async function POST(request: Request) {
     await dbConnect();
@@ -39,7 +39,6 @@ export async function POST(request: Request) {
         // Update user fields
         user.fullName = formData.fullName || user.fullName;
         user.mobileNum = formData.mobileNum || user.mobileNum;
-        user.username = formData.username || user.username;
         user.address = formData.address || user.address;
         user.dateOfBirth = formData.dateOfBirth || user.dateOfBirth;
         user.gender = formData.gender || user.gender;

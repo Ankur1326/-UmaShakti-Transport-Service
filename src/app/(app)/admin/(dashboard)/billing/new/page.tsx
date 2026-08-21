@@ -1,10 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { X } from "lucide-react";
+
+import {
+  createConsignment,
+  getConsignment,
+  getApiErrorMessage,
+  updateConsignment,
+} from "@/lib/api/consignments";
+import { Loading } from "@/components/ui/Loading";
 
 import { CompanyHeader } from "@/components/billing/CompanyHeader";
 import { ConsignmentInfoSection } from "@/components/billing/ConsignmentInfoSection";
@@ -48,11 +57,17 @@ function timeAgoLabel(date: Date | null): string {
   return `Draft saved ${minutes} min${minutes === 1 ? "" : "s"} ago`;
 }
 
-export default function TransportBillingFormPage() {
+function TransportBillingForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("id");
+
   const [draftBanner, setDraftBanner] = useState<BillingFormValues | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [, forceTick] = useState(0);
+  const [recordId, setRecordId] = useState<string | null>(editId);
+  const [isLoadingRecord, setIsLoadingRecord] = useState(Boolean(editId));
   const initialNumberRef = useRef(generateConsignmentNumber());
 
   const methods = useForm<BillingFormValues>({
@@ -68,11 +83,38 @@ export default function TransportBillingFormPage() {
     formState: { isDirty, isSubmitting },
   } = methods;
 
-  // Offer to restore an existing draft rather than silently overwriting it.
+  // Editing an existing consignment: load it from the backend instead of a fresh draft.
   useEffect(() => {
+    if (!editId) return;
+
+    let cancelled = false;
+    setIsLoadingRecord(true);
+
+    getConsignment(editId)
+      .then((record) => {
+        if (cancelled) return;
+        reset(record);
+        setRecordId(record._id);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        toast.error(getApiErrorMessage(error, "Couldn't load that consignment."));
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingRecord(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [editId, reset]);
+
+  // Offer to restore an existing draft rather than silently overwriting it (new consignments only).
+  useEffect(() => {
+    if (editId) return;
     const existing = readDraft();
     if (existing) setDraftBanner(existing);
-  }, []);
+  }, [editId]);
 
   // Re-render the "Draft saved Xs ago" label periodically.
   useEffect(() => {
@@ -96,31 +138,60 @@ export default function TransportBillingFormPage() {
     return () => subscription.unsubscribe();
   }, [watch]);
 
-  const persistNow = (values: BillingFormValues) => {
+  // Local draft cache — kept as an offline-friendly fallback alongside the backend save.
+  const cacheDraftLocally = (values: BillingFormValues) => {
     saveConsignmentNumber(values.consignmentNumber);
     window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(values));
     setLastSavedAt(new Date());
   };
 
+  /** Creates the consignment on first save, updates it on every save after that. */
+  const persistToBackend = async (values: BillingFormValues) => {
+    if (recordId) {
+      const updated = await updateConsignment(recordId, values);
+      return updated;
+    }
+    const created = await createConsignment(values);
+    setRecordId(created._id);
+    router.replace(`/admin/billing/new?id=${created._id}`);
+    return created;
+  };
+
   const onSaveDraft = handleSubmit(
-    (values) => {
-      persistNow(values);
-      toast.success(`Draft saved — Consignment No: ${values.consignmentNumber}`);
+    async (values) => {
+      cacheDraftLocally(values);
+      try {
+        await persistToBackend(values);
+        toast.success(`Draft saved — Consignment No: ${values.consignmentNumber}`);
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, "Couldn't save the draft. It's cached locally — try again shortly."));
+      }
     },
     () => toast.error("Please fix the highlighted fields before saving.")
   );
 
   const onGenerateLR = handleSubmit(
-    (values) => {
-      persistNow(values);
-      toast.success(`Consignment saved successfully\nConsignment No: ${values.consignmentNumber}`);
+    async (values) => {
+      cacheDraftLocally(values);
+      try {
+        await persistToBackend(values);
+        window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+        toast.success(`Consignment saved successfully\nConsignment No: ${values.consignmentNumber}`);
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, "Couldn't generate the LR. Please try again."));
+      }
     },
     () => toast.error("Please fix the highlighted fields before generating the LR.")
   );
 
   const onSaveAndPrint = handleSubmit(
-    (values) => {
-      persistNow(values);
+    async (values) => {
+      cacheDraftLocally(values);
+      try {
+        await persistToBackend(values);
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, "Couldn't save before printing. Showing the preview anyway."));
+      }
       setPreviewOpen(true);
     },
     () => toast.error("Please fix the highlighted fields before printing.")
@@ -129,11 +200,17 @@ export default function TransportBillingFormPage() {
   const onReset = () => {
     const fresh = buildDefaultValues(generateConsignmentNumber());
     reset(fresh);
+    setRecordId(null);
     window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+    if (editId) router.replace("/admin/billing/new");
     toast.success("Form reset.");
   };
 
   const values = watch();
+
+  if (isLoadingRecord) {
+    return <Loading fullPage label="Loading consignment…" />;
+  }
 
   return (
     <FormProvider {...methods}>
@@ -142,7 +219,7 @@ export default function TransportBillingFormPage() {
       {/* ================================================================ */}
 
       {draftBanner && (
-        <div className="mb-6 rounded-xl border border-brand-200 bg-brand-50/80 px-5 py-4 shadow-sm print:hidden">
+        <div className="mb-6 rounded-xl border border-brand-200 bg-brand-50/80 px-5 py-2 shadow-sm print:hidden">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-brand-700">
@@ -349,5 +426,13 @@ export default function TransportBillingFormPage() {
         </form>
       )}
     </FormProvider>
+  );
+}
+
+export default function TransportBillingFormPage() {
+  return (
+    <Suspense fallback={<Loading fullPage label="Loading…" />}>
+      <TransportBillingForm />
+    </Suspense>
   );
 }

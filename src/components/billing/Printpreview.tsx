@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { ArrowLeft, Printer } from "lucide-react";
@@ -13,6 +14,13 @@ interface PrintPreviewProps {
   values: BillingFormValues;
   onClose: () => void;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Copy selection                                                             */
+/* -------------------------------------------------------------------------- */
+
+const ALL_COPY_NAMES = ["LORRY COPY", "CONSIGNEE COPY", "CONSIGNOR COPY", "FILE COPY"] as const;
+type CopyName = (typeof ALL_COPY_NAMES)[number];
 
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
@@ -61,7 +69,7 @@ function LRField({ label, value, className = "" }: { label: string; value?: Reac
 /* Single Copy                                                                */
 /* -------------------------------------------------------------------------- */
 
-function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: "LORRY COPY" | "CONSIGNEE COPY" }) {
+function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: CopyName }) {
   const totals = computeBillingTotals(values.charges, values.tax);
   const segment = String(values.segment);
 
@@ -85,25 +93,39 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
             </div>
             <div className="lr-company-details">
               <div className="lr-company-name">{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
-              <div className="lr-company-address">{text(siteConfig.address)}</div>
-              <div className="lr-company-contact">
-                {text(siteConfig.phone)}
-                {siteConfig.email ? ` • ${siteConfig.email}` : ""}
+              {/* <div className="lr-company-address">{text(siteConfig.address)}</div> */}
+              <div className="mb-1 text-[12px]">
+                <div className="leading-tight">
+                  <span className="font-bold">H.O. : </span>
+                  <span className="font-semibold">90, Shree Siddh Villa, Madhodar Road, Near New Post Office, Waghodia, Dist. Vadodara 391760 Mob.: 9662820706 / 9558008708</span>
+
+                </div>
+                <div className="leading-tight">
+                  <span className="font-bold">B.O.: </span>
+                  <span className="font-semibold">Plot No. 104/A, Siddhi Industrial Park, Tal. Waghodia, Dist. Vadodara 391 760. E mail : umashakti.brd@gmail.com</span>
+                </div>
               </div>
+              {/* <div className="lr-company-contact">
+                        {text(siteConfig.phone)}
+                        {siteConfig.email ? ` • ${siteConfig.email}` : ""}
+                      </div> */}
             </div>
           </div>
 
-          <div className="lr-registration">
-            <div>REG. NO.: 24AAHFU8816H1ZX</div>
-            <div>PAN NO. AAHFU8816H</div>
-            <div>UDYAM-GJ-24-0106951</div>
-          </div>
+          <div className="flex">
 
-          <div className="lr-bank-details">
-            <div className="lr-bank-title">BANK DETAILS</div>
-            <div>{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
-            <div>HDFC BANK, Opp. Apollo Tyres, Limda, Waghodia.</div>
-            <div>IFSC Code: HDFC0007181 - A/c. No.: 50200983890449</div>
+            <div className="lr-registration pr-1">
+              <div>REG. NO.: 24AAHFU8816H1ZX</div>
+              <div>PAN NO. AAHFU8816H</div>
+              <div>UDYAM-GJ-24-0106951</div>
+            </div>
+
+            <div className="border-l border-black pl-2">
+              <div className="lr-bank-title">BANK DETAILS</div>
+              <div className="font-semibold">{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
+              <div className="font-semibold">HDFC BANK, Opp. Apollo Tyres, Limda, Waghodia.</div>
+              <div className="font-semibold">IFSC Code: HDFC0007181 - A/c. No.: 50200983890449</div>
+            </div>
           </div>
         </div>
 
@@ -204,91 +226,124 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
 
           {/* SHIPMENT TABLE */}
           <div className="lr-shipment">
-            {/* Row 1: Pkgs / Packing / Private Mark / CNS No. / Vehicle No. */}
-            <div className="lr-row-one">
-              <div className="lr-row-one-cell">
-                <LRField label="Pkgs." value={text(values.shipment.packages)} />
-              </div>
-              <div className="lr-row-one-cell">
-                <LRField label="Packing" value={text(values.shipment.packing)} />
-              </div>
-              {/* <div className="lr-row-one-cell">
-                <LRField label="Private Mark" value="" />
-              </div> */}
-
-
-              <div className="lr-cns-cell">
-                <div className="lr-vertical-title lr-cns-label">CNS NO.</div>
-                <strong className="lr-cns-number">{text(values.consignmentNumber)}</strong>
-              </div>
-
-              <div className="flex flex-col justify-center gap-1 lr-date-block">
-                <div className="flex p-1 gap-2 border-b border-b-black" >
-                  <SmallLabel>Booking Date</SmallLabel>
-                  <strong>{formatDate(values.bookingDate)}</strong>
+            <div className="lr-shipment-body">
+              {/* LEFT COLUMN */}
+              <div className="lr-shipment-left">
+                {/* Row 1: Pkgs / Packing / Private Mark */}
+                <div className="lr-row-one">
+                  <div className="lr-row-one-cell">
+                    <LRField label="Pkgs." value={text(values.shipment.packages)} />
+                  </div>
+                  <div className="lr-row-one-cell">
+                    <LRField label="Packing" value={text(values.shipment.packing)} />
+                  </div>
+                  <div className="lr-row-one-cell">
+                    <LRField label="Private Mark" value="" />
+                  </div>
                 </div>
-                <div className="flex p-1 gap-2">
-                  <span className="lr-label">CNS Date</span>
-                  <strong>{formatDate(values.cnsDate)}</strong>
+
+                {/* Row 2: Declared Value / Invoice No. / Volume */}
+                <div className="lr-shipment-row row-two">
+                  <LRField label="Declared Value" value={formatINR(values.shipment.declaredValue ?? 0)} />
+                  <LRField
+                    label="Invoice No."
+                    value={[text(values.invoiceNumber), values.invoiceDate ? formatDate(values.invoiceDate) : ""]
+                      .filter(Boolean)
+                      .join("  •  ")}
+                  />
+                  <LRField label="Volume LxBxH - CFT" value={text(values.shipment.volume)} />
                 </div>
-              </div>
 
-
-              <div className="lr-vehicle-cell">
-
-                <div className="lr-vertical-title lr-cns-label">VEHICLE NO.</div>
-                <strong className="lr-vehicle-number">{text(values.vehicleNumber)}</strong>
-              </div>
-            </div>
-
-            {/* Row 2: Declared Value / Invoice No. / Volume / Invoice Date */}
-            <div className="lr-shipment-row row-two">
-              <LRField label="Declared Value" value={formatINR(values.shipment.declaredValue ?? 0)} />
-              <LRField label="Invoice No." value={text(values.invoiceNumber)} />
-              <LRField label="Volume LxBxH - CFT" value={text(values.shipment.volume)} />
-              <LRField label="Invoice Date" value={formatDate(values.invoiceDate)} />
-            </div>
-
-            {/* Row 3: E-Way Bill / Valid upto / Actual Wt. / Charged Wt. */}
-            <div className="lr-shipment-row row-three">
-              <LRField label="E-Way Bill No." value={text(values.eWayBillNumber)} />
-              <LRField label="Valid upto" value={formatDate(values.validUpTo)} />
-              <LRField label="Actual Wt." value={`${text(values.shipment.actualWeight)} ${text(values.shipment.weightUnit)}`} />
-              <LRField label="Charged Wt." value={`${text(values.shipment.actualWeight)} ${text(values.shipment.weightUnit)}`} />
-            </div>
-
-            {/* Terms / Description / Classification / Acknowledgement */}
-            <div className="lr-bottom-row">
-              <div className="lr-terms-cell">
-                <div className="lr-terms-text">
-                  We hereby confirm that particulars of goods packed &amp; declared in invoice are same. Packing of the
-                  consignment was done under the supervision. We have read the terms &amp; conditions printed on the face
-                  &amp; overleaf of the consignment note.
+                {/* Row 3: E-Way Bill / Valid upto */}
+                <div className="lr-shipment-row row-three">
+                  <LRField label="E-Way Bill No." value={text(values.eWayBillNumber)} />
+                  <LRField label="Valid upto" value={formatDate(values.validUpTo)} />
                 </div>
-                <div className="lr-terms-caption">Description of the goods as declared by Consignor</div>
-                <div className="lr-copy-date">Date: {formatDate(values.vehicle.expectedDeliveryDate)}</div>
-              </div>
 
-              <div className="lr-description-cell">
-                <div className="lr-description-inner">
-                  <SmallLabel>Description of Goods</SmallLabel>
-                  <div className="lr-goods-value">{text(values.shipment.description)}</div>
-                </div>
-                <div className="lr-copy-name-row">
-                  <div className="lr-copy-name">{copyName}</div>
+                {/* Terms / Description / Classification */}
+                <div className="lr-bottom-row-left">
+                  <div className="lr-terms-cell relative">
+                    <div className="lr-terms-text ">
+                      We hereby confirm that particulars of goods packed &amp; declared in invoice are same. Packing of the
+                      consignment was done under the supervision. We have read the terms &amp; conditions printed on the face
+                      &amp; overleaf of the consignment note.
+                    </div>
+                    <div className="lr-terms-caption">Description of the goods as declared by Consignor</div>
+
+                    <div className="absolute bottom-0 left-0 w-full flex justify-between items-center px-2 py-1">
+                      <div className="lr-copy-sign absolute right-0 bottom-13 w-full text-end pt-32">Consignor's Signature &nbsp;</div>
+                      <div className="lr-copy-date border-t border-black w-full pt-3 absolute bottom-3 left-0">&nbsp; Expected Delivery Date: {values.vehicle.expectedDeliveryDate ? formatDate(values.vehicle.expectedDeliveryDate) : "_____________"}</div>
+                    </div>
+                  </div>
+
+                  <div className="lr-description-cell">
+                    <div className="lr-description-inner">
+                      <div className="lr-classification-block">
+                        <SmallLabel>Classification of Goods</SmallLabel>
+                        <div className="lr-goods-value">{text(values.shipment.classification)}</div>
+                      </div>
+                      <div className="lr-goods-block">
+                        <SmallLabel>Description of Goods</SmallLabel>
+                        <div className="lr-goods-value">{text(values.shipment.description)}</div>
+                      </div>
+                    </div>
+                    <div className="lr-copy-name-row">
+                      <div className="lr-copy-name">{copyName}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="lr-classification-cell">
-                <SmallLabel>Classification of Goods</SmallLabel>
-                <div className="lr-goods-value">{text(values.shipment.classification)}</div>
-              </div>
+              {/* RIGHT COLUMN */}
+              <div className="lr-shipment-right">
+                <div className="lr-cns-vehicle-top">
+                  {/* CNS No. and CNS Date now stacked together in a single column */}
+                  <div className="lr-cns-cell">
+                    <div className="lr-cns-top">
+                      <div className="lr-vertical-title lr-cns-label">CNS NO.</div>
+                      <strong className="lr-cns-number">{text(values.consignmentNumber)}</strong>
+                    </div>
+                    <div className="lr-cns-date-row">
+                      <span className="lr-label">CNS Date</span>
+                      <strong>{formatDate(values.cnsDate)}</strong>
+                    </div>
+                  </div>
 
-              <div className="lr-ack-cell">
-                <div className="lr-ack-banner">SPACE FOR ACKNOWLEDGEMENT</div>
-                <div className="lr-ack-footer">
-                  <div className="lr-copy-date">Date: {formatDate(values.bookingDate)}</div>
-                  <div className="lr-copy-sign">Signature / Stamp</div>
+                  <div className="lr-vehicle-cell">
+                    <div className="lr-vertical-title lr-cns-label">VEHICLE NO.</div>
+                    <strong className="lr-vehicle-number">{text(values.vehicleNumber)}</strong>
+                  </div>
+                </div>
+
+                <div className="lr-actual-charged-row">
+                  <LRField label="Actual Wt." value={`${text(values.shipment.actualWeight)} ${text(values.shipment.weightUnit)}`} />
+                  <LRField label="Charged Wt. as agreed" value={`${text(values.shipment.actualWeight)} ${text(values.shipment.weightUnit)}`} />
+                </div>
+
+                <div className="lr-ack-cell">
+                  <div className="lr-insurance-row">
+                    <div className="lr-field">
+                      <SmallLabel>Insurance Company Name &amp; Place</SmallLabel>
+                      <span className="lr-field-value">
+                        {values.insurance.required
+                          ? [text(values.insurance.company), text(values.from.location)].filter(Boolean).join(", ")
+                          : "Not Insured"}
+                      </span>
+                    </div>
+                    <div className="lr-field">
+                      <SmallLabel>Policy No. &amp; Date</SmallLabel>
+                      <span className="lr-field-value">
+                        {values.insurance.required
+                          ? [text(values.insurance.policyNumber), formatDate(values.insurance.date)].filter(Boolean).join("  •  ")
+                          : ""}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="lr-ack-banner">SPACE FOR ACKNOWLEDGEMENT</div>
+                  <div className="lr-ack-footer">
+                    <div className="lr-copy-date">Date: {formatDate(values.bookingDate)}</div>
+                    <div className="lr-copy-sign">Signature / Stamp</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -372,11 +427,18 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
             </div>
           </div>
 
-          <div className="lr-authorized">
+          <div className="lr-authorized relative">
+            <div className="lr-terms-text ">
+              Amount of GST are provisional actual amount shall be as per received
+              money received to be issued UTS of consionmen
+              freight payable by consignor or cons ghee at the time of delivery freicht pavable sbaation cf consignment
+            </div>
             <div className="lr-authorized-space" />
-            <strong>For {siteConfig.name}</strong>
-            <div className="lr-authorized-line" />
-            <span>Authorized Signatory</span>
+            {/* <strong>For {siteConfig.name}</strong> */}
+            {/* <div className="lr-authorized-line" /> */}
+            <div className="lr-copy-sign absolute left-3 bottom-13 w-full text-start">Signature of Staff___________________</div>
+
+            <div className="lr-copy-sign">Staff Identification No.__________________</div>
           </div>
         </div>
       </div>
@@ -400,6 +462,32 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
 /* -------------------------------------------------------------------------- */
 
 export function PrintPreview({ values, onClose }: PrintPreviewProps) {
+  // Which copies the user wants printed — all four are selected by default.
+  const [selectedCopies, setSelectedCopies] = useState<Set<CopyName>>(new Set(ALL_COPY_NAMES));
+
+  function toggleCopy(name: CopyName) {
+    setSelectedCopies((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    });
+  }
+
+  function selectAll() {
+    setSelectedCopies(new Set(ALL_COPY_NAMES));
+  }
+
+  function selectNone() {
+    setSelectedCopies(new Set());
+  }
+
+  const copiesToRender = ALL_COPY_NAMES.filter((name) => selectedCopies.has(name));
+  const hasSelection = copiesToRender.length > 0;
+
   return (
     <div className="lr-preview">
       {/* TOOLBAR — hidden on print */}
@@ -408,16 +496,43 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Back to Edit
         </Button>
-        <Button variant="primary" size="sm" onClick={() => window.print()}>
+
+        {/* COPY SELECTOR — choose which copies get printed */}
+        <div className="lr-copy-selector">
+          <span className="lr-copy-selector-label">Copies:</span>
+          {ALL_COPY_NAMES.map((name) => (
+            <label key={name} className="lr-copy-option">
+              <input
+                type="checkbox"
+                checked={selectedCopies.has(name)}
+                onChange={() => toggleCopy(name)}
+              />
+              <span>{name}</span>
+            </label>
+          ))}
+          <button type="button" className="lr-copy-quick-action" onClick={selectAll}>
+            All
+          </button>
+          <button type="button" className="lr-copy-quick-action" onClick={selectNone}>
+            None
+          </button>
+        </div>
+
+        <Button variant="primary" size="sm" onClick={() => window.print()} disabled={!hasSelection}>
           <Printer className="h-4 w-4" aria-hidden="true" />
           Print / Save as PDF
         </Button>
       </div>
 
-      {/* DOCUMENT — two copies, matching the physical Lorry Copy / Consignee Copy pair */}
+      {/* DOCUMENT — only the copies the user selected are rendered / printed */}
       <div className="lr-document">
-        <LorryCopy values={values} copyName="LORRY COPY" />
-        <LorryCopy values={values} copyName="CONSIGNEE COPY" />
+        {hasSelection ? (
+          copiesToRender.map((name) => <LorryCopy key={name} values={values} copyName={name} />)
+        ) : (
+          <div className="lr-no-selection print:hidden">
+            Select at least one copy above to preview and print it.
+          </div>
+        )}
       </div>
 
       <style jsx global>{`
@@ -430,6 +545,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         .lr-preview {
+        // width: 100%;
           min-height: 100vh;
           background: #e5e7eb;
           color: #111;
@@ -440,17 +556,84 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           position: sticky;
           top: 0;
           z-index: 100;
-          height: 60px;
-          padding: 0 20px;
+          min-height: 60px;
+          padding: 10px 20px;
           display: flex;
+          flex-wrap: wrap;
           align-items: center;
           justify-content: space-between;
+          gap: 10px;
           background: #fff;
           border-bottom: 1px solid #d1d5db;
         }
 
+        /* ============================================================= */
+        /* COPY SELECTOR                                                  */
+        /* ============================================================= */
+
+        .lr-copy-selector {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 12px;
+          font-size: 12px;
+        }
+
+        .lr-copy-selector-label {
+          font-weight: 700;
+          color: #374151;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+          font-size: 11px;
+        }
+
+        .lr-copy-option {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-weight: 600;
+          color: #26314a;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .lr-copy-option input[type="checkbox"] {
+          width: 14px;
+          height: 14px;
+          accent-color: #16213e;
+          cursor: pointer;
+        }
+
+        .lr-copy-quick-action {
+          border: 1px solid #d1d5db;
+          background: #f9fafb;
+          color: #374151;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 3px 9px;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        .lr-copy-quick-action:hover {
+          background: #eef0f2;
+        }
+
+        .lr-no-selection {
+          max-width: 13in;
+          margin: 40px auto;
+          padding: 24px;
+          text-align: center;
+          background: #fff;
+          border: 1px dashed #9ca3af;
+          border-radius: 6px;
+          color: #6b7280;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
         .lr-document {
-          padding: 25px;
+          padding: 10px;
         }
 
         /* ============================================================= */
@@ -458,8 +641,9 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         .lr-page {
-          width: 11.69in;
-          min-height: 8.27in;
+           width: 13in;
+          min-height: 9in;
+          max-height: 10in;
           margin: 0 auto 25px;
           background: #fff;
           border: 1.5px solid #16213e;
@@ -698,7 +882,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         .lr-parties {
-          min-height: 1.9in;
+          min-height: 2.2in;
           display: grid;
           grid-template-columns: 1fr 1fr;
         }
@@ -776,6 +960,26 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           flex: 1;
         }
 
+        .lr-shipment-body {
+          display: flex;
+          flex: 1;
+        }
+
+        .lr-shipment-left {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          border-right: 1px solid #111;
+        }
+
+        .lr-shipment-right {
+          width: 50%;
+          min-width: 30%;
+          display: flex;
+          flex-direction: column;
+        }
+
         .lr-shipment-row {
           display: grid;
           border-bottom: 1px solid #111;
@@ -791,12 +995,12 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .row-two {
-          grid-template-columns: 22% 22% 28% 28%;
+          grid-template-columns: 30% 40% 30%;
           min-height: 38px;
         }
 
         .row-three {
-          grid-template-columns: 25% 18% 28% 29%;
+          grid-template-columns: 55% 45%;
           min-height: 38px;
         }
 
@@ -813,10 +1017,10 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           word-break: break-word;
         }
 
-        /* Row 1: Pkgs / Packing / Private Mark / CNS No. / Vehicle No. */
+        /* Row 1 (left column): Pkgs / Packing / Private Mark */
         .lr-row-one {
           display: grid;
-          grid-template-columns: 17% 17% 16% 25% 25%;
+          grid-template-columns: 1fr 1fr 1fr;
           border-bottom: 1px solid #111;
           min-height: 48px;
         }
@@ -828,22 +1032,49 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           align-items: center;
         }
 
-        .lr-cns-cell,
-        .lr-vehicle-cell {
-          border-right: 1px solid #111;
-          position: relative;
+        .lr-row-one-cell:last-child {
+          border-right: 0;
+        }
+
+        /* ============================================================= */
+        /* CNS NO. / CNS DATE / VEHICLE NO.                               */
+        /* CNS No. and CNS Date are stacked together in one column so     */
+        /* they read as a single related block; Vehicle No. sits in its   */
+        /* own column and stretches to match the combined height.        */
+        /* ============================================================= */
+
+        .lr-cns-vehicle-top {
+          min-height: 112px;
           display: flex;
           align-items: stretch;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-cns-cell {
+          flex: 1;
+          border-right: 1px solid #111;
+          display: flex;
+          flex-direction: column;
         }
 
         .lr-vehicle-cell {
-          border-right: 0;
+          flex: 1;
+          display: flex;
+          align-items: stretch;
         }
 
         .lr-cns-label {
           width: 22px;
           min-width: 22px;
           font-size: 9px;
+        }
+
+        .lr-cns-top {
+          flex: 1;
+          min-height: 62px;
+          display: flex;
+          align-items: stretch;
+          border-bottom: 1px solid #111;
         }
 
         .lr-cns-number {
@@ -868,51 +1099,54 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           letter-spacing: 0.5px;
         }
 
-        /* ============================================================= */
-        /* VEHICLE / DATE ROW                                             */
-        /* ============================================================= */
+        .lr-cns-date-row {
+          min-height: 30px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 4px 8px;
+          // background: #f4f5f7;
+        }
 
-        .lr-vehicle-row {
-          min-height: 34px;
+        .lr-cns-date-row .lr-label {
+          margin-bottom: 0;
+        }
+
+        .lr-cns-date-row strong {
+          font-size: 12px;
+          color: #16213e;
+          font-weight: 800;
+        }
+
+        /* Aligns with row-three on the left */
+        .lr-actual-charged-row {
           display: grid;
           grid-template-columns: 1fr 1fr;
+          min-height: 38px;
           border-bottom: 1px solid #111;
         }
 
-        .lr-vehicle-row > div {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
+        .lr-actual-charged-row > * {
           padding: 4px 6px;
           border-right: 1px solid #111;
         }
 
-        .lr-vehicle-row > div:last-child {
+        .lr-actual-charged-row > *:last-child {
           border-right: 0;
-        }
-
-        .lr-vehicle-row strong {
-          font-size: 12px;
-        }
-
-        .lr-date-block strong {
-          font-size: 11px;
-          color: #16213e;
-          font-weight: 800;
         }
 
         /* ============================================================= */
         /* BOTTOM ROW: TERMS / DESCRIPTION / CLASSIFICATION / ACK         */
         /* ============================================================= */
 
-        .lr-bottom-row {
+        .lr-bottom-row-left {
           display: flex;
           flex: 1;
           min-height: 100px;
         }
 
         .lr-terms-cell {
-          width: 26%;
+          width: 58%;
           padding: 5px;
           border-right: 1px solid #111;
           display: flex;
@@ -921,28 +1155,40 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-terms-text {
-          font-size: 9px;
-          font-weight: 500;
+          font-size: 12px;
+          font-weight: 600;
           line-height: 1.35;
+          text-align: start;
           color: #3f3f46;
         }
 
         .lr-terms-caption {
-          font-size: 9px;
+          font-size: 13px;
           font-weight: 700;
           color: #16213e;
         }
 
         .lr-description-cell {
-          width: 24%;
-          border-right: 1px solid #111;
+          flex: 1;
           display: flex;
           flex-direction: column;
         }
 
         .lr-description-inner {
           flex: 1;
+          display: flex;
+          flex-direction: column;
           padding: 5px 7px;
+        }
+
+        .lr-goods-block {
+          padding-top: 6px;
+          border-top: 1px dashed #a1a1aa;
+        }
+
+        .lr-classification-block {
+          padding-bottom: 6px;
+          
         }
 
         .lr-copy-name-row {
@@ -952,21 +1198,43 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-goods-value {
           margin-top: 6px;
-          font-size: 15px;
+          font-size: 13px;
           font-weight: 700;
           color: #16213e;
+          line-height: 1.3;
+          word-break: break-word;
         }
 
-        .lr-classification-cell {
-          width: 20%;
-          padding: 5px 7px;
-          border-right: 1px solid #111;
+        .lr-goods-block .lr-goods-value {
+          font-size: 16px;
+        }
+
+        .lr-classification-block .lr-goods-value {
+          margin-top: 4px;
+          font-size: 10px;
+          font-weight: 600;
+          color: #52525b;
         }
 
         .lr-ack-cell {
           flex: 1;
           display: flex;
           flex-direction: column;
+        }
+
+        .lr-insurance-row {
+          display: grid;
+          grid-template-columns: 58% 42%;
+          border-bottom: 1px solid #111;
+        }
+
+        .lr-insurance-row > * {
+          padding: 4px 6px;
+          border-right: 1px solid #111;
+        }
+
+        .lr-insurance-row > *:last-child {
+          border-right: 0;
         }
 
         .lr-ack-banner {
@@ -998,7 +1266,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-copy-date,
         .lr-copy-sign {
-          font-size: 10px;
+          font-size: 12px;
           color: #52525b;
           font-weight: 600;
         }
@@ -1008,7 +1276,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         .lr-charges {
-          font-size: 10px;
+          font-size: 12px;
           display: flex;
           flex-direction: column;
           color: #26314a;
@@ -1132,7 +1400,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         .lr-authorized {
           flex: 1;
           padding: 6px;
-          text-align: center;
+          text-align: start;
           display: flex;
           flex-direction: column;
           justify-content: flex-end;

@@ -44,7 +44,6 @@ export function ShipmentDetailsSection(){
 
         <Textarea
           label="Description of Goods"
-          required
           placeholder="e.g. Activated Carbon"
           error={shipmentErrors?.description?.message}
           {...register("shipment.description")}

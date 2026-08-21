@@ -7,6 +7,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import 'nprogress/nprogress.css';
 import '../globals.css';
 import { useSession } from "next-auth/react";
+import type { DefaultSession } from "next-auth";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 // import ToastContainer from "@/components/notifications/ToastContainer";
@@ -15,6 +16,16 @@ import Navbar from "@/components/Navbar";
 import { Providers } from "../(app)/providers";
 import { Shield, GraduationCap, BookOpen } from 'lucide-react';
 
+type UserRole = 'admin' | 'superAdmin' | 'customer';
+
+declare module "next-auth" {
+  interface Session {
+    user: DefaultSession["user"] & {
+      role?: UserRole;
+    };
+  }
+}
+
 // Configure NProgress
 interface RoleBadgeConfig {
   label: string;
@@ -22,7 +33,6 @@ interface RoleBadgeConfig {
   className: string;
 }
 
-type UserRole = 'admin' | 'superAdmin' | 'customer' | string;
 
 const ROLE_BADGE: Record<string, RoleBadgeConfig> = {
   admin: {
@@ -61,10 +71,10 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 function RootLayoutContent({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession<any>();
+  const { data: session, status } = useSession();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState("");
-  const userRole: any = session?.user?.role ?? '';
+  const userRole: UserRole = session?.user?.role ?? 'admin';
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
