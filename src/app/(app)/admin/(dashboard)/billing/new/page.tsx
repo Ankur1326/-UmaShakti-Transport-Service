@@ -147,7 +147,7 @@ function TransportBillingForm() {
 
   /** Creates the consignment on first save, updates it on every save after that. */
   const persistToBackend = async (values: BillingFormValues) => {
-    console.log("recordId ", recordId)
+    console.log("recordId", recordId)
     if (recordId) {
       const updated = await updateConsignment(recordId, values);
       return updated;
@@ -158,45 +158,55 @@ function TransportBillingForm() {
     return created;
   };
 
-  const onSaveDraft = handleSubmit(
-    async (values) => {
-      cacheDraftLocally(values);
-      try {
-        await persistToBackend(values);
-        toast.success(`Draft saved — Consignment No: ${values.consignmentNumber}`);
-      } catch (error) {
-        toast.error(getApiErrorMessage(error, "Couldn't save the draft. It's cached locally — try again shortly."));
-      }
-    },
-    () => toast.error("Please fix the highlighted fields before saving.")
-  );
+  /** Walks the nested react-hook-form error object and returns the first "field.path: message" pair. */
+function firstErrorMessage(errors: Record<string, unknown>, path: string[] = []): string | null {
+  for (const key of Object.keys(errors)) {
+    const value = errors[key] as Record<string, unknown> | undefined;
+    if (!value) continue;
+    if (typeof value.message === "string") {
+      return `${[...path, key].join(".")}: ${value.message}`;
+    }
+    const nested = firstErrorMessage(value, [...path, key]);
+    if (nested) return nested;
+  }
+  return null;
+}
 
-  const onGenerateLR = handleSubmit(
-    async (values) => {
-      cacheDraftLocally(values);
-      try {
-        await persistToBackend(values);
-        window.localStorage.removeItem(DRAFT_STORAGE_KEY);
-        toast.success(`Consignment saved successfully\nConsignment No: ${values.consignmentNumber}`);
-      } catch (error) {
-        toast.error(getApiErrorMessage(error, "Couldn't generate the LR. Please try again."));
-      }
-    },
-    () => toast.error("Please fix the highlighted fields before generating the LR.")
-  );
+const onInvalid = (errors: Record<string, unknown>) => {
+  console.log("Form validation errors:", errors);
+  toast.error(firstErrorMessage(errors) ?? "Please fix the highlighted fields.");
+};
 
-  const onSaveAndPrint = handleSubmit(
-    async (values) => {
-      cacheDraftLocally(values);
-      try {
-        await persistToBackend(values);
-      } catch (error) {
-        toast.error(getApiErrorMessage(error, "Couldn't save before printing. Showing the preview anyway."));
-      }
-      setPreviewOpen(true);
-    },
-    () => toast.error("Please fix the highlighted fields before printing.")
-  );
+const onSaveDraft = handleSubmit(async (values) => {
+  cacheDraftLocally(values);
+  try {
+    await persistToBackend(values);
+    toast.success(`Draft saved — Consignment No: ${values.consignmentNumber}`);
+  } catch (error) {
+    toast.error(getApiErrorMessage(error, "Couldn't save the draft. It's cached locally — try again shortly."));
+  }
+}, onInvalid);
+
+const onGenerateLR = handleSubmit(async (values) => {
+  cacheDraftLocally(values);
+  try {
+    await persistToBackend(values);
+    window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+    toast.success(`Consignment saved successfully\nConsignment No: ${values.consignmentNumber}`);
+  } catch (error) {
+    toast.error(getApiErrorMessage(error, "Couldn't generate the LR. Please try again."));
+  }
+}, onInvalid);
+
+const onSaveAndPrint = handleSubmit(async (values) => {
+  cacheDraftLocally(values);
+  try {
+    await persistToBackend(values);
+  } catch (error) {
+    toast.error(getApiErrorMessage(error, "Couldn't save before printing. Showing the preview anyway."));
+  }
+  setPreviewOpen(true);
+}, onInvalid);
 
   const onReset = () => {
     const fresh = buildDefaultValues(generateConsignmentNumber());

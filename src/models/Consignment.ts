@@ -217,6 +217,7 @@ const paymentSchema = new Schema<IPayment>(
         receivedType: { type: String, enum: RECEIVED_TYPES, default: "Cash" },
         receivedMoney: { type: String, default: "" },
         receivedDate: { type: String, default: "" },
+        UTRNumber: { type: String, default: "" },
         mrNumber: { type: String, default: "" },
         mrDate: { type: String, default: "" },
     },

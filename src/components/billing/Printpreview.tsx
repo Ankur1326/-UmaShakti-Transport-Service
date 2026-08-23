@@ -33,7 +33,7 @@ function text(value: unknown) {
   return String(value);
 }
 
-function formatDate(value?: string) {
+function formatDate(value?: string | null | undefined) {
   if (!value) return "";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
@@ -336,7 +336,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
                       <SmallLabel>Policy No. &amp; Date</SmallLabel>
                       <span className="lr-field-value">
                         {values.insurance.required
-                          ? [text(values.insurance.policyNumber), formatDate(values.insurance.date)].filter(Boolean).join("  •  ")
+                          ? [text(values.insurance.policyNumber), formatDate(values?.insurance?.date)].filter(Boolean).join("  •  ")
                           : ""}
                       </span>
                     </div>

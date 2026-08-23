@@ -142,7 +142,7 @@ export const billingFormSchema = z.object({
     company: z.string().trim().optional().or(z.literal("")),
     policyNumber: z.string().trim().optional().or(z.literal("")),
     amount: z.coerce.number().nonnegative().optional(),
-    date: z.string().optional().or(z.literal("")),
+    date: z.string().optional().or(z.literal(null)),
     riskType: z.string().trim().optional().or(z.literal("")),
   }),
 
@@ -226,7 +226,7 @@ export function buildDefaultValues(consignmentNumber: string): BillingFormValues
     },
     tax: { type: "", percentage: "", customPercentage: undefined },
     payment: { type: "", billingParty: "", billingAccount: "", status: "", receivedType: "", UTRNumber: "", receivedMoney: "", receivedDate: "", mrNumber: "", mrDate: "" },
-    insurance: { required: false, company: "", policyNumber: "", amount: 0, date: "", riskType: "" },
+    insurance: { required: false, company: "", policyNumber: "", amount: 0, date: null, riskType: "" },
     remarks: "",
     internalNotes: "",
     specialInstructions: "",

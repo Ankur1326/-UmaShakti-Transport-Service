@@ -18,12 +18,12 @@ export type MongoDate = string | { $date: string } | null | undefined;
 export interface ConsignmentListItem {
   _id: string;
   consignmentNumber: string;
-  bookingDate?: MongoDate;
-  cnsDate?: MongoDate;
+  bookingDate?: MongoDate | null;
+  cnsDate?: MongoDate | null;
   eWayBillNumber?: string;
-  validUpTo?: MongoDate;
+  validUpTo?: MongoDate | null;
   invoiceNumber?: string;
-  invoiceDate?: MongoDate;
+  invoiceDate?: MongoDate | null;
   vehicleNumber?: string;
   from?: { location?: string; branch?: string; state?: string; gstin?: string };
   to?: { location?: string; branch?: string; state?: string; gstin?: string };
@@ -61,7 +61,7 @@ export interface ConsignmentListItem {
     company?: string;
     policyNumber?: string;
     amount?: number;
-    date?: MongoDate;
+    date?: MongoDate | null;
     riskType?: string;
   };
   remarks?: string;
