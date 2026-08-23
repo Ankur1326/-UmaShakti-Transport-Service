@@ -33,13 +33,14 @@ export function GstSection() {
 
   return (
     <FormSection title="GST" description="Tax is calculated automatically from the charges above.">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Select label="GST Type" options={GST_TYPE_OPTIONS} {...register("tax.type")} />
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+        <Select size="compact" label="GST Type" options={GST_TYPE_OPTIONS} {...register("tax.type")} />
         <Controller
           control={control}
           name="tax.percentage"
           render={({ field }) => (
             <Select
+              size="compact"
               label="GST Percentage"
               options={GST_PERCENTAGE_OPTIONS}
               disabled={gstType === "NONE"}
@@ -49,32 +50,32 @@ export function GstSection() {
           )}
         />
         {gstPercentage === "custom" && gstType !== "NONE" && (
-          <Input type="number" min={0} max={100} step="0.01" label="Custom GST %" {...register("tax.customPercentage")} />
+          <Input size="compact" type="number" min={0} max={100} step="0.01" label="Custom GST %" {...register("tax.customPercentage")} />
         )}
       </div>
 
       {gstType !== "NONE" && (
-        <div className="mt-4 grid grid-cols-1 gap-3 rounded-lg bg-neutral-50 p-4 sm:grid-cols-3">
+        <div className="mt-2 grid grid-cols-2 gap-2 rounded-md bg-neutral-50 p-2 sm:grid-cols-3">
           {gstType === "CGST_SGST" ? (
             <>
               <div>
-                <p className="text-caption text-neutral-500">CGST</p>
-                <p className="text-body-sm font-semibold text-neutral-900">{formatINR(totals.cgstAmount)}</p>
+                <p className="text-[10px] text-neutral-500">CGST</p>
+                <p className="text-[11px] font-semibold text-neutral-900">{formatINR(totals.cgstAmount)}</p>
               </div>
               <div>
-                <p className="text-caption text-neutral-500">SGST</p>
-                <p className="text-body-sm font-semibold text-neutral-900">{formatINR(totals.sgstAmount)}</p>
+                <p className="text-[10px] text-neutral-500">SGST</p>
+                <p className="text-[11px] font-semibold text-neutral-900">{formatINR(totals.sgstAmount)}</p>
               </div>
             </>
           ) : (
             <div>
-              <p className="text-caption text-neutral-500">IGST</p>
-              <p className="text-body-sm font-semibold text-neutral-900">{formatINR(totals.igstAmount)}</p>
+              <p className="text-[10px] text-neutral-500">IGST</p>
+              <p className="text-[11px] font-semibold text-neutral-900">{formatINR(totals.igstAmount)}</p>
             </div>
           )}
           <div>
-            <p className="text-caption text-neutral-500">Total GST Amount</p>
-            <p className="text-body-sm font-semibold text-brand-700">{formatINR(totals.gstAmount)}</p>
+            <p className="text-[10px] text-neutral-500">Total GST Amount</p>
+            <p className="text-[11px] font-semibold text-brand-700">{formatINR(totals.gstAmount)}</p>
           </div>
         </div>
       )}

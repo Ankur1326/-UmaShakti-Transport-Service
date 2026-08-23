@@ -14,19 +14,32 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   options: SelectOption[];
   /** Text for a disabled placeholder option shown when no value is selected. */
   placeholder?: string;
+  /**
+   * Visual density. "default" preserves the original size used across the
+   * app; "compact" is a tighter variant for dense forms (e.g. the billing
+   * form) and does not change behavior/validation.
+   */
+  size?: "default" | "compact";
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, error, helperText, options, placeholder, id, required, ...props }, ref) => {
+  ({ className, label, error, helperText, options, placeholder, id, required, size = "default", ...props }, ref) => {
     const generatedId = useId();
     const selectId = id ?? generatedId;
     const helperId = `${selectId}-helper`;
     const errorId = `${selectId}-error`;
+    const isCompact = size === "compact";
 
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={selectId} className="mb-1.5 block text-body-sm font-medium text-neutral-800">
+          <label
+            htmlFor={selectId}
+            className={cn(
+              "mb-1.5 block text-body-sm font-medium text-neutral-800",
+              isCompact && "mb-0.5 text-[9.5px] font-semibold uppercase tracking-[0.02em] text-neutral-600"
+            )}
+          >
             {label}
             {required && <span className="ml-0.5 text-error-600">*</span>}
           </label>
@@ -42,6 +55,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             className={cn(
               "focus-ring h-11 w-full appearance-none rounded-lg border border-neutral-300 bg-white px-3.5 pr-9 text-body text-neutral-900",
               "transition-colors hover:border-neutral-400",
+              isCompact && "h-8 rounded-md px-2 pr-6 text-[12px]",
               error && "border-error-500 hover:border-error-500 focus-visible:ring-error-500",
               className
             )}
@@ -59,17 +73,20 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             ))}
           </select>
           <ChevronDown
-            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
+            className={cn(
+              "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400",
+              isCompact && "right-2 h-3.5 w-3.5"
+            )}
             aria-hidden="true"
           />
         </div>
 
         {error ? (
-          <p id={errorId} className="mt-1.5 text-body-sm text-error-600">
+          <p id={errorId} className={cn("mt-1.5 text-body-sm text-error-600", isCompact && "mt-0.5 text-[10px]")}>
             {error}
           </p>
         ) : helperText ? (
-          <p id={helperId} className="mt-1.5 text-body-sm text-neutral-500">
+          <p id={helperId} className={cn("mt-1.5 text-body-sm text-neutral-500", isCompact && "mt-0.5 text-[10px]")}>
             {helperText}
           </p>
         ) : null}

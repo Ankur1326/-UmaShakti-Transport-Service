@@ -3,11 +3,12 @@ import { cn } from "@/lib/utils";
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Adds hover elevation + border color shift — use for clickable cards */
   interactive?: boolean;
-  padding?: "none" | "sm" | "md" | "lg";
+  padding?: "none" | "xs" | "sm" | "md" | "lg";
 }
 
 const paddingClasses = {
   none: "",
+  xs: "p-2",
   sm: "p-3",
   md: "p-6",
   lg: "p-8",

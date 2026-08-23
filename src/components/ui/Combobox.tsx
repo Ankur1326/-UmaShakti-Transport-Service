@@ -19,6 +19,12 @@ interface ComboboxProps {
   onCreateNew?: () => void;
   createNewLabel?: string;
   className?: string;
+  /**
+   * Visual density. "default" preserves the original size used across the
+   * app; "compact" is a tighter variant for dense forms (e.g. the billing
+   * form) and does not change behavior.
+   */
+  size?: "default" | "compact";
 }
 
 export function Combobox({
@@ -29,7 +35,9 @@ export function Combobox({
   onCreateNew,
   createNewLabel = "+ Add New",
   className,
+  size = "default",
 }: ComboboxProps) {
+  const isCompact = size === "compact";
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -53,13 +61,25 @@ export function Combobox({
   return (
     <div className={cn("relative w-full", className)} ref={containerRef}>
       {label && (
-        <label htmlFor={inputId} className="mb-1.5 block text-body-sm font-medium text-neutral-800">
+        <label
+          htmlFor={inputId}
+          className={cn(
+            "mb-1.5 block text-body-sm font-medium text-neutral-800",
+            isCompact && "mb-0.5 text-[9.5px] font-semibold uppercase tracking-[0.02em] text-neutral-600"
+          )}
+        >
           {label}
         </label>
       )}
 
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" aria-hidden="true" />
+        <Search
+          className={cn(
+            "pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400",
+            isCompact && "left-2 h-3.5 w-3.5"
+          )}
+          aria-hidden="true"
+        />
         <input
           id={inputId}
           type="text"
@@ -74,16 +94,22 @@ export function Combobox({
             setQuery(e.target.value);
             setOpen(true);
           }}
-          className="focus-ring h-11 w-full rounded-lg border border-neutral-300 bg-white pl-10 pr-9 text-body text-neutral-900 placeholder:text-neutral-400 transition-colors hover:border-neutral-400"
+          className={cn(
+            "focus-ring h-11 w-full rounded-lg border border-neutral-300 bg-white pl-10 pr-9 text-body text-neutral-900 placeholder:text-neutral-400 transition-colors hover:border-neutral-400",
+            isCompact && "h-8 rounded-md pl-7 pr-7 text-[12px]"
+          )}
         />
         {query && (
           <button
             type="button"
             aria-label="Clear search"
             onClick={() => setQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+            className={cn(
+              "absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600",
+              isCompact && "right-2"
+            )}
           >
-            <X className="h-4 w-4" aria-hidden="true" />
+            <X className={cn("h-4 w-4", isCompact && "h-3.5 w-3.5")} aria-hidden="true" />
           </button>
         )}
       </div>

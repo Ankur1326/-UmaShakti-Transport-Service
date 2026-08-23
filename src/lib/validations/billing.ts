@@ -14,8 +14,8 @@ const gstinSchema = z
 
 const partySchema = z.object({
   customerId: z.string().optional(),
-  name: z.string().trim().min(1, "Name is required."),
-  address: z.string().trim().min(1, "Address is required."),
+  name: z.string().trim().optional().or(z.literal("")),
+  address: z.string().trim().optional().or(z.literal("")),
   city: z.string().trim().optional().or(z.literal("")),
   state: z.string().trim().optional().or(z.literal("")),
   pincode: z
@@ -28,8 +28,9 @@ const partySchema = z.object({
   mobile: z
     .string()
     .trim()
-    .min(1, "Mobile number is required.")
-    .refine((v) => /^[0-9]{10}$/.test(v.replace(/\D/g, "")), {
+    .optional()
+    .or(z.literal(""))
+    .refine((v) => !v || /^[0-9]{10}$/.test(v.replace(/\D/g, "")), {
       message: "Enter a valid 10-digit mobile number.",
     }),
   email: z.string().trim().optional().or(z.literal("")).refine((v) => !v || z.string().email().safeParse(v).success, {
@@ -38,7 +39,7 @@ const partySchema = z.object({
 });
 
 const locationSchema = z.object({
-  location: z.string().trim().min(1, "This field is required."),
+  location: z.string().trim().optional().or(z.literal("")),
   branch: z.string().trim().optional().or(z.literal("")),
   state: z.string().trim().optional().or(z.literal("")),
   gstin: gstinSchema,
@@ -46,28 +47,28 @@ const locationSchema = z.object({
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-export const PACKING_TYPES = ["Bags", "Boxes", "Cartons", "Drums", "Pallets", "Loose", "Other"] as const;
-export const VOLUME_UNITS = ["CFT", "CBM", "Litre", "Other"] as const;
+export const PACKING_TYPES = ["Bags", "Boxes", "Cartons", "Drums", "Pallets", "Wooden box", "Machine", "Pipe", "Loose", "Other"] as const;
+// export const VOLUME_UNITS = ["CFT", "CBM", "Litre", "Other"] as const;
 export const WEIGHT_UNITS = ["KG", "Ton", "Gram"] as const;
-export const SEGMENTS = ["FTL", "LTL", "Part Load", "Full Load", "Other"] as const;
+export const SEGMENTS = ["FTL", "LTL", "SUN", "ODC", "MM", "SAARC", "Other"] as const;
 export const LOAD_TYPES = ["Charged Weight", "Full Load", "Part Load", "Minimum Weight", "Actual Weight"] as const;
 export const GST_TYPES = ["IGST", "CGST_SGST", "NONE"] as const;
 export const GST_PERCENTAGES = [0, 5, 12, 18, "custom"] as const;
-export const PAYMENT_TYPES = ["To Pay", "Paid", "TBB", "Credit", "Cash", "Online", "Bank Transfer", "UPI"] as const;
+export const PAYMENT_TYPES = ["To Pay", "Paid", "TBB at", "Credit", "Cash", "Online", "Bank Transfer", "UPI"] as const;
 export const BILLING_PARTIES = ["Consignor", "Consignee", "Third Party"] as const;
 export const PAYMENT_STATUSES = ["Pending", "Partially Paid", "Paid", "Cancelled"] as const;
-
+export const RECEIVED_TYPES = ["Cash", "NEFT", "Check"] as const;
 // ─── Main schema ─────────────────────────────────────────────────────────────
 
 export const billingFormSchema = z.object({
   consignmentNumber: z.string().trim().min(1, "Consignment number is required."),
-  bookingDate: z.string().min(1, "Booking date is required."),
+  bookingDate: z.string().optional().or(z.literal("")),
   cnsDate: z.string().optional().or(z.literal("")),
   eWayBillNumber: z.string().trim().optional().or(z.literal("")),
   validUpTo: z.string().optional().or(z.literal("")),
   invoiceNumber: z.string().trim().optional().or(z.literal("")),
   invoiceDate: z.string().optional().or(z.literal("")),
-  vehicleNumber: z.string().trim().min(1, "Vehicle number is required."),
+  vehicleNumber: z.string().trim().optional().or(z.literal("")),
 
   from: locationSchema,
   to: locationSchema,
@@ -76,20 +77,20 @@ export const billingFormSchema = z.object({
   consignee: partySchema,
 
   shipment: z.object({
-    packages: z.coerce.number({ message: "Packages must be a number." }).int().positive("Packages must be greater than 0."),
-    packing: z.enum(PACKING_TYPES),
-    description: z.string().trim().min(1, "Description of goods is required."),
+    packages: z.string().optional().or(z.literal("")),
+    packing: z.enum(PACKING_TYPES).optional().or(z.literal("")),
+    description: z.string().trim().optional().or(z.literal("")),
     classification: z.string().trim().optional().or(z.literal("")),
-    declaredValue: z.coerce.number().nonnegative("Declared value cannot be negative.").optional(),
+    declaredValue: z.string().optional().or(z.literal("")),
     invoiceNumber: z.string().trim().optional().or(z.literal("")),
-    volume: z.coerce.number().nonnegative().optional(),
-    volumeUnit: z.enum(VOLUME_UNITS),
-    actualWeight: z.coerce.number({ message: "Actual weight is required." }).positive("Weight must be greater than 0."),
-    weightUnit: z.enum(WEIGHT_UNITS),
+    volume: z.string().trim().optional().or(z.literal("")),
+    // volumeUnit: z.enum(VOLUME_UNITS),
+    actualWeight: z.string().optional().or(z.literal("")),
+    chargeWeight: z.string().optional().or(z.literal(""))
   }),
 
-  segment: z.enum(SEGMENTS),
-  loadType: z.enum(LOAD_TYPES),
+  segment: z.enum(SEGMENTS).optional().or(z.literal("")),
+  loadType: z.enum(LOAD_TYPES).optional().or(z.literal("")),
 
   vehicle: z.object({
     driverName: z.string().trim().optional().or(z.literal("")),
@@ -114,20 +115,26 @@ export const billingFormSchema = z.object({
     codCharges: z.coerce.number().nonnegative().default(0),
     statisticalCharges: z.coerce.number().nonnegative().default(0),
     localCollectionCharges: z.coerce.number().nonnegative().default(0),
-    
+    printHidden: z.boolean().default(false),
   }),
 
   tax: z.object({
-    type: z.enum(GST_TYPES),
-    percentage: z.union([z.literal(0), z.literal(5), z.literal(12), z.literal(18), z.literal("custom")]),
+    type: z.enum(GST_TYPES).optional().or(z.literal("")),
+    percentage: z.union([z.literal(0), z.literal(5), z.literal(12), z.literal(18), z.literal("custom")]).optional().or(z.literal("")),
     customPercentage: z.coerce.number().min(0).max(100).optional(),
   }),
 
   payment: z.object({
-    type: z.enum(PAYMENT_TYPES, { message: "Select a payment type." }),
-    billingParty: z.enum(BILLING_PARTIES),
+    type: z.enum(PAYMENT_TYPES).optional().or(z.literal("")),
+    billingParty: z.enum(BILLING_PARTIES).optional().or(z.literal("")),
     billingAccount: z.string().trim().optional().or(z.literal("")),
-    status: z.enum(PAYMENT_STATUSES),
+    status: z.enum(PAYMENT_STATUSES).optional().or(z.literal("")),
+    receivedType: z.enum(RECEIVED_TYPES).optional().or(z.literal("")),
+    receivedMoney: z.string().optional().or(z.literal("")),
+    receivedDate: z.string().optional().or(z.literal("")),
+    UTRNumber: z.string().optional().or(z.literal("")),
+    mrNumber: z.string().optional().or(z.literal("")),
+    mrDate: z.string().optional().or(z.literal("")),
   }),
 
   insurance: z.object({
@@ -185,16 +192,16 @@ export function buildDefaultValues(consignmentNumber: string): BillingFormValues
     consignor: { ...emptyParty },
     consignee: { ...emptyParty },
     shipment: {
-      packages: 0,
+      packages: "",
       packing: "Bags",
       description: "",
       classification: "",
-      declaredValue: 0,
+      declaredValue: "",
       invoiceNumber: "",
-      volume: 0,
-      volumeUnit: "CFT",
-      actualWeight: 0,
-      weightUnit: "KG",
+      volume: "",
+      // volumeUnit: "CFT",
+      actualWeight: "",
+      chargeWeight: "",
     },
     segment: "FTL",
     loadType: "Actual Weight",
@@ -215,9 +222,10 @@ export function buildDefaultValues(consignmentNumber: string): BillingFormValues
       codCharges: 0,
       statisticalCharges: 0,
       localCollectionCharges: 0,
+      printHidden: false,
     },
-    tax: { type: "CGST_SGST", percentage: 18, customPercentage: undefined },
-    payment: { type: "To Pay", billingParty: "Consignor", billingAccount: "", status: "Pending" },
+    tax: { type: "", percentage: "", customPercentage: undefined },
+    payment: { type: "", billingParty: "", billingAccount: "", status: "", receivedType: "", UTRNumber: "", receivedMoney: "", receivedDate: "", mrNumber: "", mrDate: "" },
     insurance: { required: false, company: "", policyNumber: "", amount: 0, date: "", riskType: "" },
     remarks: "",
     internalNotes: "",

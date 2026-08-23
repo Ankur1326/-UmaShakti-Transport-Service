@@ -16,9 +16,10 @@ export function ConsignmentInfoSection() {
 
   return (
     <FormSection title="Consignment Information" description="Core details that identify this consignment note.">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-5">
         <div className="relative">
           <Input
+            size="compact"
             label="Consignment No."
             required
             // readOnly={numberLocked}
@@ -37,36 +38,33 @@ export function ConsignmentInfoSection() {
           </button> */}
         </div>
 
-        <Input
-          type="date"
-          label="Booking Date"
-          required
-          error={errors.bookingDate?.message}
-          {...register("bookingDate")}
-        />
-
-        <Input type="date" label="CNS Date" error={errors.cnsDate?.message} {...register("cnsDate")} />
+        <Input size="compact" type="date" label="CNS Date" error={errors.cnsDate?.message} {...register("cnsDate")} />
 
         <Input
+          size="compact"
           label="Vehicle Number"
-          required
+          // required
           placeholder="RJ14 GA 3317"
           error={errors.vehicleNumber?.message}
           {...register("vehicleNumber")}
         />
 
         <Input
+          size="compact"
           label="E-Way Bill Number"
           placeholder="Optional"
           error={errors.eWayBillNumber?.message}
           {...register("eWayBillNumber")}
         />
 
-        <Input type="datetime-local" label="Valid Up To" error={errors.validUpTo?.message} {...register("validUpTo")} />
+        <Input
+          size="compact"
+          type="datetime-local"
+          label="Valid Up To"
+          error={errors.validUpTo?.message}
+          {...register("validUpTo")}
+        />
 
-        <Input label="Invoice Number" error={errors.invoiceNumber?.message} {...register("invoiceNumber")} />
-
-        <Input type="date" label="Invoice Date" error={errors.invoiceDate?.message} {...register("invoiceDate")} />
       </div>
     </FormSection>
   );

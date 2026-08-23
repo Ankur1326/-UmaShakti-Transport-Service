@@ -16,7 +16,7 @@ function PillGroup<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2" role="radiogroup">
+    <div className="flex flex-wrap gap-1.5" role="radiogroup">
       {options.map((opt) => {
         const active = opt === value;
         return (
@@ -27,7 +27,7 @@ function PillGroup<T extends string>({
             aria-checked={active}
             onClick={() => onChange(opt)}
             className={cn(
-              "focus-ring rounded-full border px-4 py-2 text-body-sm font-medium transition-colors",
+              "focus-ring rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors",
               active
                 ? "border-brand-700 bg-brand-700 text-white"
                 : "border-neutral-300 bg-white text-neutral-700 hover:border-brand-400 hover:bg-brand-50"
@@ -46,9 +46,9 @@ export function LoadTypeSection() {
 
   return (
     <FormSection title="Segment & Load Type" description="Classifies how this shipment is billed and moved.">
-      <div className="space-y-5">
+      <div className="space-y-2">
         <div>
-          <p className="mb-2 text-body-sm font-medium text-neutral-800">Segment</p>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.02em] text-neutral-600">Segment</p>
           <Controller
             control={control}
             name="segment"
@@ -57,7 +57,7 @@ export function LoadTypeSection() {
         </div>
 
         <div>
-          <p className="mb-2 text-body-sm font-medium text-neutral-800">Load Type</p>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.02em] text-neutral-600">Load Type</p>
           <Controller
             control={control}
             name="loadType"

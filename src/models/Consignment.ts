@@ -1,14 +1,15 @@
 import mongoose, { model, Schema, Document, Model } from "mongoose";
 import {
     PACKING_TYPES,
-    VOLUME_UNITS,
-    WEIGHT_UNITS,
+    // VOLUME_UNITS,
+    // WEIGHT_UNITS,
     SEGMENTS,
     LOAD_TYPES,
     GST_TYPES,
     PAYMENT_TYPES,
     BILLING_PARTIES,
     PAYMENT_STATUSES,
+    RECEIVED_TYPES,
 } from "@/lib/validations/billing";
 
 // ─── Sub-document interfaces ────────────────────────────────────────────────
@@ -33,16 +34,16 @@ export interface ILocation {
 }
 
 export interface IShipment {
-    packages: number;
+    packages: string;
     packing: (typeof PACKING_TYPES)[number];
     description: string;
     classification?: string;
-    declaredValue?: number;
+    declaredValue?: string;
     invoiceNumber?: string;
-    volume?: number;
-    volumeUnit: (typeof VOLUME_UNITS)[number];
-    actualWeight: number;
-    weightUnit: (typeof WEIGHT_UNITS)[number];
+    volume?: string;
+    // volumeUnit: (typeof VOLUME_UNITS)[number];
+    actualWeight: string;
+    chargeWeight: string;
 }
 
 export interface IVehicleDetails {
@@ -76,6 +77,12 @@ export interface IPayment {
     billingParty: (typeof BILLING_PARTIES)[number];
     billingAccount?: string;
     status: (typeof PAYMENT_STATUSES)[number];
+    receivedMoney: string;
+    receivedDate: string;
+    UTRNumber: string;
+    receivedType: (typeof RECEIVED_TYPES)[number];
+    mrNumber: string;
+    mrDate: string;
 }
 
 export interface IInsurance {
@@ -152,16 +159,16 @@ const locationSchema = new Schema<ILocation>(
 
 const shipmentSchema = new Schema<IShipment>(
     {
-        packages: { type: Number, min: 1 },
+        packages: { type: String },
         packing: { type: String, enum: PACKING_TYPES },
         description: { type: String, trim: true },
         classification: { type: String, default: "" },
-        declaredValue: { type: Number, default: 0, min: 0 },
+        declaredValue: { type: String, default: "" },
         invoiceNumber: { type: String, default: "" },
-        volume: { type: Number, default: 0, min: 0 },
-        volumeUnit: { type: String, enum: VOLUME_UNITS},
-        actualWeight: { type: Number, min: 0 },
-        weightUnit: { type: String, enum: WEIGHT_UNITS },
+        volume: { type: String, default: "" },
+        // volumeUnit: { type: String, enum: VOLUME_UNITS},
+        actualWeight: { type: String, default: "" },
+        chargeWeight: { type: String, default: "" }
     },
     { _id: false }
 );
@@ -207,6 +214,11 @@ const paymentSchema = new Schema<IPayment>(
         billingParty: { type: String, enum: BILLING_PARTIES },
         billingAccount: { type: String, default: "" },
         status: { type: String, enum: PAYMENT_STATUSES, default: "Pending" },
+        receivedType: { type: String, enum: RECEIVED_TYPES, default: "Cash" },
+        receivedMoney: { type: String, default: "" },
+        receivedDate: { type: String, default: "" },
+        mrNumber: { type: String, default: "" },
+        mrDate: { type: String, default: "" },
     },
     { _id: false }
 );

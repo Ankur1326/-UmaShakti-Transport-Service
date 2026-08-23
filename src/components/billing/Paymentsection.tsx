@@ -6,7 +6,7 @@ import { Select } from "@/components/ui/Select";
 import { Combobox } from "@/components/ui/Combobox";
 import { Input } from "@/components/ui/Input";
 import { MOCK_CUSTOMERS } from "@/lib/mock-data/customers";
-import { BILLING_PARTIES, PAYMENT_STATUSES, PAYMENT_TYPES } from "@/lib/validations/billing";
+import { BILLING_PARTIES, PAYMENT_STATUSES, PAYMENT_TYPES, RECEIVED_TYPES } from "@/lib/validations/billing";
 import type { BillingFormValues } from "@/lib/validations/billing";
 
 const toOptions = (values: readonly string[]) => values.map((v) => ({ value: v, label: v }));
@@ -20,41 +20,97 @@ export function PaymentSection() {
   } = useFormContext<BillingFormValues>();
   const paymentErrors = errors.payment;
   const billingAccount = watch("payment.billingAccount");
+  const paymentStatus = watch("payment.status");
+  const showReceivedFields = paymentStatus === "Paid" || paymentStatus === "Partially Paid";
+  const receivedType = watch("payment.receivedType");
 
   return (
     <FormSection title="Payment / Billing Information" description="How and by whom this consignment will be paid.">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-1.5">
         <Select
+          size="compact"
           label="Payment Type"
-          required
+          // required
           placeholder="Select payment type"
           options={toOptions(PAYMENT_TYPES)}
           error={paymentErrors?.type?.message}
           {...register("payment.type")}
         />
         <Select
+          size="compact"
           label="Billing Party"
           options={toOptions(BILLING_PARTIES)}
           error={paymentErrors?.billingParty?.message}
           {...register("payment.billingParty")}
         />
 
-        <div className="sm:col-span-2">
+        {/* <div className="col-span-2">
           <Combobox
+            size="compact"
             label="Billing Account"
             placeholder="Search customer to bill…"
             items={MOCK_CUSTOMERS.map((c) => ({ id: c.id, label: c.name, subLabel: `${c.city}, ${c.state}` }))}
             onSelect={(item) => setValue("payment.billingAccount", item.label)}
           />
-          {billingAccount && <Input readOnly value={billingAccount} className="mt-2 bg-neutral-50 text-neutral-600" />}
-        </div>
+          {billingAccount && (
+            <Input size="compact" readOnly value={billingAccount} className="mt-1 bg-neutral-50 text-neutral-600" />
+          )}
+        </div> */}
 
         <Select
+          size="compact"
           label="Payment Status"
           options={toOptions(PAYMENT_STATUSES)}
           error={paymentErrors?.status?.message}
           {...register("payment.status")}
         />
+
+        {showReceivedFields && (
+          <>
+            <Select
+              size="compact"
+              label="Received Type"
+              options={toOptions(RECEIVED_TYPES)}
+              {...register("payment.receivedType")}
+            />
+            {
+              receivedType == "NEFT" &&
+              <Input
+                size="compact"
+                type="text"
+                label="UTR Number"
+                {...register("payment.UTRNumber")}
+              />
+            }
+            <Input
+              size="compact"
+              type="text"
+              label="Received Money"
+              {...register("payment.receivedMoney")}
+            />
+            <Input
+              size="compact"
+              type="Date"
+              label="Received Date"
+              {...register("payment.receivedDate")}
+            />
+
+            <Input
+              size="compact"
+              type="text"
+              label="MR. No."
+              {...register("payment.mrNumber")}
+            />
+            <Input
+              size="compact"
+              type="Date"
+              label="MR. Date"
+              {...register("payment.mrDate")}
+            />
+
+          </>
+        )}
+
       </div>
     </FormSection>
   );

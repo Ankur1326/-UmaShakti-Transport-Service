@@ -5,19 +5,32 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
   helperText?: string;
+  /**
+   * Visual density. "default" preserves the original size used across the
+   * app; "compact" is a tighter variant for dense forms (e.g. the billing
+   * form) and does not change behavior/validation.
+   */
+  size?: "default" | "compact";
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, error, helperText, id, required, rows = 3, ...props }, ref) => {
+  ({ className, label, error, helperText, id, required, rows = 3, size = "default", ...props }, ref) => {
     const generatedId = useId();
     const textareaId = id ?? generatedId;
     const helperId = `${textareaId}-helper`;
     const errorId = `${textareaId}-error`;
+    const isCompact = size === "compact";
 
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={textareaId} className="mb-1.5 block text-body-sm font-medium text-neutral-800">
+          <label
+            htmlFor={textareaId}
+            className={cn(
+              "mb-1.5 block text-body-sm font-medium text-neutral-800",
+              isCompact && "mb-0.5 text-[9.5px] font-semibold uppercase tracking-[0.02em] text-neutral-600"
+            )}
+          >
             {label}
             {required && <span className="ml-0.5 text-error-600">*</span>}
           </label>
@@ -33,6 +46,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           className={cn(
             "focus-ring w-full resize-y rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-body text-neutral-900 placeholder:text-neutral-400",
             "transition-colors hover:border-neutral-400",
+            isCompact && "rounded-md px-2 py-1.5 text-[12px]",
             error && "border-error-500 hover:border-error-500 focus-visible:ring-error-500",
             className
           )}
@@ -40,11 +54,11 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
 
         {error ? (
-          <p id={errorId} className="mt-1.5 text-body-sm text-error-600">
+          <p id={errorId} className={cn("mt-1.5 text-body-sm text-error-600", isCompact && "mt-0.5 text-[10px]")}>
             {error}
           </p>
         ) : helperText ? (
-          <p id={helperId} className="mt-1.5 text-body-sm text-neutral-500">
+          <p id={helperId} className={cn("mt-1.5 text-body-sm text-neutral-500", isCompact && "mt-0.5 text-[10px] leading-tight")}>
             {helperText}
           </p>
         ) : null}

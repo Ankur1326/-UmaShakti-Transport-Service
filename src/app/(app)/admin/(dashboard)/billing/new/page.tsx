@@ -22,7 +22,7 @@ import { PartyCard } from "@/components/billing/PartyCard";
 import { ShipmentDetailsSection } from "@/components/billing/Shipmentdetailssection";
 // import { ShipmentDetailsSection } from "@/components/billing/ShipmentDetailsSection";
 import { LoadTypeSection } from "@/components/billing/Loadtypesection";
-import { TransportDetailsSection } from "@/components/billing/Transportdetailssection";
+// import { TransportDetailsSection } from "@/components/billing/Transportdetailssection";
 import { ChargesSection } from "@/components/billing/Chargessection";
 import { GstSection } from "@/components/billing/Gstsection";
 import { BillingSummary } from "@/components/billing/Billingsummary";
@@ -147,6 +147,7 @@ function TransportBillingForm() {
 
   /** Creates the consignment on first save, updates it on every save after that. */
   const persistToBackend = async (values: BillingFormValues) => {
+    console.log("recordId ", recordId)
     if (recordId) {
       const updated = await updateConsignment(recordId, values);
       return updated;
@@ -277,7 +278,7 @@ function TransportBillingForm() {
         />
       ) : (
         <form
-          className="pb-32"
+          className="pb-20 text-[12px]"
           onSubmit={(e) => e.preventDefault()}
         >
           {/* ============================================================ */}
@@ -289,7 +290,7 @@ function TransportBillingForm() {
           {/* BILLING SUMMARY                                                */}
           {/* ============================================================ */}
 
-          <div className="mb-4">
+          <div className="mb-2">
             <BillingSummary />
           </div>
 
@@ -297,7 +298,7 @@ function TransportBillingForm() {
           {/* MAIN FORM                                                      */}
           {/* ============================================================ */}
 
-          <div className="flex flex-wrap items-start gap-3 xl:gap-3">
+          <div className="flex flex-wrap items-start gap-2">
             {/* ========================================================== */}
             {/* CONSIGNMENT INFORMATION                                    */}
             {/* ========================================================== */}
@@ -310,15 +311,23 @@ function TransportBillingForm() {
             {/* ROUTE                                                       */}
             {/* ========================================================== */}
 
-            <section className="w-full">
+            <section className="w-full md:w-[calc(60%-0.5rem)]">
               <RouteSection />
+            </section>
+
+            {/* ========================================================== */}
+            {/* LOAD TYPE                                                   */}
+            {/* ========================================================== */}
+
+            <section className="w-full md:w-[calc(40%-0.5rem)]">
+              <LoadTypeSection />
             </section>
 
             {/* ========================================================== */}
             {/* CONSIGNOR                                                   */}
             {/* ========================================================== */}
 
-            <section className="w-full lg:w-[calc(50%-0.75rem)]">
+            <section className="w-full md:w-[calc(50%-0.5rem)]">
               <PartyCard
                 prefix="consignor"
                 title="Consignor"
@@ -330,7 +339,7 @@ function TransportBillingForm() {
             {/* CONSIGNEE                                                   */}
             {/* ========================================================== */}
 
-            <section className="w-full lg:w-[calc(50%-0.75rem)]">
+            <section className="w-full md:w-[calc(50%-0.5rem)]">
               <PartyCard
                 prefix="consignee"
                 title="Consignee"
@@ -347,26 +356,18 @@ function TransportBillingForm() {
             </section>
 
             {/* ========================================================== */}
-            {/* LOAD TYPE                                                   */}
-            {/* ========================================================== */}
-
-            <section className="w-full lg:w-[calc(50%-0.75rem)]">
-              <LoadTypeSection />
-            </section>
-
-            {/* ========================================================== */}
             {/* TRANSPORT DETAILS                                           */}
             {/* ========================================================== */}
 
-            <section className="w-full lg:w-[calc(50%-0.75rem)]">
+            {/* <section className="w-full md:w-[calc(50%-0.5rem)]">
               <TransportDetailsSection />
-            </section>
+            </section> */}
 
             {/* ========================================================== */}
             {/* CHARGES                                                     */}
             {/* ========================================================== */}
 
-            <section className="w-full xl:w-[calc(66.666%-0.5rem)]">
+            <section className="w-full lg:w-[calc(66.666%-0.35rem)]">
               <ChargesSection />
             </section>
 
@@ -374,7 +375,7 @@ function TransportBillingForm() {
             {/* GST                                                         */}
             {/* ========================================================== */}
 
-            <section className="w-full xl:w-[calc(33.333%-1rem)]">
+            <section className="w-full lg:w-[calc(33.333%-0.65rem)]">
               <GstSection />
             </section>
 
@@ -382,7 +383,7 @@ function TransportBillingForm() {
             {/* PAYMENT                                                     */}
             {/* ========================================================== */}
 
-            <section className="w-full lg:w-[calc(50%-0.75rem)]">
+            <section className="w-full md:w-[calc(40%-0.5rem)]">
               <PaymentSection />
             </section>
 
@@ -390,7 +391,7 @@ function TransportBillingForm() {
             {/* INSURANCE                                                   */}
             {/* ========================================================== */}
 
-            <section className="w-full lg:w-[calc(50%-0.75rem)]">
+            <section className="w-full md:w-[calc(50%-0.5rem)]">
               <InsuranceSection />
             </section>
 
@@ -398,7 +399,7 @@ function TransportBillingForm() {
             {/* ADDITIONAL INFORMATION                                      */}
             {/* ========================================================== */}
 
-            <section className="w-full">
+            <section className="w-full md:w-[calc(50%-0.5rem)]">
               <AdditionalInfoSection />
             </section>
           </div>
@@ -407,7 +408,7 @@ function TransportBillingForm() {
           {/* VISUAL SPACER                                                 */}
           {/* ============================================================ */}
 
-          <div className="hidden h-10 xl:block" />
+          <div className="hidden h-4 xl:block" />
 
           {/* ============================================================ */}
           {/* ACTION BAR                                                    */}

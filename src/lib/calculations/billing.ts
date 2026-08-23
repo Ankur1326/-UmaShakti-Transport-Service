@@ -24,6 +24,7 @@ const CHARGE_LABELS: Record<keyof BillingFormValues["charges"], string> = {
   codCharges: "COD Charges",
   statisticalCharges: "Statistical Charges",
   localCollectionCharges: "Local Collection Charges",
+  printHidden: ""
 };
 
 function toNumber(v: unknown): number {

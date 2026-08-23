@@ -38,8 +38,8 @@ export function FormActionsBar({
 
   return (
     <>
-      <div className="sticky bottom-0 z-10 -mx-6 mt-6 border-t border-neutral-200 bg-white/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80 print:hidden">
-        <div className="mx-auto flex max-w-[1160px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="sticky bottom-0 z-10 -mx-6 mt-3 border-t border-neutral-200 bg-white/95 px-6 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/80 print:hidden">
+        <div className="mx-auto flex max-w-[1160px] flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-h-5 text-caption text-neutral-500">{draftSavedLabel}</div>
 
           <div className="flex flex-wrap items-center gap-2">

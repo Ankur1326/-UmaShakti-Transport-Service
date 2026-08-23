@@ -8,10 +8,11 @@ function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
 }
 
-export async function PATCH(
+export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ [key: string]: string | string[] }> }
 ) {
+
     await dbConnect();
     const resolvedParams = await params;
     const id = typeof resolvedParams.id === "string" ? resolvedParams.id : Array.isArray(resolvedParams.id) ? resolvedParams.id[0] : "";
@@ -22,7 +23,7 @@ export async function PATCH(
 
     try {
         const body = await request.json();
-
+        console.log("body : ", body)
         if (!body || typeof body !== "object" || Array.isArray(body)) {
             return NextResponse.json({ success: false, message: "Invalid request body" }, { status: 400 });
         }
@@ -33,7 +34,9 @@ export async function PATCH(
             { new: true, runValidators: true }
         );
 
+        console.log("consignment : ", consignment)
         if (!consignment) {
+            console.log("Consignment not found : ")
             return NextResponse.json({ success: false, message: "Consignment not found" }, { status: 404 });
         }
 

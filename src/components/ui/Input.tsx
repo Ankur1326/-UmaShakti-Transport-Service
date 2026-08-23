@@ -16,6 +16,13 @@ interface InputProps
 
   /** Optional icon rendered inside the input */
   startIcon?: React.ReactNode;
+
+  /**
+   * Visual density. "default" preserves the original size used across the
+   * app; "compact" is a tighter variant for dense forms (e.g. the billing
+   * form) and does not change behavior/validation.
+   */
+  size?: "default" | "compact";
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -28,10 +35,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       startIcon,
       id,
       required,
+      size = "default",
       ...props
     },
     ref
   ) => {
+    const isCompact = size === "compact";
     const generatedId = useId();
 
     const inputId = id ?? generatedId;
@@ -47,15 +56,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="
-              mb-1.5
-              block
-              text-[11px]
-              font-semibold
-              uppercase
-              tracking-[0.04em]
-              text-neutral-600
-            "
+            className={cn(
+              "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.04em] text-neutral-600",
+              isCompact && "mb-0.5 text-[9.5px] tracking-[0.02em]"
+            )}
           >
             {label}
 
@@ -75,15 +79,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {/* Start Icon */}
           {startIcon && (
             <span
-              className="
-                pointer-events-none
-                absolute
-                left-3
-                top-1/2
-                z-10
-                -translate-y-1/2
-                text-neutral-400
-              "
+              className={cn(
+                "pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-neutral-400",
+                isCompact && "left-2"
+              )}
             >
               {startIcon}
             </span>
@@ -144,6 +143,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               // Icon spacing
               startIcon && "pl-10",
 
+              // Compact density
+              isCompact && "h-8 px-2 text-[12px]",
+              isCompact && startIcon && "pl-7",
+
               // Error state
               error &&
               `
@@ -168,24 +171,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {error ? (
           <p
             id={errorId}
-            className="
-              mt-1.5
-              text-[11px]
-              font-medium
-              text-error-600
-            "
+            className={cn(
+              "mt-1.5 text-[11px] font-medium text-error-600",
+              isCompact && "mt-0.5 text-[10px]"
+            )}
           >
             {error}
           </p>
         ) : helperText ? (
           <p
             id={helperId}
-            className="
-              mt-1.5
-              text-[11px]
-              leading-4
-              text-neutral-500
-            "
+            className={cn(
+              "mt-1.5 text-[11px] leading-4 text-neutral-500",
+              isCompact && "mt-0.5 text-[10px] leading-tight"
+            )}
           >
             {helperText}
           </p>

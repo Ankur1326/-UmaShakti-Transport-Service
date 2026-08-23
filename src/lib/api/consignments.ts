@@ -7,6 +7,70 @@ export interface ConsignmentRecord extends BillingFormValues {
   updatedAt: string;
 }
 
+/** Mongo can serialize dates either as a plain ISO string or as extended-JSON `{ $date: "..." }`. */
+export type MongoDate = string | { $date: string } | null | undefined;
+
+/**
+ * Shape actually returned by GET /api/consignments/get — looser than
+ * BillingFormValues since several fields (weights, packages, tax %) are
+ * stored as free-text strings and may be partially filled on older records.
+ */
+export interface ConsignmentListItem {
+  _id: string;
+  consignmentNumber: string;
+  bookingDate?: MongoDate;
+  cnsDate?: MongoDate;
+  eWayBillNumber?: string;
+  validUpTo?: MongoDate;
+  invoiceNumber?: string;
+  invoiceDate?: MongoDate;
+  vehicleNumber?: string;
+  from?: { location?: string; branch?: string; state?: string; gstin?: string };
+  to?: { location?: string; branch?: string; state?: string; gstin?: string };
+  consignor?: { name?: string; city?: string; state?: string; mobile?: string; gstin?: string };
+  consignee?: { name?: string; city?: string; state?: string; mobile?: string; gstin?: string };
+  shipment?: {
+    packages?: string;
+    packing?: string;
+    description?: string;
+    classification?: string;
+    declaredValue?: string;
+    invoiceNumber?: string;
+    volume?: string;
+    actualWeight?: string;
+    chargeWeight?: string;
+  };
+  segment?: string;
+  loadType?: string;
+  charges?: Record<string, number>;
+  tax?: { type?: string; percentage?: number | "custom"; customPercentage?: number };
+  payment?: {
+    type?: string;
+    billingParty?: string;
+    billingAccount?: string;
+    status?: string;
+    receivedType?: string;
+    receivedMoney?: string;
+    receivedDate?: string;
+    UTRNumber?: string;
+    mrNumber?: string;
+    mrDate?: string;
+  };
+  insurance?: {
+    required?: boolean;
+    company?: string;
+    policyNumber?: string;
+    amount?: number;
+    date?: MongoDate;
+    riskType?: string;
+  };
+  remarks?: string;
+  internalNotes?: string;
+  specialInstructions?: string;
+  createdAt?: MongoDate;
+  updatedAt?: MongoDate;
+}
+
 export interface ConsignmentListParams {
   search?: string;
   paymentStatus?: string;
@@ -18,7 +82,7 @@ export interface ConsignmentListParams {
 export interface ConsignmentListResponse {
   success: boolean;
   message: string;
-  data: ConsignmentRecord[];
+  data: ConsignmentListItem[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
 }
 
@@ -41,13 +105,13 @@ export function getApiErrorMessage(error: unknown, fallback = "Something went wr
 
 /** Fetch a paginated, filterable list of consignments. */
 export async function listConsignments(params: ConsignmentListParams = {}): Promise<ConsignmentListResponse> {
-  const { data } = await axios.get<ConsignmentListResponse>(BASE_URL, { params });
+  const { data } = await axios.get<ConsignmentListResponse>(`${BASE_URL}/get`, { params });
   return data;
 }
 
 /** Fetch a single consignment by its Mongo id. */
 export async function getConsignment(id: string): Promise<ConsignmentRecord> {
-  const { data } = await axios.get<ApiResponse<ConsignmentRecord>>(`${BASE_URL}/${id}`);
+  const { data } = await axios.get<ApiResponse<ConsignmentRecord>>(`${BASE_URL}/get-one/${id}`);
   return data.data as ConsignmentRecord;
 }
 
@@ -72,7 +136,7 @@ export async function createConsignment(values: BillingFormValues): Promise<Cons
 
 /** Replace an existing consignment's fields. */
 export async function updateConsignment(id: string, values: BillingFormValues): Promise<ConsignmentRecord> {
-  const { data } = await axios.put<ApiResponse<ConsignmentRecord>>(`${BASE_URL}/${id}`, values);
+  const { data } = await axios.put<ApiResponse<ConsignmentRecord>>(`${BASE_URL}/update/${id}`, values);
   return data.data as ConsignmentRecord;
 }
 

@@ -16,10 +16,11 @@ function RouteColumn({ prefix, title }: { prefix: "from" | "to"; title: string }
   const sectionErrors = errors[prefix];
 
   return (
-    <div className="flex-1 rounded-lg border border-neutral-200 p-4">
-      <h3 className="mb-3 text-caption font-semibold uppercase tracking-wide text-brand-700">{title}</h3>
-      <div className="space-y-4">
-        <Combobox
+    <div className="flex-1 rounded-lg border border-neutral-200 p-2">
+      {/* <h3 className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-brand-700">{title}</h3> */}
+      <div className="space-y-1.5">
+        {/* <Combobox
+          size="compact"
           label="Search location / branch"
           placeholder="Search by city or branch…"
           items={MOCK_BRANCHES.map((b) => ({ id: b.id, label: b.location, subLabel: b.branch }))}
@@ -31,18 +32,21 @@ function RouteColumn({ prefix, title }: { prefix: "from" | "to"; title: string }
             setValue(`${prefix}.state`, branch.state);
             setValue(`${prefix}.gstin`, branch.gstin);
           }}
-        />
+        /> */}
 
-        <Input
-          label="Location"
-          required
-          error={sectionErrors?.location?.message}
-          {...register(`${prefix}.location`)}
-        />
-        <Input label="Branch / Office" error={sectionErrors?.branch?.message} {...register(`${prefix}.branch`)} />
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="State" error={sectionErrors?.state?.message} {...register(`${prefix}.state`)} />
-          <Input label="GSTIN" error={sectionErrors?.gstin?.message} {...register(`${prefix}.gstin`)} />
+        {/* <div className="grid grid-cols-2 gap-1.5"> */}
+          <Input
+            size="compact"
+            label={prefix === "from" ? "From" : "To"}
+            // required
+            error={sectionErrors?.location?.message}
+            {...register(`${prefix}.location`)}
+          />
+          <Input size="compact" label="Branch / Office" error={sectionErrors?.branch?.message} {...register(`${prefix}.branch`)} />
+        {/* </div> */}
+        <div className="grid grid-cols-2 gap-1.5">
+          <Input size="compact" label="State" error={sectionErrors?.state?.message} {...register(`${prefix}.state`)} />
+          <Input size="compact" label="GSTIN" error={sectionErrors?.gstin?.message} {...register(`${prefix}.gstin`)} />
         </div>
       </div>
     </div>
@@ -52,7 +56,7 @@ function RouteColumn({ prefix, title }: { prefix: "from" | "to"; title: string }
 export function RouteSection() {
   return (
     <FormSection title="Route" description="Origin and destination for this shipment.">
-      <div className="flex flex-col gap-4 lg:flex-row">
+      <div className="flex flex-col gap-2 md:flex-row">
         <RouteColumn prefix="from" title="From" />
         <RouteColumn prefix="to" title="To" />
       </div>

@@ -14,14 +14,14 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={cn(
-        "focus-ring relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
+        "focus-ring relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors",
         checked ? "bg-brand-700" : "bg-neutral-300"
       )}
     >
       <span
         className={cn(
-          "inline-block h-4.5 w-4.5 transform rounded-full bg-white transition-transform",
-          checked ? "translate-x-6" : "translate-x-1"
+          "inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform",
+          checked ? "translate-x-4.5" : "translate-x-1"
         )}
       />
     </button>
@@ -46,8 +46,8 @@ export function InsuranceSection() {
           control={control}
           name="insurance.required"
           render={({ field }) => (
-            <div className="flex items-center gap-2">
-              <span className="text-body-sm text-neutral-600">{field.value ? "Required" : "Not required"}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-neutral-600">{field.value ? "Required" : "Not required"}</span>
               <Toggle checked={field.value} onChange={field.onChange} />
             </div>
           )}
@@ -55,18 +55,19 @@ export function InsuranceSection() {
       }
     >
       {required && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input label="Insurance Company" error={insuranceErrors?.company?.message} {...register("insurance.company")} />
-          <Input label="Policy Number" error={insuranceErrors?.policyNumber?.message} {...register("insurance.policyNumber")} />
+        <div className="grid grid-cols-2 gap-1.5">
+          <Input size="compact" label="Insurance Company" error={insuranceErrors?.company?.message} {...register("insurance.company")} />
+          <Input size="compact" label="Policy Number" error={insuranceErrors?.policyNumber?.message} {...register("insurance.policyNumber")} />
           <Input
+            size="compact"
             type="number"
             min={0}
             label="Insurance Amount (₹)"
             error={insuranceErrors?.amount?.message}
             {...register("insurance.amount")}
           />
-          <Input type="date" label="Insurance Date" error={insuranceErrors?.date?.message} {...register("insurance.date")} />
-          <Input label="Risk Type" error={insuranceErrors?.riskType?.message} {...register("insurance.riskType")} />
+          <Input size="compact" type="date" label="Insurance Date" error={insuranceErrors?.date?.message} {...register("insurance.date")} />
+          <Input size="compact" label="Risk Type" error={insuranceErrors?.riskType?.message} {...register("insurance.riskType")} />
         </div>
       )}
     </FormSection>

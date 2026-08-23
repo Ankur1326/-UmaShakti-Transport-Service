@@ -101,7 +101,7 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     // <NotificationProvider>
-    <div className="min-h-screen flex bg-[#f8faf9] dark:bg-gray-900">
+    <div className="min-h-screen flex bg-[#f8faf9] dark:bg-gray-900 print:block">
       {/* Sidebar - Show sidebar for authenticated users */}
       {session?.user ? (
         <div className="print:hidden">
@@ -112,18 +112,9 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Content Area */}
-      <div className={`flex-1 transition-all duration-300 "md:ml-64"}`}>
-        <header className="flex justify-between h-16 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 items-center fixed top-0 left-0 right-0 z-10 px-4 print:hidden">
-          {/* <div className="flex items-center"> */}
-          {/* <button
-                    className="text-[#66B788] hover:text-[#4a8f65] transition-colors p-2 rounded-md md:hidden"
-                    onClick={toggleSidebar}
-                    aria-label="Toggle sidebar"
-                  >
-                    <HiOutlineMenuAlt2 className="w-6 h-6" />
-                  </button> */}
-
-          <div className="flex items-center gap-3 md:ml-64">
+      <div className="flex-1 transition-all duration-300 md:pl-64 print:pl-0">
+        <header className="fixed inset-x-0 top-0 z-10 flex h-16 items-center justify-between border-b border-gray-300 bg-white px-4 dark:border-gray-700 dark:bg-gray-800 md:pl-64 print:hidden">
+          <div className="flex items-center gap-3">
             {/* Hamburger — mobile only */}
             <button
               type="button"
@@ -144,20 +135,6 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
             <RoleBadge role={userRole} />
           </div>
 
-          {/* Logo/System Name with role indicator */}
-          {/* <div className="hidden md:flex items-center ml-2 md:ml-64">
-                    {userRole === "admin" && (
-                      <span className="ml-2 px-2 py-0.5 text-lg font-bold text-red-800">Admin</span>
-                    )}
-                    {userRole === "instructor" && (
-                      <span className="ml-2 px-2 py-0.5 text-lg font-bold text-blue-800">Instructor</span>
-                    )}
-                    {userRole === "student" && (
-                      <span className="ml-2 px-2 py-0.5 text-lg font-bold text-green-800">Student</span>
-                    )}
-                  </div> */}
-          {/* </div> */}
-
           {/* Enhanced Navbar with notifications */}
           <div className="ml-auto flex items-center space-x-4">
             <Navbar />
@@ -165,7 +142,7 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Main content - Full width container */}
-        <main className="mt-16 ml-64 px-2 py-2 bg-[#f8faf9] dark:bg-gray-900 min-h-screen transition-all duration-300">
+        <main className="min-h-screen bg-[#f8faf9] px-2 py-2 pt-20 transition-all duration-300 dark:bg-gray-900 print:pt-0">
           {children}
         </main>
       </div>

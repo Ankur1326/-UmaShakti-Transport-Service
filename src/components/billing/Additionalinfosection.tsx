@@ -10,8 +10,9 @@ export function AdditionalInfoSection() {
 
   return (
     <FormSection title="Additional Information">
-      <div className="space-y-4">
+      <div className="space-y-1.5">
         <Textarea
+          size="compact"
           label="Internal Notes"
           rows={2}
           helperText="Private — not shown on the customer's printed copy."

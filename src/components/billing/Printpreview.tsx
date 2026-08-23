@@ -72,7 +72,7 @@ function LRField({ label, value, className = "" }: { label: string; value?: Reac
 function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: CopyName }) {
   const totals = computeBillingTotals(values.charges, values.tax);
   const segment = String(values.segment);
-
+  // console.log("values ", values)
   return (
     <div className="lr-page">
       {/* ================================================================== */}
@@ -86,21 +86,21 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
               <Image
                 src="/media/logo.jpeg"
                 alt={siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}
-                width={56}
-                height={56}
+                width={59}
+                height={59}
                 priority
               />
             </div>
             <div className="lr-company-details">
-              <div className="lr-company-name">{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
+              <div className="lr-company-name !tracking-tight">{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
               {/* <div className="lr-company-address">{text(siteConfig.address)}</div> */}
-              <div className="mb-1 text-[12px]">
-                <div className="leading-tight">
+              <div className="text-[13.4px]">
+                <div className="leading-tight tracking-tighter">
                   <span className="font-bold">H.O. : </span>
-                  <span className="font-semibold">90, Shree Siddh Villa, Madhodar Road, Near New Post Office, Waghodia, Dist. Vadodara 391760 Mob.: 9662820706 / 9558008708</span>
+                  <span className="font-semibold">90, Shree Siddh Villa, Madhodar Road, Near New Post Office, Waghodia, Dist. Vadodara 391760 <span className="font-bold">Mob.:</span> 9662820706 / 9558008708</span>
 
                 </div>
-                <div className="leading-tight">
+                <div className="leading-tight tracking-tighter">
                   <span className="font-bold">B.O.: </span>
                   <span className="font-semibold">Plot No. 104/A, Siddhi Industrial Park, Tal. Waghodia, Dist. Vadodara 391 760. E mail : umashakti.brd@gmail.com</span>
                 </div>
@@ -111,21 +111,10 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
                       </div> */}
             </div>
           </div>
-
-          <div className="flex">
-
-            <div className="lr-registration pr-1">
-              <div>REG. NO.: 24AAHFU8816H1ZX</div>
-              <div>PAN NO. AAHFU8816H</div>
-              <div>UDYAM-GJ-24-0106951</div>
-            </div>
-
-            <div className="border-l border-black pl-2">
-              <div className="lr-bank-title">BANK DETAILS</div>
-              <div className="font-semibold">{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
-              <div className="font-semibold">HDFC BANK, Opp. Apollo Tyres, Limda, Waghodia.</div>
-              <div className="font-semibold">IFSC Code: HDFC0007181 - A/c. No.: 50200983890449</div>
-            </div>
+          <div className="lr-registration flex px-5 w-full">
+            <div>REG. NO.: 24AAHFU8816H1ZX</div>
+            <div>PAN NO. AAHFU8816H</div>
+            <div>UDYAM-GJ-24-0106951</div>
           </div>
         </div>
 
@@ -161,13 +150,15 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
         {/* SEGMENTS */}
         <div className="lr-segment-section">
           <div className="lr-segment-title">SEGMENTS</div>
-
+          {/* "FTL", "LTL", "SUN", "ODC", "MM", "SAARC", "Other" */}
           <div className="lr-segment-options">
+            <span className={segment === "FTL" ? "active" : ""}>FTL</span>
             <span className={segment === "LTL" ? "active" : ""}>LTL</span>
             <span className={segment === "SUN" ? "active" : ""}>SUN</span>
             <span className={segment === "ODC" ? "active" : ""}>ODC</span>
             <span className={segment === "MM" ? "active" : ""}>MM</span>
             <span className={segment === "SAARC" ? "active" : ""}>SAARC</span>
+            <span className={segment === "Other" ? "active" : ""}>Other</span>
           </div>
 
           <div className="lr-segment-info">
@@ -176,11 +167,17 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
           <div className="lr-segment-info">
             <b>Risk:</b> Owner&apos;s Risk
           </div>
-          <div className="lr-segment-info">
+          {/* <div className="lr-segment-info">
             <b>Vehicle:</b> {text(values.vehicleNumber)}
-          </div>
-          <div className="lr-segment-info">
+          </div> */}
+          {/* <div className="lr-segment-info">
             <b>Mode:</b> {text(values.vehicle.transportMode)}
+          </div> */}
+          <div className="leading-tighter">
+            <div className="lr-bank-title lr-segment-title">BANK DETAILS</div>
+            <div className="font-semibold tracking-tight text-[12px]  pl-1">{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
+            <div className="font-semibold tracking-tight text-[12px]  pl-1">HDFC BANK, Opp. Apollo Tyres, Limda, Waghodia.</div>
+            <div className="font-semibold tracking-tight text-[12px]  pl-1">IFSC Code: HDFC0007181 - A/c. No.: 50200983890449</div>
           </div>
         </div>
       </div>
@@ -194,7 +191,12 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
           {/* CONSIGNOR / CONSIGNEE */}
           <div className="lr-parties">
             <div className="lr-party">
-              <div className="lr-vertical-title">CONSIGNOR</div>
+              {/* <div className="lr-ack-banner">SPACE FOR ACKNOWLEDGEMENT</div> */}
+              {/* <div className="lr-ack-footer"> */}
+              {/* <div className="lr-copy-date">Date: {formatDate(values.bookingDate)}</div> */}
+              {/* <div className="lr-copy-sign">Signature / Stamp</div> */}
+              {/* </div> */}
+              <div className="lr-ack-banner">CONSIGNOR</div>
               <div className="lr-party-content">
                 <SmallLabel>Address</SmallLabel>
                 <div className="lr-party-name">{text(values.consignor.name)}</div>
@@ -209,7 +211,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
             </div>
 
             <div className="lr-party">
-              <div className="lr-vertical-title">CONSIGNEE</div>
+              <div className="lr-ack-banner">CONSIGNEE</div>
               <div className="lr-party-content">
                 <SmallLabel>Address</SmallLabel>
                 <div className="lr-party-name">{text(values.consignee.name)}</div>
@@ -244,7 +246,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
 
                 {/* Row 2: Declared Value / Invoice No. / Volume */}
                 <div className="lr-shipment-row row-two">
-                  <LRField label="Declared Value" value={formatINR(values.shipment.declaredValue ?? 0)} />
+                  <LRField label="Declared Value" value={text("₹" + values.shipment.declaredValue ? values.shipment.declaredValue : 0)} />
                   <LRField
                     label="Invoice No."
                     value={[text(values.invoiceNumber), values.invoiceDate ? formatDate(values.invoiceDate) : ""]
@@ -316,8 +318,8 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
                 </div>
 
                 <div className="lr-actual-charged-row">
-                  <LRField label="Actual Wt." value={`${text(values.shipment.actualWeight)} ${text(values.shipment.weightUnit)}`} />
-                  <LRField label="Charged Wt. as agreed" value={`${text(values.shipment.actualWeight)} ${text(values.shipment.weightUnit)}`} />
+                  <LRField label="Actual Wt." value={`${text(values.shipment.actualWeight)}`} />
+                  <LRField label="Charged Wt. as agreed" value={`${text(values.shipment.chargeWeight)}`} />
                 </div>
 
                 <div className="lr-ack-cell">
@@ -352,69 +354,74 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
 
         {/* RIGHT CHARGES */}
         <div className="lr-charges">
-          <div className="lr-charge-header">
-            <span>Particulars</span>
-            <span>Amount in Rs.</span>
-          </div>
+          {values.charges.printHidden ? (
+            <div className="text-center text-[16px] py-22 border-b border-b-black">
+              <span>Freight: To be billed</span>
+              {/* <span /> */}
+            </div>
+          ) : (
+            <>
+              <div className="lr-charge-header">
+                <span>Particulars</span>
+                <span>Amount in Rs.</span>
+              </div>
+              <div className="lr-charge-row">
+                <span>Freight</span>
+                <span>{rupees(values.charges.freight)}</span>
+              </div>
+              <div className="lr-charge-row">
+                <span>Local Godown Charges</span>
+                <span>{rupees(values.charges.localGodownCharges)}</span>
+              </div>
+              <div className="lr-charge-row">
+                <span>Unloading Charge</span>
+                <span>{rupees(values.charges.unloadingCharge)}</span>
+              </div>
+              <div className="lr-charge-row">
+                <span>Loading Charge</span>
+                <span>{rupees(values.charges.loadingCharge)}</span>
+              </div>
+              <div className="lr-charge-row">
+                <span>Statistical Charges</span>
+                <span>{rupees(values.charges.statisticalCharges)}</span>
+              </div>
+              <div className="lr-charge-row">
+                <span>Local Collection Charges</span>
+                <span>{rupees(values.charges.localCollectionCharges)}</span>
+              </div>
+              <div className="lr-charge-row lr-subtotal">
+                <strong>SUB TOTAL</strong>
+                <strong>{rupees(totals.subtotal)}</strong>
+              </div>
+              <div className="lr-charge-row">
+                <span>GST Charges @ {totals.gstPercentage}%</span>
+                <span>{rupees(totals.gstAmount)}</span>
+              </div>
+              <div className="lr-grand-total">
+                <strong>GRAND TOTAL</strong>
+                <strong>{rupees(totals.grandTotal)}</strong>
+              </div>
 
-          <div className="lr-charge-row">
-            <span>Freight</span>
-            <span>{rupees(values.charges.freight)}</span>
-          </div>
-          <div className="lr-charge-row">
-            <span>Local Godown Charges</span>
-            <span>{rupees(values.charges.localGodownCharges)}</span>
-          </div>
-          <div className="lr-charge-row">
-            <span>Unloading Charge</span>
-            <span>{rupees(values.charges.unloadingCharge)}</span>
-          </div>
-          <div className="lr-charge-row">
-            <span>Loading Charge</span>
-            <span>{rupees(values.charges.loadingCharge)}</span>
-          </div>
-          <div className="lr-charge-row">
+              <div className="lr-amount-words">
+                <SmallLabel>Amt. in Words</SmallLabel>
+                <div>{amountToWords(totals.grandTotal)}</div>
+              </div>
+            </>
+          )}
+          {/* <div className="lr-charge-row">
             <span>COD Charges</span>
             <span>{rupees(values.charges.codCharges)}</span>
-          </div>
-          <div className="lr-charge-row">
-            <span>Statistical Charges</span>
-            <span>{rupees(values.charges.statisticalCharges)}</span>
-          </div>
-          <div className="lr-charge-row">
-            <span>Local Collection Charges</span>
-            <span>{rupees(values.charges.localCollectionCharges)}</span>
-          </div>
-
-          <div className="lr-charge-row lr-subtotal">
-            <strong>SUB TOTAL</strong>
-            <strong>{rupees(totals.subtotal)}</strong>
-          </div>
-
-          <div className="lr-charge-row">
-            <span>GST Charges @ {totals.gstPercentage}%</span>
-            <span>{rupees(totals.gstAmount)}</span>
-          </div>
-
-          <div className="lr-grand-total">
-            <strong>GRAND TOTAL</strong>
-            <strong>{rupees(totals.grandTotal)}</strong>
-          </div>
-
-          <div className="lr-amount-words">
-            <SmallLabel>Amt. in Words</SmallLabel>
-            <div>{amountToWords(totals.grandTotal)}</div>
-          </div>
+          </div> */}
 
           <div className="lr-basis">
             <SmallLabel>Basis of Booking</SmallLabel>
             <div className="lr-checkbox-row">
               <span>{values.payment.type === "To Pay" ? "☑" : "☐"} 1. To Pay</span>
-              <span>{values.payment.type === "TBB" ? "☑" : "☐"} 2. TBB</span>
+              <span>{values.payment.type === "TBB at" ? "☑" : "☐"} 2. TBB at___________</span>
             </div>
             <div className="lr-checkbox-row">
               <span>{values.payment.type === "Paid" ? "☑" : "☐"} 3. Paid</span>
-              <span>MR No. ____</span>
+              <span>MR No. ______</span>
             </div>
           </div>
 
@@ -436,7 +443,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
             <div className="lr-authorized-space" />
             {/* <strong>For {siteConfig.name}</strong> */}
             {/* <div className="lr-authorized-line" /> */}
-            <div className="lr-copy-sign absolute left-3 bottom-13 w-full text-start">Signature of Staff___________________</div>
+            <div className="lr-copy-sign absolute left-2 bottom-6 w-full text-start">Signature of Staff___________________</div>
 
             <div className="lr-copy-sign">Staff Identification No.__________________</div>
           </div>
@@ -545,7 +552,6 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         .lr-preview {
-        // width: 100%;
           min-height: 100vh;
           background: #e5e7eb;
           color: #111;
@@ -634,25 +640,31 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-document {
           padding: 10px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
         }
 
         /* ============================================================= */
         /* PAGE                                                           */
+        /* Sized to match the A4 landscape printable area (297mm x       */
+        /* 210mm) minus a 5mm margin on every side: 287mm x 200mm.       */
+        /* Kept identical on screen so the preview matches the printout. */
         /* ============================================================= */
 
         .lr-page {
-           width: 13in;
-          min-height: 9in;
-          max-height: 10in;
-          margin: 0 auto 25px;
+          width: 287mm;
+          height: 200mm;
           background: #fff;
           border: 1.5px solid #16213e;
           color: #1a1a2e;
           position: relative;
+          // overflow: auto;
           font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-          font-size: 11px;
-          line-height: 1.2;
-          letter-spacing: 0.3px;
+          font-size: 12.5px;
+          line-height: 1.22;
+          letter-spacing: 0.2px;
           display: flex;
           flex-direction: column;
         }
@@ -668,7 +680,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-company-section {
-          padding: 6px;
+          padding: 5px 6px;
           border-right: 1px solid #111;
         }
 
@@ -679,9 +691,9 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-logo {
-          width: 56px;
-          height: 56px;
-          min-width: 56px;
+          width: 60px;
+          height: 60px;
+          min-width: 60px;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -702,17 +714,17 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-company-name {
           color: #b91c1c;
-          font-size: 18px;
+          font-size: 19px;
           font-weight: 900;
           line-height: 1.15;
           margin-bottom: 4px;
           text-transform: uppercase;
-          letter-spacing: 0.4px;
+          letter-spacing: 0.3px;
         }
 
         .lr-company-details {
-          font-size: 10px;
-          line-height: 1.45;
+          font-size: 12px;
+          line-height: 1.4;
           color: #3f3f46;
         }
 
@@ -730,16 +742,16 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           color: #9a1414;
           font-weight: 700;
           line-height: 1.4;
-          font-size: 10px;
-          margin-bottom: 5px;
+          font-size: 10.5px;
+          margin-bottom: 4px;
           letter-spacing: 0.2px;
         }
 
         .lr-bank-details {
-          font-size: 10px;
-          line-height: 1.45;
+          font-size: 10.5px;
+          line-height: 1.4;
           border-top: 1.5px solid #16213e;
-          padding-top: 4px;
+          padding-top: 3px;
           letter-spacing: 0.2px;
           font-weight: 600;
           color: #26314a;
@@ -747,9 +759,10 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-bank-title {
           font-weight: 900;
-          letter-spacing: 0.6px;
+          letter-spacing: 0.5px;
           color: #16213e;
           margin-bottom: 1px;
+          font-size: 10.5px;
         }
 
         /* ============================================================= */
@@ -763,9 +776,9 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-route-row {
-          height: 32px;
+          height: 30px;
           display: grid;
-          grid-template-columns: 55px 1fr;
+          grid-template-columns: 52px 1fr;
           border-bottom: 1px solid #111;
           font-weight: 600;
           font-size: 13px;
@@ -777,9 +790,8 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           justify-content: center;
           border-right: 1px solid #111;
           font-weight: 700;
-          font-size: 12px;
-          letter-spacing: 0.5px;
-          // background: #16213e;
+          font-size: 12.5px;
+          letter-spacing: 0.4px;
           color: #000;
         }
 
@@ -787,18 +799,18 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           display: flex;
           align-items: center;
           padding: 0 8px;
-          font-size: 16px;
+          font-size: 17px;
           font-weight: 700;
           color: #16213e;
         }
 
         .lr-delivery-office {
-          padding: 5px 8px;
+          padding: 4px 8px;
         }
 
         .lr-handwriting {
-          margin-top: 5px;
-          margin-bottom: 4px;
+          margin-top: 4px;
+          margin-bottom: 3px;
           font-size: 16px;
           font-weight: 600;
           color: #1a1a2e;
@@ -808,7 +820,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           display: flex;
           gap: 5px;
           margin-top: 2px;
-          font-size: 11px;
+          font-size: 11.5px;
           color: #3f3f46;
         }
 
@@ -822,24 +834,25 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         .lr-segment-section {
-          font-size: 10px;
+          font-size: 11px;
           color: #26314a;
         }
 
         .lr-segment-title {
           text-align: center;
           font-weight: 900;
-          padding: 5px;
+          padding: 4px;
           border-bottom: 1px solid #111;
           background: #16213e;
           color: #fff;
-          letter-spacing: 0.8px;
+          letter-spacing: 0.7px;
+          font-size: 11.5px;
         }
 
         .lr-segment-options {
           display: flex;
           justify-content: space-around;
-          padding: 5px 2px;
+          padding: 4px 2px;
           border-bottom: 1px solid #111;
           font-weight: 600;
           color: #6b7280;
@@ -852,7 +865,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-segment-info {
-          padding: 4px 6px;
+          padding: 3px 6px;
           border-bottom: 1px solid #111;
         }
 
@@ -869,12 +882,14 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           display: grid;
           grid-template-columns: 75% 25%;
           border-bottom: 1px solid #111;
+          min-height: 0;
         }
 
         .lr-main {
           border-right: 1px solid #111;
           display: flex;
           flex-direction: column;
+          min-height: 0;
         }
 
         /* ============================================================= */
@@ -882,13 +897,13 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         .lr-parties {
-          min-height: 2.2in;
+          min-height: 1.95in;
           display: grid;
           grid-template-columns: 1fr 1fr;
         }
 
         .lr-party {
-          display: flex;
+          // display: flex;
           border-bottom: 1px solid #111;
           border-right: 1px solid #111;
         }
@@ -898,8 +913,8 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-vertical-title {
-          width: 26px;
-          min-width: 26px;
+          width: 24px;
+          min-width: 24px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -908,24 +923,24 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           font-size: 10px;
           font-weight: 900;
           border-right: 1px solid #111;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
           background-color: #16213e;
           color: white;
         }
 
         .lr-party-content {
-          padding: 5px 7px;
+          padding: 2px 6px;
           flex: 1;
           min-width: 0;
         }
 
         .lr-label {
           display: block;
-          font-size: 8.5px;
+          font-size: 9.5px;
           color: #6b7280;
           font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.4px;
           margin-bottom: 2px;
         }
 
@@ -937,14 +952,14 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-party-address {
-          font-size: 11px;
+          font-size: 15px;
           line-height: 1.35;
           color: #3f3f46;
           margin-bottom: 2px;
         }
 
         .lr-party-detail {
-          font-size: 10px;
+          font-size: 12px;
           margin-top: 3px;
           color: #26314a;
           font-weight: 600;
@@ -958,11 +973,13 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           display: flex;
           flex-direction: column;
           flex: 1;
+          min-height: 0;
         }
 
         .lr-shipment-body {
           display: flex;
           flex: 1;
+          min-height: 0;
         }
 
         .lr-shipment-left {
@@ -987,7 +1004,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-shipment-row > * {
           border-right: 1px solid #111;
-          padding: 4px 6px;
+          padding: 3px 5px;
         }
 
         .lr-shipment-row > *:last-child {
@@ -996,12 +1013,12 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .row-two {
           grid-template-columns: 30% 40% 30%;
-          min-height: 38px;
+          min-height: 34px;
         }
 
         .row-three {
           grid-template-columns: 55% 45%;
-          min-height: 38px;
+          min-height: 34px;
         }
 
         .lr-field {
@@ -1011,8 +1028,8 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-field-value {
-          font-size: 12px;
-          font-weight: 700;
+          font-size: 13.5px;
+          font-weight: 600;
           color: #16213e;
           word-break: break-word;
         }
@@ -1022,12 +1039,12 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           display: grid;
           grid-template-columns: 1fr 1fr 1fr;
           border-bottom: 1px solid #111;
-          min-height: 48px;
+          min-height: 42px;
         }
 
         .lr-row-one-cell {
           border-right: 1px solid #111;
-          padding: 4px 6px;
+          padding: 3px 5px;
           display: flex;
           align-items: center;
         }
@@ -1038,13 +1055,10 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         /* ============================================================= */
         /* CNS NO. / CNS DATE / VEHICLE NO.                               */
-        /* CNS No. and CNS Date are stacked together in one column so     */
-        /* they read as a single related block; Vehicle No. sits in its   */
-        /* own column and stretches to match the combined height.        */
         /* ============================================================= */
 
         .lr-cns-vehicle-top {
-          min-height: 112px;
+          min-height: 100px;
           display: flex;
           align-items: stretch;
           border-bottom: 1px solid #111;
@@ -1064,14 +1078,14 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-cns-label {
-          width: 22px;
-          min-width: 22px;
+          width: 20px;
+          min-width: 20px;
           font-size: 9px;
         }
 
         .lr-cns-top {
           flex: 1;
-          min-height: 62px;
+          min-height: 54px;
           display: flex;
           align-items: stretch;
           border-bottom: 1px solid #111;
@@ -1083,9 +1097,9 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           align-items: center;
           justify-content: center;
           color: #b91c1c;
-          font-size: 19px;
+          font-size: 20px;
           font-weight: 900;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.4px;
         }
 
         .lr-vehicle-number {
@@ -1093,19 +1107,18 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 14px;
+          font-size: 15px;
           font-weight: 800;
           color: #16213e;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.4px;
         }
 
         .lr-cns-date-row {
-          min-height: 30px;
+          min-height: 28px;
           display: flex;
           align-items: center;
           gap: 6px;
-          padding: 4px 8px;
-          // background: #f4f5f7;
+          padding: 3px 8px;
         }
 
         .lr-cns-date-row .lr-label {
@@ -1113,7 +1126,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-cns-date-row strong {
-          font-size: 12px;
+          font-size: 13px;
           color: #16213e;
           font-weight: 800;
         }
@@ -1122,12 +1135,12 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         .lr-actual-charged-row {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          min-height: 38px;
+          min-height: 34px;
           border-bottom: 1px solid #111;
         }
 
         .lr-actual-charged-row > * {
-          padding: 4px 6px;
+          padding: 3px 5px;
           border-right: 1px solid #111;
         }
 
@@ -1142,29 +1155,30 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         .lr-bottom-row-left {
           display: flex;
           flex: 1;
-          min-height: 100px;
+          min-height: 92px;
         }
 
         .lr-terms-cell {
           width: 58%;
-          padding: 5px;
+          padding: 4px;
           border-right: 1px solid #111;
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 3px;
         }
 
         .lr-terms-text {
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 600;
-          line-height: 1.35;
+          line-height: 1.1;
+          letter-spacing: 0.4px;
           text-align: start;
           color: #3f3f46;
         }
 
         .lr-terms-caption {
-          font-size: 13px;
-          font-weight: 700;
+          font-size: 12px;
+          font-weight: 600;
           color: #16213e;
         }
 
@@ -1178,26 +1192,25 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           flex: 1;
           display: flex;
           flex-direction: column;
-          padding: 5px 7px;
+          padding: 4px 6px;
         }
 
         .lr-goods-block {
-          padding-top: 6px;
+          padding-top: 5px;
           border-top: 1px dashed #a1a1aa;
         }
 
         .lr-classification-block {
-          padding-bottom: 6px;
-          
+          padding-bottom: 5px;
         }
 
         .lr-copy-name-row {
           border-top: 1px solid #111;
-          padding: 4px 7px;
+          padding: 3px 6px;
         }
 
         .lr-goods-value {
-          margin-top: 6px;
+          margin-top: 5px;
           font-size: 13px;
           font-weight: 700;
           color: #16213e;
@@ -1210,8 +1223,8 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-classification-block .lr-goods-value {
-          margin-top: 4px;
-          font-size: 10px;
+          margin-top: 3px;
+          font-size: 11px;
           font-weight: 600;
           color: #52525b;
         }
@@ -1229,7 +1242,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-insurance-row > * {
-          padding: 4px 6px;
+          padding: 3px 5px;
           border-right: 1px solid #111;
         }
 
@@ -1239,12 +1252,12 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-ack-banner {
           text-align: center;
-          padding: 5px 4px;
-          font-size: 11px;
+          padding: 4px 4px;
+          font-size: 11.5px;
           font-weight: 900;
           color: #fff;
           background: #16213e;
-          letter-spacing: 0.6px;
+          letter-spacing: 0.5px;
         }
 
         .lr-ack-footer {
@@ -1252,16 +1265,16 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           display: flex;
           align-items: flex-end;
           justify-content: space-between;
-          padding: 6px 8px;
+          padding: 5px 7px;
           gap: 8px;
         }
 
         .lr-copy-name {
           text-align: center;
           color: #b91c1c;
-          font-size: 14px;
+          font-size: 15px;
           font-weight: 900;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.4px;
         }
 
         .lr-copy-date,
@@ -1276,14 +1289,14 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         .lr-charges {
-          font-size: 12px;
+          font-size: 12.5px;
           display: flex;
           flex-direction: column;
           color: #26314a;
         }
 
         .lr-charge-header {
-          min-height: 28px;
+          min-height: 22px;
           display: grid;
           grid-template-columns: 60% 40%;
           font-weight: 800;
@@ -1296,7 +1309,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         .lr-charge-header span {
           display: flex;
           align-items: center;
-          padding: 4px 6px;
+          padding: 3px 6px;
           border-right: 1px solid rgba(255, 255, 255, 0.25);
         }
 
@@ -1306,14 +1319,14 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-charge-row {
-          min-height: 20px;
+          min-height: 19px;
           display: grid;
           grid-template-columns: 60% 40%;
           border-bottom: 1px solid #111;
         }
 
         .lr-charge-row > * {
-          padding: 3px 6px;
+          padding: 2.5px 6px;
           border-right: 1px solid #111;
           font-weight: 600;
         }
@@ -1335,27 +1348,27 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-grand-total {
-          min-height: 32px;
+          min-height: 30px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 6px 8px;
+          padding: 5px 8px;
           border-bottom: 1px solid #111;
-          font-size: 13px;
+          font-size: 14px;
           color: #fff;
           background: #b91c1c;
-          letter-spacing: 0.4px;
+          letter-spacing: 0.3px;
         }
 
         .lr-amount-words {
-          min-height: 54px;
-          padding: 6px;
+          min-height: 50px;
+          padding: 5px 6px;
           border-bottom: 1px solid #111;
         }
 
         .lr-amount-words > div:last-child {
-          margin-top: 5px;
-          font-size: 11px;
+          margin-top: 4px;
+          font-size: 12px;
           line-height: 1.35;
           font-weight: 700;
           color: #16213e;
@@ -1366,8 +1379,8 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         .lr-basis {
-          min-height: 50px;
-          padding: 6px;
+          min-height: 46px;
+          padding: 5px 6px;
           border-bottom: 1px solid #111;
         }
 
@@ -1375,31 +1388,31 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           display: flex;
           justify-content: space-between;
           gap: 4px;
-          margin-top: 5px;
-          font-size: 10px;
+          margin-top: 4px;
+          font-size: 11px;
           font-weight: 600;
           color: #26314a;
         }
 
         .lr-cod-row {
-          min-height: 26px;
+          min-height: 24px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 5px;
+          padding: 4px;
           border-bottom: 1px solid #111;
           font-weight: 700;
         }
 
         .lr-gst-payable {
-          min-height: 40px;
-          padding: 6px;
+          min-height: 38px;
+          padding: 5px 6px;
           border-bottom: 1px solid #111;
         }
 
         .lr-authorized {
           flex: 1;
-          padding: 6px;
+          padding: 5px 6px;
           text-align: start;
           display: flex;
           flex-direction: column;
@@ -1408,23 +1421,23 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-authorized-space {
           flex: 1;
-          min-height: 20px;
+          min-height: 16px;
         }
 
         .lr-authorized strong {
           display: block;
-          font-size: 10px;
+          font-size: 10.5px;
           color: #16213e;
         }
 
         .lr-authorized-line {
           width: 80%;
-          margin: 14px auto 3px;
+          margin: 12px auto 3px;
           border-top: 1px solid #111;
         }
 
         .lr-authorized span {
-          font-size: 10px;
+          font-size: 10.5px;
           color: #6b7280;
         }
 
@@ -1438,7 +1451,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           align-items: center;
           justify-content: space-between;
           gap: 15px;
-          font-size: 9px;
+          font-size: 10px;
           background: #f7f7f8;
           border-top: 1px solid #111;
         }
@@ -1452,7 +1465,8 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         .lr-footer strong {
           color: #b91c1c;
           white-space: nowrap;
-          letter-spacing: 0.4px;
+          letter-spacing: 0.3px;
+          font-size: 11px;
         }
 
         /* ============================================================= */
@@ -1467,12 +1481,15 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         /* ============================================================= */
         /* PRINT                                                          */
+        /* A4 landscape with a 5mm margin on every side. The printable    */
+        /* area is 287mm x 200mm, which .lr-page is sized to fill         */
+        /* exactly — no larger, so nothing is cut off by the printer.     */
         /* ============================================================= */
 
         @media print {
           @page {
             size: A4 landscape;
-            margin: 0;
+            margin: 5mm;
           }
 
           html,
@@ -1493,11 +1510,12 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
           .lr-document {
             padding: 0 !important;
+            gap: 0 !important;
           }
 
           .lr-page {
-            width: 11.69in;
-            height: 8.27in;
+            width: 287mm;
+            height: 200mm;
             margin: 0 !important;
             border: 1px solid #111;
             box-shadow: none !important;

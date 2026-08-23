@@ -22,13 +22,13 @@ export function TransportDetailsSection() {
 
   return (
     <FormSection title="Booking & Transport Details" description="Driver, transport mode, and delivery route.">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Input type="date" label="Expected Delivery Date" error={vehicleErrors?.expectedDeliveryDate?.message} {...register("vehicle.expectedDeliveryDate")} />
-        <Select label="Transport Mode" options={TRANSPORT_MODES} error={vehicleErrors?.transportMode?.message} {...register("vehicle.transportMode")} />
-        <Input label="Route" placeholder="e.g. Baddi → Solan" error={vehicleErrors?.route?.message} {...register("vehicle.route")} />
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+        
+        <Select size="compact" label="Transport Mode" options={TRANSPORT_MODES} error={vehicleErrors?.transportMode?.message} {...register("vehicle.transportMode")} />
+        <Input size="compact" label="Route" placeholder="e.g. Baddi → Solan" error={vehicleErrors?.route?.message} {...register("vehicle.route")} />
 
-        <Input label="Booking Branch" error={vehicleErrors?.branch?.message} {...register("vehicle.branch")} />
-        <Input label="Delivery Branch" error={vehicleErrors?.deliveryBranch?.message} {...register("vehicle.deliveryBranch")} />
+        <Input size="compact" label="Booking Branch" error={vehicleErrors?.branch?.message} {...register("vehicle.branch")} />
+        <Input size="compact" label="Delivery Branch" error={vehicleErrors?.deliveryBranch?.message} {...register("vehicle.deliveryBranch")} />
       </div>
     </FormSection>
   );
