@@ -132,7 +132,7 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
             </button>
 
             {/* FIX: Role badge with icon — not colour-only (WCAG 1.4.1 compliant) */}
-            <RoleBadge role={userRole} />
+            {/* <RoleBadge role={userRole} /> */}
           </div>
 
           {/* Enhanced Navbar with notifications */}

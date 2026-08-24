@@ -211,7 +211,7 @@ export default function BookingsPage() {
       ) : (
         <>
           {/* DESKTOP TABLE */}
-          <Card padding="none" className="hidden overflow-hidden rounded-xl md:block">
+          <Card padding="none" className="hidden overflow-hidden md:block">
             <table className="w-full text-left text-body-sm">
               <thead>
                 <tr className="border-b border-neutral-200 bg-neutral-50 text-caption font-semibold uppercase tracking-wide text-neutral-500">
