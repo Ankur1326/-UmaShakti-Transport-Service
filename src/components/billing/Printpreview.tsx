@@ -534,7 +534,11 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
       {/* DOCUMENT — only the copies the user selected are rendered / printed */}
       <div className="lr-document">
         {hasSelection ? (
-          copiesToRender.map((name) => <LorryCopy key={name} values={values} copyName={name} />)
+          copiesToRender.map((name) => (
+            <div key={name} className="lr-page-frame">
+              <LorryCopy values={values} copyName={name} />
+            </div>
+          ))
         ) : (
           <div className="lr-no-selection print:hidden">
             Select at least one copy above to preview and print it.
@@ -1508,20 +1512,33 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
             display: none !important;
           }
 
+          
           .lr-document {
             display: block !important;
             padding: 0 !important;
             gap: 0 !important;
           }
 
+          .lr-page-frame {
+            height: 99vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            page-break-after: always;
+            break-after: page;
+          }
+
+        .lr-page-frame:last-child {
+          page-break-after: auto;
+          break-after: auto;
+        }
+
         .lr-page {
-          width: 100%;
-          height: 100%;
+          width: 287mm;
+          height: 200mm;
           margin: 0 !important;
           border: 1px solid #111;
           box-shadow: none !important;
-          page-break-after: always;
-          break-after: page;
         }
 
         .lr-page:last-child {
