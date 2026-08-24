@@ -11,7 +11,7 @@ import { siteConfig } from "@/lib/site-config";
 import type { BillingFormValues } from "@/lib/validations/billing";
 
 interface PrintPreviewProps {
-  values: BillingFormValues;
+  values: any;
   onClose: () => void;
 }
 
@@ -654,20 +654,19 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         .lr-page {
-          width: 287mm;
-          height: 200mm;
-          background: #fff;
-          border: 1.5px solid #16213e;
-          color: #1a1a2e;
-          position: relative;
-          // overflow: auto;
-          font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-          font-size: 12.5px;
-          line-height: 1.22;
-          letter-spacing: 0.2px;
-          display: flex;
-          flex-direction: column;
-        }
+  width: 287mm;
+  height: 200mm;
+  background: #fff;
+  border: 1.5px solid #16213e;
+  color: #1a1a2e;
+  position: relative;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  font-size: 12.5px;
+  line-height: 1.22;
+  letter-spacing: 0.2px;
+  display: flex;
+  flex-direction: column;
+}
 
         /* ============================================================= */
         /* HEADER                                                         */
@@ -1501,6 +1500,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           }
 
           .lr-preview {
+            min-height: 0 !important;
             background: white !important;
           }
 
@@ -1509,29 +1509,30 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           }
 
           .lr-document {
+            display: block !important;
             padding: 0 !important;
             gap: 0 !important;
           }
 
-          .lr-page {
-            width: 287mm;
-            height: 200mm;
-            margin: 0 !important;
-            border: 1px solid #111;
-            box-shadow: none !important;
-            page-break-after: always;
-            break-after: page;
-          }
+        .lr-page {
+          width: 100%;
+          height: 100%;
+          margin: 0 !important;
+          border: 1px solid #111;
+          box-shadow: none !important;
+          page-break-after: always;
+          break-after: page;
+        }
 
-          .lr-page:last-child {
-            page-break-after: auto;
-            break-after: auto;
-          }
+        .lr-page:last-child {
+          page-break-after: auto;
+          break-after: auto;
+        }
 
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
         }
       `}</style>
     </div>
