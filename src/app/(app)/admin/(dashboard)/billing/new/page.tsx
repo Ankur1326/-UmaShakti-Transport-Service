@@ -33,7 +33,7 @@ import { FormActionsBar } from "@/components/billing/Formactionsbar";
 import { PrintPreview } from "@/components/billing/Printpreview";
 
 import { billingFormSchema, buildDefaultValues, type BillingFormValues } from "@/lib/validations/billing";
-import { generateConsignmentNumber, saveConsignmentNumber } from "@/lib/generateConsignmentNumber";
+import { fetchNextConsignmentNumber, generateConsignmentNumber, saveConsignmentNumber } from "@/lib/generateConsignmentNumber";
 
 const DRAFT_STORAGE_KEY = "uts:billing-draft:v1";
 const AUTOSAVE_DEBOUNCE_MS = 1200;
@@ -82,6 +82,29 @@ function TransportBillingForm() {
     reset,
     formState: { isDirty, isSubmitting },
   } = methods;
+
+  // New consignment: the ref above is just an instant local placeholder — replace it
+  // with the real next number from the database as soon as it resolves, but only if
+  // the person hasn't already started editing the field themselves.
+  useEffect(() => {
+    if (editId) return;
+
+    let cancelled = false;
+    fetchNextConsignmentNumber().then((nextNumber) => {
+      if (cancelled) return;
+      const current = methods.getValues("consignmentNumber");
+      if (current === initialNumberRef.current) {
+        methods.setValue("consignmentNumber", nextNumber, { shouldDirty: false, shouldValidate: false });
+        initialNumberRef.current = nextNumber;
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+    // Only ever run once on mount for a fresh consignment.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId]);
 
   // Editing an existing consignment: load it from the backend instead of a fresh draft.
   useEffect(() => {
@@ -147,7 +170,7 @@ function TransportBillingForm() {
 
   /** Creates the consignment on first save, updates it on every save after that. */
   const persistToBackend = async (values: BillingFormValues) => {
-    console.log("recordId", recordId)
+    console.log("recordId ", recordId)
     if (recordId) {
       const updated = await updateConsignment(recordId, values);
       return updated;
@@ -158,58 +181,50 @@ function TransportBillingForm() {
     return created;
   };
 
-  /** Walks the nested react-hook-form error object and returns the first "field.path: message" pair. */
-function firstErrorMessage(errors: Record<string, unknown>, path: string[] = []): string | null {
-  for (const key of Object.keys(errors)) {
-    const value = errors[key] as Record<string, unknown> | undefined;
-    if (!value) continue;
-    if (typeof value.message === "string") {
-      return `${[...path, key].join(".")}: ${value.message}`;
-    }
-    const nested = firstErrorMessage(value, [...path, key]);
-    if (nested) return nested;
-  }
-  return null;
-}
+  const onSaveDraft = handleSubmit(
+    async (values) => {
+      cacheDraftLocally(values);
+      try {
+        await persistToBackend(values);
+        toast.success(`Draft saved — Consignment No: ${values.consignmentNumber}`);
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, "Couldn't save the draft. It's cached locally — try again shortly."));
+      }
+    },
+    () => toast.error("Please fix the highlighted fields before saving.")
+  );
 
-const onInvalid = (errors: Record<string, unknown>) => {
-  console.log("Form validation errors:", errors);
-  toast.error(firstErrorMessage(errors) ?? "Please fix the highlighted fields.");
-};
+  const onGenerateLR = handleSubmit(
+    async (values) => {
+      cacheDraftLocally(values);
+      try {
+        await persistToBackend(values);
+        window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+        toast.success(`Consignment saved successfully\nConsignment No: ${values.consignmentNumber}`);
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, "Couldn't generate the LR. Please try again."));
+      }
+    },
+    () => toast.error("Please fix the highlighted fields before generating the LR.")
+  );
 
-const onSaveDraft = handleSubmit(async (values) => {
-  cacheDraftLocally(values);
-  try {
-    await persistToBackend(values);
-    toast.success(`Draft saved — Consignment No: ${values.consignmentNumber}`);
-  } catch (error) {
-    toast.error(getApiErrorMessage(error, "Couldn't save the draft. It's cached locally — try again shortly."));
-  }
-}, onInvalid);
+  const onSaveAndPrint = handleSubmit(
+    async (values) => {
+      cacheDraftLocally(values);
+      try {
+        await persistToBackend(values);
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, "Couldn't save before printing. Showing the preview anyway."));
+      }
+      setPreviewOpen(true);
+    },
+    () => toast.error("Please fix the highlighted fields before printing.")
+  );
 
-const onGenerateLR = handleSubmit(async (values) => {
-  cacheDraftLocally(values);
-  try {
-    await persistToBackend(values);
-    window.localStorage.removeItem(DRAFT_STORAGE_KEY);
-    toast.success(`Consignment saved successfully\nConsignment No: ${values.consignmentNumber}`);
-  } catch (error) {
-    toast.error(getApiErrorMessage(error, "Couldn't generate the LR. Please try again."));
-  }
-}, onInvalid);
-
-const onSaveAndPrint = handleSubmit(async (values) => {
-  cacheDraftLocally(values);
-  try {
-    await persistToBackend(values);
-  } catch (error) {
-    toast.error(getApiErrorMessage(error, "Couldn't save before printing. Showing the preview anyway."));
-  }
-  setPreviewOpen(true);
-}, onInvalid);
-
-  const onReset = () => {
-    const fresh = buildDefaultValues(generateConsignmentNumber());
+  const onReset = async () => {
+    const nextNumber = await fetchNextConsignmentNumber();
+    const fresh = buildDefaultValues(nextNumber);
+    initialNumberRef.current = nextNumber;
     reset(fresh);
     setRecordId(null);
     window.localStorage.removeItem(DRAFT_STORAGE_KEY);

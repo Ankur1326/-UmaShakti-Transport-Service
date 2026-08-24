@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { ChevronLeft, ChevronRight, Package, Pencil, Search, Trash2, Truck } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Package, Pencil, Search, Trash2, Truck } from "lucide-react";
 
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -21,6 +21,10 @@ import {
   type ConsignmentListItem,
   type MongoDate,
 } from "@/lib/api/consignments";
+import {
+  ConsignmentDetailsModal,
+} from "@/components/billing/ConsignmentDetailsModal";
+
 
 const PAGE_SIZE = 10;
 
@@ -76,6 +80,11 @@ export default function BookingsPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<ConsignmentListItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // The row clicked for "View Details". We render the modal with whatever the
+  // list API returned for this item — see the note in ConsignmentDetailsModal
+  // about why the type is widened rather than trimmed.
+  const [viewTarget, setViewTarget] = useState<any | null>(null);
 
   // Debounce the search box so we're not firing a request on every keystroke.
   useEffect(() => {
@@ -218,7 +227,11 @@ export default function BookingsPage() {
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <tr key={item._id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
+                  <tr
+                    key={item._id}
+                    className="cursor-pointer border-b border-neutral-100 last:border-0 hover:bg-neutral-50"
+                    onClick={() => setViewTarget(item as any)}
+                  >
                     <td className="px-4 py-3">
                       <div className="font-semibold text-brand-700">{item.consignmentNumber}</div>
                       <div className="text-caption text-neutral-500">{formatDate(item.bookingDate)}</div>
@@ -244,7 +257,15 @@ export default function BookingsPage() {
                       {formatINR(sumCharges(item.charges))}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="View details"
+                          onClick={() => setViewTarget(item)}
+                        >
+                          <Eye className="h-4 w-4" aria-hidden="true" />
+                        </Button>
                         <Link href={`/admin/billing/new?id=${item._id}`}>
                           <Button variant="ghost" size="icon" aria-label="Edit consignment">
                             <Pencil className="h-4 w-4" aria-hidden="true" />
@@ -269,7 +290,12 @@ export default function BookingsPage() {
           {/* MOBILE CARDS */}
           <div className="grid gap-3 md:hidden">
             {items.map((item) => (
-              <Card key={item._id} padding="md" className="rounded-xl">
+              <Card
+                key={item._id}
+                padding="md"
+                className="cursor-pointer rounded-xl"
+                onClick={() => setViewTarget(item)}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="text-[15px] font-bold text-brand-700">{item.consignmentNumber}</div>
@@ -300,7 +326,15 @@ export default function BookingsPage() {
 
                 <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3">
                   <div className="text-[15px] font-semibold text-neutral-900">{formatINR(sumCharges(item.charges))}</div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="View details"
+                      onClick={() => setViewTarget(item)}
+                    >
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                    </Button>
                     <Link href={`/admin/billing/new?id=${item._id}`}>
                       <Button variant="outline" size="sm">
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
@@ -345,6 +379,8 @@ export default function BookingsPage() {
           </div>
         </>
       )}
+
+      <ConsignmentDetailsModal consignment={viewTarget} onClose={() => setViewTarget(null)} />
 
       <ConfirmDialog
         open={Boolean(deleteTarget)}

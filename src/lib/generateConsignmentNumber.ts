@@ -1,12 +1,21 @@
+import axios from "axios";
+
 /**
- * Generates a sequential consignment number starting from 1725.
- * Example: UTS-2026-1725, UTS-2026-1726, UTS-2026-1727...
+ * Consignment numbering.
  *
- * The last-used value is stored in localStorage so each new form starts from the previous one.
- * Users can still overwrite the field manually before saving.
+ * The source of truth is the database: GET /api/consignments/next-number
+ * looks at the highest consignment number already saved and returns one
+ * more than that, starting from 2051 for the very first consignment.
+ * That keeps numbering correct and sequential across every browser,
+ * device, and user — not just the current tab.
+ *
+ * localStorage is kept only as an instant placeholder for the very first
+ * paint (before the network call resolves) and as an offline fallback if
+ * the backend request fails. Whenever the backend answers, its number wins
+ * and the local cache is updated to match.
  */
 const CONSIGNMENT_SEQUENCE_KEY = "uts:consignment-sequence:v1";
-const START_NUMBER = 1725;
+const START_NUMBER = 2051;
 
 function readLastUsedNumber(): number {
   if (typeof window === "undefined") return START_NUMBER;
@@ -22,6 +31,7 @@ function readLastUsedNumber(): number {
   }
 }
 
+/** Records the highest consignment number we've seen so far, for the local fallback. */
 export function saveConsignmentNumber(value: string): void {
   if (typeof window === "undefined") return;
 
@@ -40,6 +50,11 @@ export function saveConsignmentNumber(value: string): void {
   }
 }
 
+/**
+ * Synchronous, local-only guess — used only as an instant placeholder before
+ * the backend responds, or if the backend call fails outright (e.g. offline).
+ * Prefer fetchNextConsignmentNumber() everywhere a network round-trip is fine.
+ */
 export function generateConsignmentNumber(): string {
   const hasExistingValue = typeof window !== "undefined" && window.localStorage.getItem(CONSIGNMENT_SEQUENCE_KEY) !== null;
   const lastUsedNumber = readLastUsedNumber();
@@ -66,4 +81,25 @@ export function generateConsignmentNumber(): string {
   }
 
   return String(nextNumber);
+}
+
+/**
+ * Asks the backend for the next consignment number, based on the highest
+ * number already saved in the database. Falls back to the local
+ * localStorage-based guess if the request fails (e.g. offline).
+ */
+export async function fetchNextConsignmentNumber(): Promise<string> {
+  try {
+    const { data } = await axios.get<{ success: boolean; data?: { nextNumber: string } }>(
+      "/api/admin/consignments/next-number/get"
+    );
+    const nextNumber = data?.data?.nextNumber;
+    if (nextNumber) {
+      saveConsignmentNumber(nextNumber);
+      return nextNumber;
+    }
+  } catch {
+    // Network/server issue — fall through to the local fallback below.
+  }
+  return generateConsignmentNumber();
 }

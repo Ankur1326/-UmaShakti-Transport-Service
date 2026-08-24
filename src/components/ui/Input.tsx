@@ -22,7 +22,7 @@ interface InputProps
    * app; "compact" is a tighter variant for dense forms (e.g. the billing
    * form) and does not change behavior/validation.
    */
-  size?: "default" | "compact";
+  size?: any
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
