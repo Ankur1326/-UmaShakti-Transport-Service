@@ -319,12 +319,12 @@ export default function Sidebar({
             <div className="flex items-center justify-center px-3 py-3 border-b border-gray-100 dark:border-gray-800 shrink-0 dark:bg-gray-800">
                 {!isCollapsed ? (
                     <div className="flex items-center gap-2.5 w-full">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-lg">
+                        <span className="flex items-center justify-center rounded-lg">
                             <Image
-                                src="/media/logo.jpeg"
+                                src="/media/UTS-logo.png"
                                 alt="Mastery Hub"
-                                width={40}
-                                height={40}
+                                width={60}
+                                height={60}
                                 priority
                             />
                         </span>

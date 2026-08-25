@@ -101,7 +101,7 @@ export default function Page() {
                 <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                     <Link href="/" className="focus-ring flex items-center gap-2 rounded-md font-semibold text-brand-800">
                         <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg">
-                            <Image src="/media/logo.jpeg" alt="Umashakti Transport Service" width={40} height={40} priority />
+                            <Image src="/media/UTS-logo.png" alt="Umashakti Transport Service" width={40} height={40} priority />
                         </span>
                         <span className="text-lg font-semibold text-brand-800 sm:text-xl">UmaShakti Transport</span>
                     </Link>

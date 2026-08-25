@@ -35,15 +35,15 @@ export function PublicHeader() {
           href="/"
           className="focus-ring flex items-center gap-2 rounded-md font-semibold text-brand-800"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg">
+          {/* <span className=""> */}
             <Image
-              src="/media/logo.jpeg"
+              src="/media/UTS-logo.png"
               alt="Mastery Hub"
-              width={40}
-              height={40}
+              width={70}
+              height={50}
               priority
             />
-          </span>
+          {/* </span> */}
           <span className="text-h4">{siteConfig.name}</span>
         </Link>
 

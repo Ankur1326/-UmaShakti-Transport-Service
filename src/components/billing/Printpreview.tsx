@@ -22,6 +22,8 @@ interface PrintPreviewProps {
 const ALL_COPY_NAMES = ["LORRY COPY", "CONSIGNEE COPY", "CONSIGNOR COPY", "FILE COPY"] as const;
 type CopyName = (typeof ALL_COPY_NAMES)[number];
 
+const DEFAULT_SELECTED_COPIES: readonly CopyName[] = ["LORRY COPY", "CONSIGNEE COPY"];
+
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -84,10 +86,10 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
           <div className="lr-company-top">
             <div className="lr-logo">
               <Image
-                src="/media/logo.jpeg"
+                src="/media/UTS-logo.png"
                 alt={siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}
-                width={59}
-                height={59}
+                width={60}
+                height={60}
                 priority
               />
             </div>
@@ -140,7 +142,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
               <span>State :</span>
               <span>{text(values.to.state)}</span>
             </div>
-            <div className="lr-mini-row absolute bottom-1">
+            <div className="lr-mini-row  absolute bottom-1">
               <span>GSTIN :</span>
               <span>{text(values.to.gstin)}</span>
             </div>
@@ -205,7 +207,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
                   {text(values.consignor.city)}
                   {values.consignor.state ? `, ${text(values.consignor.state)}` : ""}
                 </div>
-                <div className="lr-party-detail">GSTIN: {text(values.consignor.gstin)}</div>
+                <div className="lr-party-detail !text-[15px] !font-normal">GSTIN: {text(values.consignor.gstin)}</div>
                 <div className="lr-party-detail">Mobile: {text(values.consignor.mobile)}</div>
               </div>
             </div>
@@ -220,7 +222,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
                   {text(values.consignee.city)}
                   {values.consignee.state ? `, ${text(values.consignee.state)}` : ""}
                 </div>
-                <div className="lr-party-detail">GSTIN: {text(values.consignee.gstin)}</div>
+                <div className="lr-party-detail !text-[15px] !font-normal">GSTIN: {text(values.consignee.gstin)}</div>
                 <div className="lr-party-detail">Mobile: {text(values.consignee.mobile)}</div>
               </div>
             </div>
@@ -417,7 +419,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
             <SmallLabel>Basis of Booking</SmallLabel>
             <div className="lr-checkbox-row">
               <span>{values.payment.type === "To Pay" ? "☑" : "☐"} 1. To Pay</span>
-              <span>{values.payment.type === "TBB at" ? "☑" : "☐"} 2. TBB at___________</span>
+              <span>{values.payment.type === "TBB at" ? "☑" : "☐"} 2. TBB AT WGH</span>
             </div>
             <div className="lr-checkbox-row">
               <span>{values.payment.type === "Paid" ? "☑" : "☐"} 3. Paid</span>
@@ -470,7 +472,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
 
 export function PrintPreview({ values, onClose }: PrintPreviewProps) {
   // Which copies the user wants printed — all four are selected by default.
-  const [selectedCopies, setSelectedCopies] = useState<Set<CopyName>>(new Set(ALL_COPY_NAMES));
+  const [selectedCopies, setSelectedCopies] = useState<Set<CopyName>>(new Set(DEFAULT_SELECTED_COPIES));
 
   function toggleCopy(name: CopyName) {
     setSelectedCopies((prev) => {
@@ -535,9 +537,9 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
       <div className="lr-document">
         {hasSelection ? (
           copiesToRender.map((name) => (
-            <div key={name} className="lr-page-frame">
-              <LorryCopy values={values} copyName={name} />
-            </div>
+            // <div key={name} className="lr-page-frame">
+            <LorryCopy values={values} copyName={name} />
+            // {/* </div> */}
           ))
         ) : (
           <div className="lr-no-selection print:hidden">
@@ -694,8 +696,8 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-logo {
-          width: 60px;
-          height: 60px;
+          width: 70px;
+          height: 70px;
           min-width: 60px;
           border-radius: 50%;
           display: flex;
@@ -1172,7 +1174,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-terms-text {
           font-size: 11px;
-          font-weight: 600;
+          font-weight: 300;
           line-height: 1.1;
           letter-spacing: 0.4px;
           text-align: start;
@@ -1181,7 +1183,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-terms-caption {
           font-size: 12px;
-          font-weight: 600;
+          font-weight: 400;
           color: #16213e;
         }
 
@@ -1476,11 +1478,11 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* SCREEN RESPONSIVE                                              */
         /* ============================================================= */
 
-        @media (max-width: 1200px) {
-          .lr-document {
-            overflow-x: auto;
-          }
-        }
+        // @media (max-width: 1200px) {
+        //   .lr-document {
+        //     overflow-x: auto;
+        //   }
+        // }
 
         /* ============================================================= */
         /* PRINT                                                          */
@@ -1490,66 +1492,64 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         /* ============================================================= */
 
         @media print {
-          @page {
-            size: A4 landscape;
-            margin: 5mm;
+            @page {
+              size: A4 landscape;
+              margin: 5mm;
+            }
+
+            html,
+            body {
+              margin: 0 !important;
+              padding: 0 !important;
+              width: 100%;
+              background: white !important;
+            }
+
+            .lr-preview {
+              min-height: 0 !important;
+              background: white !important;
+            }
+
+            .lr-toolbar {
+              display: none !important;
+            }
+
+            .lr-document {
+              display: block !important;
+              padding: 0 !important;
+              gap: 0 !important;
+            }
+
+            /* .lr-page is already a fixed 287mm x 200mm — that alone fills exactly
+              one printable page with no gap and no overflow, so there's no longer
+              any need for a wrapping frame, vh sizing, or flex centering. Those
+              were the actual source of the blank-page bug: vh is computed
+              inconsistently across browsers/OSes in print contexts and can end up
+              a fraction over one page, spilling an almost-empty page 2. */
+            .lr-page {
+              width: 287mm;
+              height: 200mm;
+              margin: 0 !important;
+              border: 1px solid #111;
+              box-shadow: none !important;
+            }
+
+            /* Break before every copy that has a preceding sibling — i.e. every
+              page except the first. With only one copy selected, there is no
+              earlier sibling, so this selector simply never matches — a
+              single-copy print can never produce an extra page, guaranteed
+              (unlike page-break-after + :last-child, which Chrome sometimes still
+              fires even when :last-child should cancel it). */
+            .lr-page + .lr-page {
+              page-break-before: always;
+              break-before: page;
+            }
+
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
           }
-
-          html,
-          body {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100%;
-            background: white !important;
-          }
-
-          .lr-preview {
-            min-height: 0 !important;
-            background: white !important;
-          }
-
-          .lr-toolbar {
-            display: none !important;
-          }
-
-          
-          .lr-document {
-            display: block !important;
-            padding: 0 !important;
-            gap: 0 !important;
-          }
-
-          .lr-page-frame {
-            height: 99vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            page-break-after: always;
-            break-after: page;
-          }
-
-        .lr-page-frame:last-child {
-          page-break-after: auto;
-          break-after: auto;
-        }
-
-        .lr-page {
-          width: 287mm;
-          height: 200mm;
-          margin: 0 !important;
-          border: 1px solid #111;
-          box-shadow: none !important;
-        }
-
-        .lr-page:last-child {
-          page-break-after: auto;
-          break-after: auto;
-        }
-
-        * {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
         }
       `}</style>
     </div>
