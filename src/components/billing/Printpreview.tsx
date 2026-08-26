@@ -86,9 +86,9 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
           <div className="lr-company-top">
             <div className="lr-logo">
               <Image
-                src="/media/UTS-logo-vertical.png"
+                src="/media/UTS-logo-ver.png"
                 alt={siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}
-                width={50}
+                width={60}
                 height={60}
                 priority
               />
@@ -113,10 +113,20 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
                       </div> */}
             </div>
           </div>
-          <div className="lr-registration flex px-5 w-full">
-            <div>REG. NO.: 24AAHFU8816H1ZX</div>
-            <div>PAN NO. AAHFU8816H</div>
-            <div>UDYAM-GJ-24-0106951</div>
+          <div className="lr-registration flex justify-between px-6  w-full">
+            <div className="flex flex-col">
+              <span>REG. NO. </span>
+              <span>24AAHFU8816H1ZX</span>
+            </div>
+            <div className="flex flex-col">
+              <span>PAN NO. </span>
+              <span>AAHFU8816H</span>
+            </div>
+            {/* <div>PAN NO. AAHFU8816H</div> */}
+            <div className="flex flex-col ">
+              <span>MSME No.</span>
+              <span>UDYAM-GJ-24-0106951</span>
+            </div>
           </div>
         </div>
 
@@ -696,22 +706,23 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-logo {
-          width: 50px;
+          width: 70px;
           height: 110px;
           min-width: 60px;
           // border-radius: 50%;
           // display: flex;
           // align-items: center;
           // justify-content: center;
-          color: #172f57;
-          font-size: 15px;
-          font-weight: 900;
+          // color: #172f57;
+          // font-size: 15px;
+          // font-weight: 900;
           overflow: hidden;
           background: #fff;
+          // border: 1px solid #111;
         }
 
         .lr-logo img {
-          width: 80%;
+          width: 100%;
           height: 100%;
           // object-fit: cover;
           // border-radius: 50%;
