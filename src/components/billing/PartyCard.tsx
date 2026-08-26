@@ -1,17 +1,35 @@
 "use client";
 
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { UserPlus } from "lucide-react";
 import { FormSection } from "@/components/billing/FormSection";
 import { Input } from "@/components/ui/Input";
 import { Combobox } from "@/components/ui/Combobox";
-import { MOCK_CUSTOMERS } from "@/lib/mock-data/customers";
+import type { AppDispatch, RootState } from "@/redux/store";
+import { fetchConsigners } from "@/redux/slices/consignerSlice";
+import { fetchConsignees } from "@/redux/slices/consigneeSlice";
+import { GST_STATES } from "@/data/gstStates";
 import type { BillingFormValues } from "@/lib/validations/billing";
 
 interface PartyCardProps {
   prefix: "consignor" | "consignee";
   title: string;
   description: string;
+}
+
+/**
+ * State is stored as "24-GUJARAT" (code-name, see StateAutocomplete).
+ * This builds extra, invisible search text so a user can find the same
+ * record by typing the state code ("GJ"), the GST code ("24"), or the
+ * plain name ("gujarat") — not just what's already shown on screen.
+ */
+function stateSearchKeywords(state?: string): string {
+  if (!state) return "";
+  const code = state.split("-")[0]?.trim();
+  const match = GST_STATES.find((s) => s.code === code);
+  return match ? `${state} ${match.stateCode} ${match.name}` : state;
 }
 
 export function PartyCard({ prefix, title, description }: PartyCardProps) {
@@ -22,6 +40,30 @@ export function PartyCard({ prefix, title, description }: PartyCardProps) {
     formState: { errors },
   } = useFormContext<BillingFormValues>();
   const sectionErrors = errors[prefix];
+
+  const dispatch = useDispatch<AppDispatch>();
+  const isConsignor = prefix === "consignor";
+
+  // Consignor and consignee are backed by separate collections/slices —
+  // pick the right one for this card.
+  const { consigners, status: consignersStatus } = useSelector((state: RootState) => state.consigners);
+  const { consignees, status: consigneesStatus } = useSelector((state: RootState) => state.consignees);
+
+  const customers = isConsignor ? consigners : consignees;
+  const status = isConsignor ? consignersStatus : consigneesStatus;
+
+  // Load the full customer list once (large itemsPerPage) so search is
+  // instant client-side as the user types, instead of a round trip per
+  // keystroke. Guarded by status so consignor + consignee cards on the same
+  // page don't refetch each other's data or refetch on every re-render.
+  useEffect(() => {
+    if (status !== "idle") return;
+    if (isConsignor) {
+      dispatch(fetchConsigners({ itemsPerPage: 1000, currentPage: 1 }));
+    } else {
+      dispatch(fetchConsignees({ itemsPerPage: 1000, currentPage: 1 }));
+    }
+  }, [dispatch, isConsignor, status]);
 
   const handleAddNew = () => {
     resetField(`${prefix}.customerId`, { defaultValue: "" });
@@ -42,11 +84,16 @@ export function PartyCard({ prefix, title, description }: PartyCardProps) {
           size="compact"
           label="Select existing customer"
           placeholder="Search customer…"
-          items={MOCK_CUSTOMERS.map((c) => ({ id: c.id, label: c.name, subLabel: `${c.city}, ${c.state}` }))}
+          items={customers.map((c) => ({
+            id: c._id,
+            label: c.name,
+            subLabel: `${c.city}, ${c.state}`,
+            keywords: stateSearchKeywords(c.state),
+          }))}
           onSelect={(item) => {
-            const customer = MOCK_CUSTOMERS.find((c) => c.id === item.id);
+            const customer = customers.find((c) => c._id === item.id);
             if (!customer) return;
-            setValue(`${prefix}.customerId`, customer.id);
+            setValue(`${prefix}.customerId`, customer._id);
             setValue(`${prefix}.name`, customer.name, { shouldValidate: true });
             setValue(`${prefix}.address`, customer.address, { shouldValidate: true });
             setValue(`${prefix}.city`, customer.city);

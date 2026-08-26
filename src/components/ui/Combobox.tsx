@@ -8,6 +8,9 @@ export interface ComboboxItem {
   id: string;
   label: string;
   subLabel?: string;
+  /** Extra text matched against the search query but never rendered — lets a
+   *  search term match a field that isn't shown, e.g. a state code. */
+  keywords?: string;
 }
 
 interface ComboboxProps {
@@ -46,7 +49,11 @@ export function Combobox({
   const filtered =
     query.trim().length === 0
       ? items
-      : items.filter((item) => `${item.label} ${item.subLabel ?? ""}`.toLowerCase().includes(query.trim().toLowerCase()));
+      : items.filter((item) =>
+          `${item.label} ${item.subLabel ?? ""} ${item.keywords ?? ""}`
+            .toLowerCase()
+            .includes(query.trim().toLowerCase())
+        );
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {

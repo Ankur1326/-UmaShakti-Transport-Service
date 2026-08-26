@@ -8,7 +8,7 @@ export interface IConsigner extends Document {
     state: string;
     pincode: string;
     gstin: string;
-    mobile: string;
+    mobile: string | null;
     email: string;
     createdAt: Date;
     updatedAt: Date;
@@ -46,7 +46,7 @@ const ConsignerSchema: Schema<IConsigner> = new mongoose.Schema(
         },
         mobile: {
             type: String,
-            default: ""
+            default: null
         },
         email: {
             type: String,
