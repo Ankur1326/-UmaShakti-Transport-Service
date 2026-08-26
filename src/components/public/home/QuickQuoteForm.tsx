@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Truck, CalendarDays, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/Button";
 import { vehicleTypeOptions } from "@/lib/placeholder-data";
 import { cn } from "@/lib/utils";
 

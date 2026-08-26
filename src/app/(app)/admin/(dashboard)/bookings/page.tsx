@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, Eye, Package, Pencil, Printer, Search, Trash
 
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Loading } from "@/components/ui/Loading";
@@ -160,8 +160,8 @@ export default function BookingsPage() {
               <h1 className="text-h3 font-semibold text-neutral-900">Bookings</h1>
               <p className="text-body-sm text-neutral-500">All consignments booked so far.</p>
             </div>
-            <Link href="/admin/billing/new">
-              <Button variant="primary" size="sm">
+            <Link href="/admin/consignment/new">
+              <Button size="sm">
                 <Package className="h-4 w-4" aria-hidden="true" />
                 New Consignment
               </Button>
@@ -207,7 +207,7 @@ export default function BookingsPage() {
               }
               action={
                 !hasActiveFilters ? (
-                  <Link href="/admin/billing/new">
+                  <Link href="/admin/consignment/new">
                     <Button size="sm">Create Consignment</Button>
                   </Link>
                 ) : undefined
@@ -279,7 +279,7 @@ export default function BookingsPage() {
                             >
                               <Printer className="h-4 w-4" aria-hidden="true" />
                             </Button>
-                            <Link href={`/admin/billing/new?id=${item._id}`}>
+                            <Link href={`/admin/consignment/new?id=${item._id}`}>
                               <Button variant="ghost" size="icon" aria-label="Edit consignment">
                                 <Pencil className="h-4 w-4" aria-hidden="true" />
                               </Button>
@@ -356,7 +356,7 @@ export default function BookingsPage() {
                         >
                           <Printer className="h-4 w-4" aria-hidden="true" />
                         </Button>
-                        <Link href={`/admin/billing/new?id=${item._id}`}>
+                        <Link href={`/admin/consignment/new?id=${item._id}`}>
                           <Button variant="outline" size="sm">
                             <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                             Edit

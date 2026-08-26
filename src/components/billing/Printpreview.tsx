@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { ArrowLeft, Printer } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/Button"
 import { computeBillingTotals } from "@/lib/calculations/billing";
 import { amountToWords, formatINR } from "@/lib/numberToWords";
 import { siteConfig } from "@/lib/site-config";
@@ -86,9 +86,9 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
           <div className="lr-company-top">
             <div className="lr-logo">
               <Image
-                src="/media/UTS-logo.png"
+                src="/media/UTS-logo-vertical.png"
                 alt={siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}
-                width={60}
+                width={50}
                 height={60}
                 priority
               />
@@ -696,13 +696,13 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-logo {
-          width: 70px;
-          height: 70px;
+          width: 50px;
+          height: 110px;
           min-width: 60px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          // border-radius: 50%;
+          // display: flex;
+          // align-items: center;
+          // justify-content: center;
           color: #172f57;
           font-size: 15px;
           font-weight: 900;
@@ -711,14 +711,14 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-logo img {
-          width: 100%;
+          width: 80%;
           height: 100%;
-          object-fit: cover;
-          border-radius: 50%;
+          // object-fit: cover;
+          // border-radius: 50%;
         }
 
         .lr-company-name {
-          color: #b91c1c;
+          color: #EF6711;
           font-size: 19px;
           font-weight: 900;
           line-height: 1.15;
@@ -744,7 +744,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
         }
 
         .lr-registration {
-          color: #9a1414;
+          color: #EF6711;
           font-weight: 700;
           line-height: 1.4;
           font-size: 10.5px;
@@ -1101,7 +1101,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #b91c1c;
+          color: #EF6711;
           font-size: 20px;
           font-weight: 900;
           letter-spacing: 0.4px;
@@ -1276,7 +1276,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         .lr-copy-name {
           text-align: center;
-          color: #b91c1c;
+          color: #EF6711;
           font-size: 15px;
           font-weight: 900;
           letter-spacing: 0.4px;
@@ -1361,7 +1361,7 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
           border-bottom: 1px solid #111;
           font-size: 14px;
           color: #fff;
-          background: #b91c1c;
+          background: #EF6711;
           letter-spacing: 0.3px;
         }
 

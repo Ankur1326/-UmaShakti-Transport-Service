@@ -1,16 +1,13 @@
 import React from 'react';
 
 import {
+    HiOutlineClipboardList,
+    HiOutlineDocumentAdd,
     HiOutlineHome,
+    HiOutlineOfficeBuilding,
     HiOutlineUser,
     HiOutlineUserGroup,
-    HiOutlineBell,
-    HiOutlineDocumentText,
-    HiOutlineClipboardList,
-    HiOutlineDocumentAdd
 } from 'react-icons/hi';
-import { FiCircle } from 'react-icons/fi';
-import { MdOutlineFeedback } from 'react-icons/md';
 
 export interface NavItem {
     id: string;
@@ -62,17 +59,29 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                 name: 'Billing',
                 items: [
                     {
-                        id: 'bookings',
-                        title: 'Booking lists',
-                        icon: <HiOutlineClipboardList className="text-blue-500 w-5 h-5" />,
-                        route: '/admin/bookings',
-                    },
-                    {
-                        id: 'billing-new',
-                        title: 'New Consignment Note',
-                        icon: <HiOutlineDocumentAdd className="text-emerald-500 w-5 h-5" />,
-                        route: '/admin/billing/new',
-                    },
+    id: 'bookings',
+    title: 'Bookings',
+    icon: <HiOutlineClipboardList className="text-blue-500 w-5 h-5" />,
+    route: '/admin/bookings',
+},
+{
+    id: 'billing-new',
+    title: 'New Consignment Entry',
+    icon: <HiOutlineDocumentAdd className="text-emerald-500 w-5 h-5" />,
+    route: '/admin/consignment/new',
+},
+{
+    id: 'consigners',
+    title: 'Consigner Management',
+    icon: <HiOutlineOfficeBuilding className="text-purple-500 w-5 h-5" />,
+    route: '/admin/consigners',
+},
+{
+    id: 'consignees',
+    title: 'Consignee Management',
+    icon: <HiOutlineUserGroup className="text-orange-500 w-5 h-5" />,
+    route: '/admin/consignees',
+},
                 ]
             },
             // {

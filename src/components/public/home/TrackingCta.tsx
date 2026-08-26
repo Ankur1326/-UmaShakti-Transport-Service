@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { PackageSearch, ArrowRight } from "lucide-react";
 import { Section } from "@/components/layout/Section";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/Button";
 
 export function TrackingCta() {
   const router = useRouter();

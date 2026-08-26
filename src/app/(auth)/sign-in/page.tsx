@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, Truck } from "lucide-react";
 import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/Button";
 import { Container } from "@/components/layout/Container";
 import { signIn } from "next-auth/react";
 import toast from "react-hot-toast"

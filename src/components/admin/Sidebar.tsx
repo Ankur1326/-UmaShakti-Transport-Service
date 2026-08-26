@@ -49,7 +49,7 @@ const ROLE_THEMES: Record<UserRole, RoleTheme> = {
         activeText: 'text-red-800 dark:text-red-300',
         activeBorder: 'border-l-red-600 dark:border-l-red-500',
         hoverBg: 'hover:bg-gray-100 dark:hover:bg-gray-800/60',
-        childActiveBg: 'bg-red-600',
+        childActiveBg: 'bg-red-[#ED7225]',
         sectionColor: 'text-gray-400 dark:text-gray-500',
         roleBadgeBg: 'bg-red-50 dark:bg-red-900/30',
         roleBadgeText: 'text-red-700 dark:text-red-300',

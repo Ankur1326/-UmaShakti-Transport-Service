@@ -3,7 +3,7 @@
 import { useFormContext, useWatch } from "react-hook-form";
 import { FormSection } from "@/components/billing/FormSection";
 import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/Button";
 import type { BillingFormValues } from "@/lib/validations/billing";
 
 const CHARGE_FIELDS: { name: keyof BillingFormValues["charges"]; label: string }[] = [

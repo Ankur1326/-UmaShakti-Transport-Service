@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/Button";
 import { cn } from "@/lib/utils";
 
 interface ConfirmDialogProps {

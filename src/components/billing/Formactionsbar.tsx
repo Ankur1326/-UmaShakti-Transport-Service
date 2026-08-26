@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { RotateCcw, Printer, Eye, FileCheck2, Save } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface FormActionsBarProps {
@@ -55,14 +55,14 @@ export function FormActionsBar({
               <Save className="h-4 w-4" aria-hidden="true" />
               Save Draft
             </Button>
-            <Button variant="secondary" size="sm" isLoading={isSubmitting} onClick={onSaveAndPrint} type="button">
+            <Button variant="secondary" className="bg-[#ED7224]" size="sm" isLoading={isSubmitting} onClick={onSaveAndPrint} type="button">
               <Printer className="h-4 w-4" aria-hidden="true" />
               Save & Print
             </Button>
-            <Button variant="primary" size="sm" isLoading={isSubmitting} onClick={onGenerateLR} type="button">
+            {/* <Button variant="primary" size="sm" isLoading={isSubmitting} onClick={onGenerateLR} type="button">
               <FileCheck2 className="h-4 w-4" aria-hidden="true" />
               Save & Generate LR
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

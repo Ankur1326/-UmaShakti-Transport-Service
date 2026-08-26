@@ -21,7 +21,7 @@ import {
 
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/Button";
 import type { MongoDate } from "@/lib/api/consignments";
 
 // ─── Local formatters ────────────────────────────────────────────────────────
