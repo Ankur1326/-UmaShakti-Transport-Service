@@ -16,6 +16,7 @@ import StatusFilter from "@/components/StatusFilter";
 import { Button } from "@/components/Button";
 // import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import StateAutocomplete from "@/components/StateAutocomplete";
 
 export default function ConsigneeManagement({ params }: { params: Promise<{ role: string }> }) {
     // Check if user can delete based on role
@@ -371,7 +372,7 @@ export default function ConsigneeManagement({ params }: { params: Promise<{ role
                     <FormInput label="City" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" />
                 </div>
                 <div className="form-group mb-5">
-                    <FormInput label="State" value={state} onChange={(e) => setState(e.target.value)} placeholder="State" />
+                    <StateAutocomplete value={state} onChange={(val) => setState(val)} required={false} />
                 </div>
                 <div className="form-group mb-5">
                     <FormInput label="Pincode" value={pincode} onChange={(e) => setPincode(e.target.value)} placeholder="Pincode" />
