@@ -41,6 +41,10 @@ export async function GET(request: Request) {
             filter.name = { $regex: name, $options: "i" };
         }
 
+        if (name) {
+            filter.state = { $regex: state, $options: "i" };
+        }
+
         const skip = (currentPage - 1) * itemsPerPage;
         const limit = itemsPerPage;
         // Fetch categories based on filter and pagination
