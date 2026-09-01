@@ -214,7 +214,7 @@ const paymentSchema = new Schema<IPayment>(
         billingParty: { type: String, enum: BILLING_PARTIES },
         billingAccount: { type: String, default: "" },
         status: { type: String, enum: PAYMENT_STATUSES, default: "Pending" },
-        receivedType: { type: String, enum: RECEIVED_TYPES, default: "Cash" },
+        receivedType: { type: String, enum: RECEIVED_TYPES, default: "" },
         receivedMoney: { type: String, default: "" },
         receivedDate: { type: String, default: "" },
         UTRNumber: { type: String, default: "" },

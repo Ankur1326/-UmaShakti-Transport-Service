@@ -16,72 +16,59 @@ interface SidebarProps {
     onCollapsedChange?: (collapsed: boolean) => void;
 }
 
+// ─── Brand tokens ───────────────────────────────────────────────────────────
+// Pulled straight from the UTS mark: deep navy hull + a single hot-orange
+// accent, both built from sharp angled cuts rather than soft/rounded shapes.
+// Every role shares this brand system — roles are told apart by a small
+// badge, not by giving each one an unrelated hue (red/indigo/green, as before).
+
+const BRAND = {
+    navy: '#0F2A47',
+    navyDeep: '#0A1E33',
+    orange: '#F2680E',
+    orangeLight: '#FF8A3D',
+};
+
 // ─── Role Themes ──────────────────────────────────────────────────────────────
-// FIX: Each role now has a distinct visual identity instead of all sharing the
-// same green. This gives users immediate spatial context on which role they are in.
+// Roles stay within the two brand colours: orange marks the "operate" role,
+// navy tints mark the two supervisory/learning roles. This keeps every screen
+// legibly on-brand while still giving each role a distinct, memorable chip.
 
 interface RoleTheme {
-    // Sidebar header accent band
-    headerAccent: string;
-    // Active nav item styles
-    activeBg: string;
     activeText: string;
-    activeBorder: string;
-    // Hover styles
-    hoverBg: string;
-    // Child item active bg
+    activeIndicator: string; // the little angled flag on the active row
     childActiveBg: string;
-    // Section label colour
-    sectionColor: string;
-    // Role pill badge
     roleBadgeBg: string;
     roleBadgeText: string;
-    roleBadgeBorder: string;
-    // Role icon
     RoleIcon: React.ComponentType<{ size?: number; className?: string }>;
     roleLabel: string;
 }
 
 const ROLE_THEMES: Record<UserRole, RoleTheme> = {
     admin: {
-        headerAccent: 'bg-[#FCC605] dark:bg-[#FCC605]',
-        activeBg: 'bg-red-50 dark:bg-red-900/20',
-        activeText: 'text-red-800 dark:text-red-300',
-        activeBorder: 'border-l-red-600 dark:border-l-red-500',
-        hoverBg: 'hover:bg-gray-100 dark:hover:bg-gray-800/60',
-        childActiveBg: 'bg-red-[#ED7225]',
-        sectionColor: 'text-gray-400 dark:text-gray-500',
-        roleBadgeBg: 'bg-red-50 dark:bg-red-900/30',
-        roleBadgeText: 'text-red-700 dark:text-red-300',
-        roleBadgeBorder: 'border-red-200 dark:border-red-700',
+        activeText: 'text-[#F2680E] dark:text-[#FF8A3D]',
+        activeIndicator: 'bg-[#F2680E]',
+        childActiveBg: 'bg-[#F2680E]',
+        roleBadgeBg: 'bg-[#F2680E]',
+        roleBadgeText: 'text-white',
         RoleIcon: Shield,
         roleLabel: 'Admin',
     },
     superAdmin: {
-        headerAccent: 'bg-indigo-600 dark:bg-indigo-700',
-        activeBg: 'bg-indigo-50 dark:bg-indigo-900/20',
-        activeText: 'text-indigo-800 dark:text-indigo-300',
-        activeBorder: 'border-l-indigo-600 dark:border-l-indigo-500',
-        hoverBg: 'hover:bg-gray-100 dark:hover:bg-gray-800/60',
-        childActiveBg: 'bg-indigo-600',
-        sectionColor: 'text-gray-400 dark:text-gray-500',
-        roleBadgeBg: 'bg-indigo-50 dark:bg-indigo-900/30',
-        roleBadgeText: 'text-indigo-700 dark:text-indigo-300',
-        roleBadgeBorder: 'border-indigo-200 dark:border-indigo-700',
+        activeText: 'text-[#0F2A47] dark:text-[#8FB4DA]',
+        activeIndicator: 'bg-[#0F2A47] dark:bg-[#8FB4DA]',
+        childActiveBg: 'bg-[#0F2A47] dark:bg-[#1E4A73]',
+        roleBadgeBg: 'bg-[#0F2A47] dark:bg-[#1E4A73]',
+        roleBadgeText: 'text-white',
         RoleIcon: BookOpen,
         roleLabel: 'Instructor',
     },
     customer: {
-        headerAccent: 'bg-[#66B788] dark:bg-[#4a8f65]',
-        activeBg: 'bg-green-50 dark:bg-green-900/20',
-        activeText: 'text-green-800 dark:text-green-300',
-        activeBorder: 'border-l-[#66B788] dark:border-l-[#4a8f65]',
-        hoverBg: 'hover:bg-gray-100 dark:hover:bg-gray-800/60',
-        childActiveBg: 'bg-[#66B788]',
-        sectionColor: 'text-gray-400 dark:text-gray-500',
-        roleBadgeBg: 'bg-green-50 dark:bg-green-900/30',
-        roleBadgeText: 'text-green-700 dark:text-green-300',
-        roleBadgeBorder: 'border-green-200 dark:border-green-700',
+        activeText: 'text-[#1E4A73] dark:text-[#8FB4DA]',
+        activeIndicator: 'bg-[#1E4A73] dark:bg-[#8FB4DA]',
+        childActiveBg: 'bg-[#1E4A73]',
+        roleBadgeBg: 'bg-[#1E4A73]/10 dark:bg-[#1E4A73]/30',
+        roleBadgeText: 'text-[#1E4A73] dark:text-[#8FB4DA]',
         RoleIcon: GraduationCap,
         roleLabel: 'Student',
     },
@@ -97,13 +84,9 @@ export default function Sidebar({
     const { data: session } = useSession();
     const router = useRouter();
 
-    // FIX: Use usePathname() for reactive active state — replaces the broken
-    // window.location.pathname + useState approach that went stale after navigation.
     const currentRoute = usePathname();
 
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-
-    // FIX: Collapsible sidebar for desktop — collapses to a 56px icon rail.
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const sidebarConfig: NavigationConfig =
@@ -134,11 +117,9 @@ export default function Sidebar({
     const toggleSection = (clickedId: string) => {
         setExpandedSections((prev) => {
             const next: Record<string, boolean> = {};
-            // Collapse all other open sections (accordion behaviour).
             Object.keys(prev).forEach((k) => {
                 next[k] = false;
             });
-            // But never collapse a section whose child is currently active.
             sidebarConfig.sections?.forEach((section: any) => {
                 section.items.forEach((item: any) => {
                     if (
@@ -164,7 +145,6 @@ export default function Sidebar({
 
     const renderSectionDivider = (name: string) => {
         if (isCollapsed) {
-            // In collapsed state just show a thin rule with no text.
             return (
                 <div className="my-3 mx-3 h-px bg-gray-200 dark:bg-gray-700" aria-hidden="true" />
             );
@@ -172,9 +152,7 @@ export default function Sidebar({
         return (
             <div className="flex items-center gap-2 px-3 mt-5 mb-1">
                 {name && (
-                    <h3
-                        className={`text-[10px] font-semibold tracking-widest uppercase whitespace-nowrap ${theme.sectionColor}`}
-                    >
+                    <h3 className="text-[10px] font-bold tracking-wide text-gray-400 dark:text-gray-500 whitespace-nowrap">
                         {name}
                     </h3>
                 )}
@@ -193,33 +171,43 @@ export default function Sidebar({
         const isExpanded = expandedSections[item.route];
 
         return (
-            <div key={item.route} className="mb-0.5">
-                {/* Main item — FIX: uses <button> for keyboard + screen-reader accessibility */}
+            <div key={item.route} className="mb-0.5 relative">
                 <button
                     type="button"
                     onClick={() => (hasChildren ? toggleSection(item.route) : navigateTo(item.route))}
-                    // FIX: aria-current for screen readers, aria-expanded for accordions
                     aria-current={isActive && !hasChildren ? 'page' : undefined}
                     aria-expanded={hasChildren ? isExpanded : undefined}
                     aria-controls={hasChildren ? `section-${item.route}` : undefined}
                     title={isCollapsed ? item.title : undefined}
                     className={`
-            w-full flex items-center gap-3 cursor-pointer
+            w-full flex items-center gap-3 cursor-pointer relative
             transition-all duration-150 outline-none focus-visible:ring-2
-            focus-visible:ring-offset-1 focus-visible:ring-[#66B788]
-            ${isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3 py-2.5 justify-between'}
+            focus-visible:ring-offset-1 focus-visible:ring-[#F2680E]
+            ${isCollapsed ? 'px-3 py-2.5 justify-center' : 'pl-4 pr-3 py-2.5 justify-between'}
             ${isActive
-                            ? `${theme.activeBg} ${theme.activeText} border-l-[3px] ${theme.activeBorder} pl-[9px]`
-                            : `text-gray-600 dark:text-gray-400 border-l-[3px] border-l-transparent ${theme.hoverBg}`
+                            ? `bg-gray-100 dark:bg-gray-800/60 ${theme.activeText}`
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60'
                         }
           `}
                 >
+                    {/* FIX: active indicator is a small angled flag (clip-path), echoing
+              the sharp diagonal cuts in the UTS mark, instead of a plain vertical bar */}
+                    {isActive && (
+                        <span
+                            aria-hidden="true"
+                            className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[5px] ${theme.activeIndicator}`}
+                            style={{ clipPath: 'polygon(0 0, 100% 15%, 100% 85%, 0 100%)' }}
+                        />
+                    )}
+
                     <span className={`flex items-center ${isCollapsed ? '' : 'gap-3'}`}>
                         <span className="text-[20px] shrink-0" aria-hidden="true">
                             {item.icon}
                         </span>
                         {!isCollapsed && (
-                            <span className="text-[13.5px] font-medium leading-none">{item.title}</span>
+                            <span className={`text-[13.5px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                                {item.title}
+                            </span>
                         )}
                     </span>
 
@@ -237,7 +225,6 @@ export default function Sidebar({
                 {hasChildren && !isCollapsed && (
                     <div
                         id={`section-${item.route}`}
-                        // FIX: aria-hidden on collapsed content for screen readers
                         aria-hidden={!isExpanded}
                         className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-96 opacity-100 mt-0.5' : 'max-h-0 opacity-0'
                             }`}
@@ -258,22 +245,25 @@ export default function Sidebar({
                                         className={`
                       w-full flex items-center gap-2.5 px-3 py-2 rounded-md
                       text-[13px] transition-all duration-150 text-left
-                      outline-none focus-visible:ring-2 focus-visible:ring-[#66B788]
+                      outline-none focus-visible:ring-2 focus-visible:ring-[#F2680E]
                       ${childActive
                                                 ? `${theme.childActiveBg} text-white`
-                                                : `text-gray-500 dark:text-gray-400 ${theme.hoverBg}`
+                                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/60'
                                             }
                     `}
                                     >
                                         {isLive && (
-                                            // FIX: motion-safe so ping stops for users with prefers-reduced-motion
                                             <span className="relative flex items-center shrink-0" aria-hidden="true">
                                                 <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-red-400 opacity-75 motion-safe:animate-ping" />
                                                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
                                             </span>
                                         )}
                                         {isUpcoming && (
-                                            <Calendar size={13} className="text-blue-500 shrink-0" aria-hidden="true" />
+                                            <Calendar
+                                                size={13}
+                                                className={`shrink-0 ${childActive ? 'text-white' : 'text-[#F2680E]'}`}
+                                                aria-hidden="true"
+                                            />
                                         )}
                                         {!isLive && !isUpcoming && (
                                             <span className="shrink-0" aria-hidden="true">
@@ -297,12 +287,11 @@ export default function Sidebar({
 
     return (
         <aside
-            // FIX: Proper semantic <aside> + role="navigation" for screen readers
             role="navigation"
             aria-label="Main navigation"
             className={`
         h-screen bg-white dark:bg-gray-900
-        border-r border-gray-300 dark:border-gray-700
+        border-r border-gray-200 dark:border-gray-800
         fixed z-50 flex flex-col
         transition-all duration-300 ease-out
         ${sidebarWidth}
@@ -311,39 +300,61 @@ export default function Sidebar({
         overflow-hidden
       `}
         >
-            {/* ── Role-coloured accent strip at top ─────────────────────────────── */}
-            {/* FIX: Each role gets a visually distinct header band */}
-            <div className={`h-1 w-full shrink-0 ${theme.headerAccent}`} aria-hidden="true" />
+            {/* ── Header: navy hull with a single angled orange cut ─────────────── */}
+            {/* FIX: replaces the flat white header + thin rainbow strip with a
+          navy block carrying one deliberate diagonal orange edge, the one
+          shape borrowed directly from the UTS mark. */}
+            <div
+                className="relative shrink-0 overflow-hidden"
+                style={{ backgroundColor: BRAND.navyDeep }}
+            >
+                <div
+                    aria-hidden="true"
+                    className="absolute right-0 top-0 h-full w-10"
+                    style={{
+                        backgroundColor: BRAND.orange,
+                        clipPath: 'polygon(60% 0, 100% 0, 40% 100%, 0 100%)',
+                    }}
+                />
 
-            {/* ── Logo + Role badge ─────────────────────────────────────────────── */}
-            <div className="flex items-center justify-center px-3 py-3 border-b border-gray-100 dark:border-gray-800 shrink-0 dark:bg-gray-800">
                 {!isCollapsed ? (
-                    <div className="flex items-center gap-2.5 w-full">
-                        <span className="flex items-center justify-center rounded-lg">
-                            <Image
-                                src="/media/UTS-logo.png"
-                                alt="Mastery Hub"
-                                width={60}
-                                height={60}
-                                priority
-                            />
+                    <div className="relative flex items-center gap-3 px-4 py-3">
+                        <span className="flex items-center justify-center shrink-0 rounded bg-white/95 p-1">
+                            <Image src="/media/UTS-logo.png" alt="UTS" width={34} height={34} priority />
                         </span>
-                        <div className="flex-1 min-w-0">
-                            <div className="text-[13px] font-bold text-gray-900 dark:text-white truncate">
+                        <div className="min-w-0">
+                            <div className="text-[15px] font-bold tracking-tight text-white leading-tight">
                                 Umashakti
                             </div>
-                            <div className="text-[10px] text-gray-600 dark:text-gray-400 truncate">
+                            <div className="text-[10px] font-medium uppercase tracking-widest text-[#FF8A3D]">
                                 Transport
                             </div>
                         </div>
                     </div>
                 ) : (
-                    // Collapsed: show only the role icon centred
-                    <div className="mx-auto">
-                        <RoleIcon size={20} className={theme.roleBadgeText} aria-label={theme.roleLabel} />
+                    <div className="relative flex items-center justify-center py-4">
+                        <span className="flex items-center justify-center shrink-0 rounded bg-white/95 p-1">
+                            <Image src="/media/UTS-logo.png" alt="UTS" width={22} height={22} priority />
+                        </span>
                     </div>
                 )}
             </div>
+
+            {/* ── Role badge ────────────────────────────────────────────────────── */}
+            {/* {!isCollapsed ? (
+                <div className="px-4 py-2.5 border-b border-gray-100 dark:border-gray-800 shrink-0">
+                    <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded ${theme.roleBadgeBg} ${theme.roleBadgeText}`}
+                    >
+                        <RoleIcon size={12} />
+                        <span className="text-[11px] font-semibold">{theme.roleLabel}</span>
+                    </span>
+                </div>
+            ) : (
+                <div className="flex items-center justify-center py-2.5 border-b border-gray-100 dark:border-gray-800 shrink-0">
+                    <RoleIcon size={16} className={theme.roleBadgeText === 'text-white' ? theme.activeText : theme.roleBadgeText} aria-label={theme.roleLabel} />
+                </div>
+            )} */}
 
             {/* ── Navigation ────────────────────────────────────────────────────── */}
             <nav className="flex-1 overflow-y-auto overflow-x-hidden py-2 space-y-0">
@@ -356,27 +367,23 @@ export default function Sidebar({
             </nav>
 
             {/* ── Collapse toggle (desktop only) ────────────────────────────────── */}
-            {/* FIX: Collapsible sidebar — saves space during exams, standard SaaS pattern */}
+            {/* FIX: re-enabled — the state already existed but had no control */}
             {/* <div className="hidden md:flex shrink-0 border-t border-gray-100 dark:border-gray-800 p-2">
-        <button
-          type="button"
-          onClick={handleCollapseToggle}
-          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className={`
-            flex items-center justify-center w-full py-2 rounded-lg text-gray-400
-            hover:text-gray-600 dark:hover:text-gray-300
-            hover:bg-gray-100 dark:hover:bg-gray-800
+                <button
+                    type="button"
+                    onClick={handleCollapseToggle}
+                    aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                    className="
+            flex items-center justify-center w-full py-2 rounded-md text-gray-400
+            hover:text-[#F2680E] hover:bg-gray-100 dark:hover:bg-gray-800
             transition-all duration-150
-            outline-none focus-visible:ring-2 focus-visible:ring-[#66B788]
-          `}
-        >
-          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          {!isCollapsed && (
-            <span className="ml-2 text-[12px] font-medium">Collapse</span>
-          )}
-        </button>
-      </div> */}
+            outline-none focus-visible:ring-2 focus-visible:ring-[#F2680E]
+          "
+                >
+                    {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+                    {!isCollapsed && <span className="ml-2 text-[12px] font-medium">Collapse</span>}
+                </button>
+            </div> */}
         </aside>
     );
 }
-

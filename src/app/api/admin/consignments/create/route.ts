@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const parsed = billingFormSchema.parse(body);
-
+console.log("parsed:" , parsed)
         const existing = await ConsignmentModel.findOne({
             consignmentNumber: parsed.consignmentNumber,
         }).lean();

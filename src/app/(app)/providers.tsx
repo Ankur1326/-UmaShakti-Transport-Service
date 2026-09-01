@@ -1,26 +1,31 @@
-'use client'
+"use client";
 
-import { Provider } from "react-redux"
-import { store } from "@/redux/store"
-import { ThemeProvider } from "next-themes"
-import { SessionProvider } from "next-auth/react"
-import React from "react"
-import AuthProvider from "@/context/authProvider"
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
+import React from "react";
+import { Provider } from "react-redux";
+import { SessionProvider } from "next-auth/react";
+import { ThemeProvider } from "next-themes";
 
+import { store } from "@/redux/store";
+import AuthProvider from "@/context/authProvider";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return (
         <SessionProvider>
-            <NextThemesProvider attribute="class">
+            <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+            >
                 <AuthProvider>
-                    <ThemeProvider attribute="class" defaultTheme="system" enableSystem >
-                        <Provider store={store}>
-                            {children}
-                        </Provider>
-                    </ThemeProvider>
+                    <Provider store={store}>
+                        {children}
+                    </Provider>
                 </AuthProvider>
-            </NextThemesProvider>
+            </ThemeProvider>
         </SessionProvider>
-    )
+    );
 }

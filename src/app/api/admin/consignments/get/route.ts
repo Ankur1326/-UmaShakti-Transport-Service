@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit")) || 20));
 
         const query: Record<string, unknown> = {};
-        console.log("get is hitting...")
+        // console.log("get is hitting...")
         if (search) {
             const regex = new RegExp(search, "i");
             query.$or = [
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
             ConsignmentModel.countDocuments(query),
         ]);
 
-        console.log("consignments : ", consignments)
+        // console.log("consignments : ", consignments)
 
         return NextResponse.json(
             {

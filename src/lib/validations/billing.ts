@@ -57,7 +57,7 @@ export const GST_PERCENTAGES = [0, 5, 12, 18, "custom"] as const;
 export const PAYMENT_TYPES = ["To Pay", "Paid", "TBB at", "Credit", "Cash", "Online", "Bank Transfer", "UPI"] as const;
 export const BILLING_PARTIES = ["Consignor", "Consignee", "Third Party"] as const;
 export const PAYMENT_STATUSES = ["Pending", "Partially Paid", "Paid", "Cancelled"] as const;
-export const RECEIVED_TYPES = ["Cash", "NEFT", "Check"] as const;
+export const RECEIVED_TYPES = ["Cash", "NEFT", "Check", ""] as const;
 // ─── Main schema ─────────────────────────────────────────────────────────────
 
 export const billingFormSchema = z.object({

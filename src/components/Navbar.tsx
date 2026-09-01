@@ -18,23 +18,21 @@ function Navbar() {
     return (
         <nav className="flex items-center gap-4">
             <div className="relative flex items-center">
-                {isLoading ? (
+                {isLoading && 
                     <div className="flex items-center space-x-2">
                         <Loader2 className="h-4 w-4 text-[#66B788] animate-spin" />
                         <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                             Loading...
                         </span>
-                    </div>
-                ) : (
-                    <div className="h-0.5 w-16 bg-gradient-to-r from-[#66B788] to-[#4a8f65] rounded-full"></div>
-                )}
+                    </div>}
             </div>
 
             <div className="flex items-center space-x-3">
                 <FullScreenButton />
-                <div className="h-5 w-px bg-gray-200 dark:bg-gray-700"></div>
+
                 <div className="h-5 w-px bg-gray-200 dark:bg-gray-700"></div>
                 <ThemeSelector />
+                {/* <div className="h-5 w-px bg-gray-200 dark:bg-gray-700"></div> */}
                 <div className="h-5 w-px bg-gray-200 dark:bg-gray-700"></div>
                 <ProfileMenu />
             </div>

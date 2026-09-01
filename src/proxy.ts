@@ -79,7 +79,7 @@ export async function proxy(request: NextRequest & NextRequestWithAuth) {
     return NextResponse.next();
   }
 
-  console.log("token : ", token)
+  // console.log("token : ", token)
 
   // Public pages should be accessible without authentication.
   if (!token && isPublicRoute(url.pathname)) {
