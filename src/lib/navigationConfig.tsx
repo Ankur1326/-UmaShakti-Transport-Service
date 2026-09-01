@@ -42,9 +42,7 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
           {
             id: "dashboard",
             title: "Dashboard",
-            icon: (
-              <LuLayoutDashboard className="h-5 w-5 text-[#2E8B57]" />
-            ),
+            icon: <LuLayoutDashboard className="h-[18px] w-[18px]" />,
             route: "/admin/dashboard",
           },
         ],
@@ -54,23 +52,19 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
       // Operations
       // ─────────────────────────────────────────
       {
-        name: "Operations",
+        name: "Bookings",
         items: [
-          {
-            id: "bookings",
-            title: "Bookings",
-            icon: (
-              <LuCalendarCheck className="h-5 w-5 text-[#3B82F6]" />
-            ),
-            route: "/admin/bookings",
-          },
           {
             id: "new-consignment-entry",
             title: "New Consignment",
-            icon: (
-              <LuFilePlus2 className="h-5 w-5 text-[#0EA5A4]" />
-            ),
+            icon: <LuFilePlus2 className="h-[18px] w-[18px]" />,
             route: "/admin/consignment/new",
+          },
+          {
+            id: "all-consignments",
+            title: "ALL CNS",
+            icon: <LuCalendarCheck className="h-[18px] w-[18px]" />,
+            route: "/admin/bookings",
           },
         ],
       },
@@ -82,20 +76,16 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
         name: "Billing",
         items: [
           {
-            id: "billings",
-            title: "All Bills",
-            icon: (
-              <LuReceiptText className="h-5 w-5 text-[#F59E0B]" />
-            ),
-            route: "/admin/billings",
-          },
-          {
             id: "create-bill",
             title: "Create Bill",
-            icon: (
-              <LuFilePlus2 className="h-5 w-5 text-[#F97316]" />
-            ),
+            icon: <LuFilePlus2 className="h-[18px] w-[18px]" />,
             route: "/admin/billing/new",
+          },
+          {
+            id: "billings",
+            title: "All Bills",
+            icon: <LuReceiptText className="h-[18px] w-[18px]" />,
+            route: "/admin/billings",
           },
         ],
       },
@@ -104,22 +94,18 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
       // Parties
       // ─────────────────────────────────────────
       {
-        name: "Parties",
+        name: "Customers",
         items: [
           {
             id: "consigners",
             title: "Consigners",
-            icon: (
-              <LuSend className="h-5 w-5 text-[#8B5CF6]" />
-            ),
+            icon: <LuSend className="h-[18px] w-[18px]" />,
             route: "/admin/consigners",
           },
           {
             id: "consignees",
             title: "Consignees",
-            icon: (
-              <LuUsersRound className="h-5 w-5 text-[#A855F7]" />
-            ),
+            icon: <LuUsersRound className="h-[18px] w-[18px]" />,
             route: "/admin/consignees",
           },
         ],
@@ -134,9 +120,7 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
           {
             id: "profile",
             title: "My Profile",
-            icon: (
-              <LuCircleUserRound className="h-5 w-5 text-[#2E8B57]" />
-            ),
+            icon: <LuCircleUserRound className="h-[18px] w-[18px]" />,
             route: "/user/profile",
           },
         ],

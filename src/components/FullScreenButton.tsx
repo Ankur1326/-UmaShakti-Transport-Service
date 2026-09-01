@@ -1,7 +1,9 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Maximize, Minimize } from 'lucide-react';
+import { adminToolbarButtonClass } from '@/components/admin/admin-toolbar-styles';
 
-// Extend the `Document` and `HTMLElement` interfaces to include vendor-prefixed fullscreen methods
 interface FullScreenDocument extends Document {
   webkitExitFullscreen?: () => Promise<void>;
   mozCancelFullScreen?: () => Promise<void>;
@@ -22,42 +24,40 @@ const FullScreenButton: React.FC = () => {
     const fullScreenDoc = document as FullScreenDocument;
 
     if (!isFullScreen) {
-      // Enter full-screen mode
       if (documentElement.requestFullscreen) {
         documentElement.requestFullscreen();
-      } else if (documentElement.webkitRequestFullscreen) { // Safari support
+      } else if (documentElement.webkitRequestFullscreen) {
         documentElement.webkitRequestFullscreen();
-      } else if (documentElement.mozRequestFullScreen) { // Firefox support
+      } else if (documentElement.mozRequestFullScreen) {
         documentElement.mozRequestFullScreen();
-      } else if (documentElement.msRequestFullscreen) { // IE11 support
+      } else if (documentElement.msRequestFullscreen) {
         documentElement.msRequestFullscreen();
       }
     } else {
-      // Exit full-screen mode
       if (fullScreenDoc.exitFullscreen) {
         fullScreenDoc.exitFullscreen();
-      } else if (fullScreenDoc.webkitExitFullscreen) { // Safari support
+      } else if (fullScreenDoc.webkitExitFullscreen) {
         fullScreenDoc.webkitExitFullscreen();
-      } else if (fullScreenDoc.mozCancelFullScreen) { // Firefox support
+      } else if (fullScreenDoc.mozCancelFullScreen) {
         fullScreenDoc.mozCancelFullScreen();
-      } else if (fullScreenDoc.msExitFullscreen) { // IE11 support
+      } else if (fullScreenDoc.msExitFullscreen) {
         fullScreenDoc.msExitFullscreen();
       }
     }
 
-    setIsFullScreen(!isFullScreen); // Toggle full-screen state
+    setIsFullScreen(!isFullScreen);
   };
 
   return (
     <button
       onClick={handleFullScreenToggle}
-      aria-label="Toggle Full Screen"
-      className="flex items-center justify-center h-9 w-9 rounded-full border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      aria-label="Toggle full screen"
+      className={adminToolbarButtonClass}
     >
       {isFullScreen ? (
-        <Minimize className="w-4 h-4 text-[#66B788] dark:text-[#66B788]" />
+        <Minimize className="h-4 w-4" />
       ) : (
-        <Maximize className="w-4 h-4 text-[#66B788] dark:text-[#66B788]" />
+        <Maximize className="h-4 w-4" />
       )}
     </button>
   );

@@ -10,6 +10,8 @@ import { AppDispatch, RootState } from '@/redux/store';
 import { fetchUserProfile } from '@/redux/slices/userSlice';
 import Skeleton from 'react-loading-skeleton';
 import { UserRound, LogOut, User } from 'lucide-react';
+import { adminDropdownClass, adminToolbarButtonClass } from '@/components/admin/admin-toolbar-styles';
+import { cn } from '@/lib/utils';
 
 const RenderProfileImage = memo(
   ({ src, width, height }: { src?: string; width: number; height: number }) => (
@@ -39,7 +41,6 @@ export default function ProfileMenu() {
     (state: RootState) => state.user
   );
 
-  /* 🔹 Fetch profile only when required data exists */
   useEffect(() => {
     if (session?.user?.email) {
       dispatch(
@@ -48,7 +49,7 @@ export default function ProfileMenu() {
         })
       );
     }
-  }, [session?.user?.email]);
+  }, [session?.user?.email, dispatch]);
 
   const toggleMenu = useCallback(() => {
     setIsOpen(prev => !prev);
@@ -63,7 +64,6 @@ export default function ProfileMenu() {
     router.push('/sign-in');
   }, [router]);
 
-  /* 🔹 Close on outside click + ESC key */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -90,13 +90,13 @@ export default function ProfileMenu() {
         onClick={toggleMenu}
         aria-expanded={isOpen}
         aria-label="Open profile menu"
-        className="flex items-center justify-center h-9 w-9 rounded-full border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        className={cn(adminToolbarButtonClass, 'overflow-hidden p-0')}
       >
         {status === 'succeeded' ? (
           profilePicture ? (
             <RenderProfileImage src={profilePicture} height={36} width={36} />
           ) : (
-            <UserRound size={18} className="text-[#66B788]" />
+            <UserRound size={18} className="text-accent-600 dark:text-accent-400" />
           )
         ) : (
           <Skeleton circle width={36} height={36} />
@@ -107,9 +107,9 @@ export default function ProfileMenu() {
         <div
           ref={menuRef}
           role="menu"
-          className="absolute right-0 mt-2 w-72 z-20 bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden"
+          className={cn(adminDropdownClass, 'w-72')}
         >
-          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+          <div className="border-b border-neutral-100 p-4 dark:border-brand-800">
             <div className="flex items-center gap-3">
               {status === 'succeeded' ? (
                 profilePicture ? (
@@ -119,39 +119,39 @@ export default function ProfileMenu() {
                     width={48}
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-12 w-12 rounded-full bg-[#f0f9f4] dark:bg-gray-700">
-                    <UserRound size={24} className="text-[#66B788]" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-50 dark:bg-brand-800">
+                    <UserRound size={24} className="text-accent-600 dark:text-accent-400" />
                   </div>
                 )
               ) : (
                 <Skeleton circle width={48} height={48} />
               )}
 
-              <div>
-                {/* <p className="font-semibold text-gray-800 dark:text-white text-sm">
-                  {profile?.user?.username || <Skeleton width={100} />}
-                </p> */}
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {profile?.user?.email || <Skeleton width={150} />}
+              <div className="min-w-0">
+                <p className="truncate text-body-sm font-semibold text-brand-900 dark:text-white">
+                  {profile?.user?.username || session?.user?.name || 'Admin User'}
+                </p>
+                <p className="mt-0.5 truncate text-caption text-neutral-500 dark:text-neutral-400">
+                  {profile?.user?.email || session?.user?.email || <Skeleton width={150} />}
                 </p>
               </div>
             </div>
           </div>
 
           <div className="p-2">
-            {/* <Link href="/user/profile" onClick={closeMenu}>
-              <div className="flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                <User size={18} className="text-[#66B788]" />
-                <span className="text-sm font-medium">My Profile</span>
+            <Link href="/user/profile" onClick={closeMenu}>
+              <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-neutral-700 transition-colors hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-brand-800">
+                <User size={18} className="text-accent-600 dark:text-accent-400" />
+                <span className="text-body-sm font-medium">My Profile</span>
               </div>
-            </Link> */}
+            </Link>
 
             <button
               onClick={handleSignOut}
-              className="w-full mt-1 flex items-center gap-3 px-3 py-2.5 rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+              className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-error-600 transition-colors hover:bg-error-50 dark:text-error-500 dark:hover:bg-error-500/10"
             >
               <LogOut size={18} />
-              <span className="text-sm font-medium">Sign Out</span>
+              <span className="text-body-sm font-medium">Sign Out</span>
             </button>
           </div>
         </div>

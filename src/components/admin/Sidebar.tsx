@@ -1,12 +1,11 @@
 'use client';
+
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { FaAngleDown } from 'react-icons/fa';
-import { NAVIGATION_CONFIG, NavItem, NavigationConfig } from '@/lib/navigationConfig';
+import { NAVIGATION_CONFIG, NavigationConfig } from '@/lib/navigationConfig';
 import Image from 'next/image';
-import { Calendar, Shield, GraduationCap, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
-import { siteConfig } from '@/lib/site-config';
+import { cn } from '@/lib/utils';
 
 type UserRole = 'admin' | 'superAdmin' | 'customer';
 
@@ -16,91 +15,24 @@ interface SidebarProps {
     onCollapsedChange?: (collapsed: boolean) => void;
 }
 
-// ─── Brand tokens ───────────────────────────────────────────────────────────
-// Pulled straight from the UTS mark: deep navy hull + a single hot-orange
-// accent, both built from sharp angled cuts rather than soft/rounded shapes.
-// Every role shares this brand system — roles are told apart by a small
-// badge, not by giving each one an unrelated hue (red/indigo/green, as before).
-
-const BRAND = {
-    navy: '#0F2A47',
-    navyDeep: '#0A1E33',
-    orange: '#F2680E',
-    orangeLight: '#FF8A3D',
-};
-
-// ─── Role Themes ──────────────────────────────────────────────────────────────
-// Roles stay within the two brand colours: orange marks the "operate" role,
-// navy tints mark the two supervisory/learning roles. This keeps every screen
-// legibly on-brand while still giving each role a distinct, memorable chip.
-
-interface RoleTheme {
-    activeText: string;
-    activeIndicator: string; // the little angled flag on the active row
-    childActiveBg: string;
-    roleBadgeBg: string;
-    roleBadgeText: string;
-    RoleIcon: React.ComponentType<{ size?: number; className?: string }>;
-    roleLabel: string;
-}
-
-const ROLE_THEMES: Record<UserRole, RoleTheme> = {
-    admin: {
-        activeText: 'text-[#F2680E] dark:text-[#FF8A3D]',
-        activeIndicator: 'bg-[#F2680E]',
-        childActiveBg: 'bg-[#F2680E]',
-        roleBadgeBg: 'bg-[#F2680E]',
-        roleBadgeText: 'text-white',
-        RoleIcon: Shield,
-        roleLabel: 'Admin',
-    },
-    superAdmin: {
-        activeText: 'text-[#0F2A47] dark:text-[#8FB4DA]',
-        activeIndicator: 'bg-[#0F2A47] dark:bg-[#8FB4DA]',
-        childActiveBg: 'bg-[#0F2A47] dark:bg-[#1E4A73]',
-        roleBadgeBg: 'bg-[#0F2A47] dark:bg-[#1E4A73]',
-        roleBadgeText: 'text-white',
-        RoleIcon: BookOpen,
-        roleLabel: 'Instructor',
-    },
-    customer: {
-        activeText: 'text-[#1E4A73] dark:text-[#8FB4DA]',
-        activeIndicator: 'bg-[#1E4A73] dark:bg-[#8FB4DA]',
-        childActiveBg: 'bg-[#1E4A73]',
-        roleBadgeBg: 'bg-[#1E4A73]/10 dark:bg-[#1E4A73]/30',
-        roleBadgeText: 'text-[#1E4A73] dark:text-[#8FB4DA]',
-        RoleIcon: GraduationCap,
-        roleLabel: 'Student',
-    },
-};
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export default function Sidebar({
     isSidebarOpen,
     userRole = 'admin',
-    onCollapsedChange,
 }: SidebarProps) {
-    const { data: session } = useSession();
     const router = useRouter();
-
     const currentRoute = usePathname();
 
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const sidebarConfig: NavigationConfig =
-        NAVIGATION_CONFIG[userRole] || NAVIGATION_CONFIG.default;
-    const theme = ROLE_THEMES[userRole] || ROLE_THEMES.admin;
-    const { RoleIcon } = theme;
+        NAVIGATION_CONFIG[userRole] || NAVIGATION_CONFIG.admin;
 
-    // Auto-expand the section whose child route is currently active.
     useEffect(() => {
         if (!sidebarConfig?.sections) return;
         const autoExpand: Record<string, boolean> = {};
-        sidebarConfig.sections.forEach((section: any) => {
-            section.items.forEach((item: any) => {
-                if (item.childItems?.some((c: any) => c.route === currentRoute)) {
+        sidebarConfig.sections.forEach((section) => {
+            section.items.forEach((item) => {
+                if (item.childItems?.some((c) => c.route === currentRoute)) {
                     autoExpand[item.route] = true;
                 }
             });
@@ -120,11 +52,11 @@ export default function Sidebar({
             Object.keys(prev).forEach((k) => {
                 next[k] = false;
             });
-            sidebarConfig.sections?.forEach((section: any) => {
-                section.items.forEach((item: any) => {
+            sidebarConfig.sections?.forEach((section) => {
+                section.items.forEach((item) => {
                     if (
                         item.id !== clickedId &&
-                        item.childItems?.some((c: any) => c.route === currentRoute)
+                        item.childItems?.some((c) => c.route === currentRoute)
                     ) {
                         next[item.route] = true;
                     }
@@ -135,105 +67,90 @@ export default function Sidebar({
         });
     };
 
-    const handleCollapseToggle = () => {
-        const next = !isCollapsed;
-        setIsCollapsed(next);
-        onCollapsedChange?.(next);
-    };
-
-    // ─── Sub-renderers ─────────────────────────────────────────────────────────
-
     const renderSectionDivider = (name: string) => {
-        if (isCollapsed) {
-            return (
-                <div className="my-3 mx-3 h-px bg-gray-200 dark:bg-gray-700" aria-hidden="true" />
-            );
-        }
+        if (!name) return null;
         return (
-            <div className="flex items-center gap-2 px-3 mt-5 mb-1">
-                {name && (
-                    <h3 className="text-[10px] font-bold tracking-wide text-gray-400 dark:text-gray-500 whitespace-nowrap">
-                        {name}
-                    </h3>
-                )}
-                {name && (
-                    <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" aria-hidden="true" />
-                )}
+            <div className="flex items-center gap-2 px-4 pb-1 pt-5">
+                <h3 className="whitespace-nowrap text-overline font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
+                    {name}
+                </h3>
+                <span className="h-px flex-1 bg-neutral-200 dark:bg-brand-800" aria-hidden="true" />
             </div>
         );
     };
 
-    const renderNavItem = (item: any) => {
+    const renderNavItem = (item: (typeof sidebarConfig.sections)[0]['items'][0]) => {
         const hasChildren = item.childItems && item.childItems.length > 0;
         const isActive =
             isRouteActive(item.route) ||
-            item.childItems?.some((child: any) => isRouteActive(child.route));
+            item.childItems?.some((child) => isRouteActive(child.route));
         const isExpanded = expandedSections[item.route];
 
         return (
-            <div key={item.route} className="mb-0.5 relative">
+            <div key={item.route} className="relative mb-0.5 px-2">
                 <button
                     type="button"
                     onClick={() => (hasChildren ? toggleSection(item.route) : navigateTo(item.route))}
                     aria-current={isActive && !hasChildren ? 'page' : undefined}
                     aria-expanded={hasChildren ? isExpanded : undefined}
                     aria-controls={hasChildren ? `section-${item.route}` : undefined}
-                    title={isCollapsed ? item.title : undefined}
-                    className={`
-            w-full flex items-center gap-3 cursor-pointer relative
-            transition-all duration-150 outline-none focus-visible:ring-2
-            focus-visible:ring-offset-1 focus-visible:ring-[#F2680E]
-            ${isCollapsed ? 'px-3 py-2.5 justify-center' : 'pl-4 pr-3 py-2.5 justify-between'}
-            ${isActive
-                            ? `bg-gray-100 dark:bg-gray-800/60 ${theme.activeText}`
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60'
-                        }
-          `}
+                    className={cn(
+                        'group relative flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5',
+                        'text-body-sm transition-all duration-150 outline-none',
+                        'focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:ring-offset-2',
+                        'dark:focus-visible:ring-offset-brand-950',
+                        isActive
+                            ? 'bg-brand-900/[0.06] font-semibold text-brand-900 dark:bg-accent-500/10 dark:text-accent-300'
+                            : 'font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-brand-900/60'
+                    )}
                 >
-                    {/* FIX: active indicator is a small angled flag (clip-path), echoing
-              the sharp diagonal cuts in the UTS mark, instead of a plain vertical bar */}
                     {isActive && (
                         <span
                             aria-hidden="true"
-                            className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[5px] ${theme.activeIndicator}`}
-                            style={{ clipPath: 'polygon(0 0, 100% 15%, 100% 85%, 0 100%)' }}
+                            className="absolute bottom-2 left-0 top-2 w-1 rounded-r-sm bg-accent-500"
+                            style={{ clipPath: 'polygon(0 0, 100% 12%, 100% 88%, 0 100%)' }}
                         />
                     )}
 
-                    <span className={`flex items-center ${isCollapsed ? '' : 'gap-3'}`}>
-                        <span className="text-[20px] shrink-0" aria-hidden="true">
-                            {item.icon}
-                        </span>
-                        {!isCollapsed && (
-                            <span className={`text-[13.5px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}>
-                                {item.title}
-                            </span>
+                    <span
+                        className={cn(
+                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors',
+                            isActive
+                                ? 'bg-accent-500/15 text-accent-600 dark:bg-accent-500/20 dark:text-accent-400'
+                                : 'bg-neutral-100 text-neutral-500 group-hover:bg-neutral-200/80 dark:bg-brand-900 dark:text-neutral-400 dark:group-hover:bg-brand-800'
                         )}
+                        aria-hidden="true"
+                    >
+                        {item.icon}
                     </span>
 
-                    {hasChildren && !isCollapsed && (
+                    <span className="min-w-0 flex-1 truncate text-left leading-none">
+                        {item.title}
+                    </span>
+
+                    {hasChildren && (
                         <FaAngleDown
                             aria-hidden="true"
-                            className={`text-gray-400 dark:text-gray-500 transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180' : ''
-                                }`}
+                            className={cn(
+                                'shrink-0 text-neutral-400 transition-transform duration-200 dark:text-neutral-500',
+                                isExpanded && 'rotate-180'
+                            )}
                             size={12}
                         />
                     )}
                 </button>
 
-                {/* Child items */}
-                {hasChildren && !isCollapsed && (
+                {hasChildren && (
                     <div
                         id={`section-${item.route}`}
                         aria-hidden={!isExpanded}
-                        className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-96 opacity-100 mt-0.5' : 'max-h-0 opacity-0'
-                            }`}
+                        className={cn(
+                            'overflow-hidden transition-all duration-200 ease-in-out',
+                            isExpanded ? 'mt-0.5 max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                        )}
                     >
-                        <div className="ml-7 pl-3 border-l border-gray-200 dark:border-gray-700 space-y-0.5 py-1">
-                            {item.childItems.map((child: any) => {
-                                const titleLower = child.title?.toLowerCase();
-                                const isLive = titleLower === 'live';
-                                const isUpcoming = titleLower === 'upcoming';
+                        <div className="ml-6 space-y-0.5 border-l border-neutral-200 py-1 pl-3 dark:border-brand-800">
+                            {item.childItems!.map((child) => {
                                 const childActive = isRouteActive(child.route);
 
                                 return (
@@ -242,34 +159,18 @@ export default function Sidebar({
                                         type="button"
                                         onClick={() => navigateTo(child.route)}
                                         aria-current={childActive ? 'page' : undefined}
-                                        className={`
-                      w-full flex items-center gap-2.5 px-3 py-2 rounded-md
-                      text-[13px] transition-all duration-150 text-left
-                      outline-none focus-visible:ring-2 focus-visible:ring-[#F2680E]
-                      ${childActive
-                                                ? `${theme.childActiveBg} text-white`
-                                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/60'
-                                            }
-                    `}
+                                        className={cn(
+                                            'flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-body-sm',
+                                            'transition-all duration-150 outline-none',
+                                            'focus-visible:ring-2 focus-visible:ring-accent-500/40',
+                                            childActive
+                                                ? 'bg-brand-900 font-medium text-white dark:bg-accent-600'
+                                                : 'text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-brand-900/60'
+                                        )}
                                     >
-                                        {isLive && (
-                                            <span className="relative flex items-center shrink-0" aria-hidden="true">
-                                                <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-red-400 opacity-75 motion-safe:animate-ping" />
-                                                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
-                                            </span>
-                                        )}
-                                        {isUpcoming && (
-                                            <Calendar
-                                                size={13}
-                                                className={`shrink-0 ${childActive ? 'text-white' : 'text-[#F2680E]'}`}
-                                                aria-hidden="true"
-                                            />
-                                        )}
-                                        {!isLive && !isUpcoming && (
-                                            <span className="shrink-0" aria-hidden="true">
-                                                {child.icon}
-                                            </span>
-                                        )}
+                                        <span className="shrink-0" aria-hidden="true">
+                                            {child.icon}
+                                        </span>
                                         <span>{child.title}</span>
                                     </button>
                                 );
@@ -281,109 +182,57 @@ export default function Sidebar({
         );
     };
 
-    // ─── Render ────────────────────────────────────────────────────────────────
-
-    const sidebarWidth = isCollapsed ? 'w-14' : 'w-64';
-
     return (
         <aside
+            id="main-sidebar"
             role="navigation"
             aria-label="Main navigation"
-            className={`
-        h-screen bg-white dark:bg-gray-900
-        border-r border-gray-200 dark:border-gray-800
-        fixed z-50 flex flex-col
-        transition-all duration-300 ease-out
-        ${sidebarWidth}
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:translate-x-0
-        overflow-hidden
-      `}
+            className={cn(
+                'fixed z-40 flex h-screen w-64 flex-col overflow-hidden',
+                'border-r border-neutral-200/80 bg-white dark:border-brand-800 dark:bg-brand-950',
+                'transition-transform duration-300 ease-out',
+                isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+            )}
         >
-            {/* ── Header: navy hull with a single angled orange cut ─────────────── */}
-            {/* FIX: replaces the flat white header + thin rainbow strip with a
-          navy block carrying one deliberate diagonal orange edge, the one
-          shape borrowed directly from the UTS mark. */}
-            <div
-                className="relative shrink-0 overflow-hidden"
-                style={{ backgroundColor: BRAND.navyDeep }}
-            >
+            {/* Brand header — matches transport company identity */}
+            <div className="relative shrink-0 overflow-hidden bg-brand-950">
                 <div
                     aria-hidden="true"
-                    className="absolute right-0 top-0 h-full w-10"
-                    style={{
-                        backgroundColor: BRAND.orange,
-                        clipPath: 'polygon(60% 0, 100% 0, 40% 100%, 0 100%)',
-                    }}
+                    className="absolute right-0 top-0 h-full w-12 bg-accent-500"
+                    style={{ clipPath: 'polygon(55% 0, 100% 0, 45% 100%, 0 100%)' }}
                 />
 
-                {!isCollapsed ? (
-                    <div className="relative flex items-center gap-3 px-4 py-3">
-                        <span className="flex items-center justify-center shrink-0 rounded bg-white/95 p-1">
-                            <Image src="/media/UTS-logo.png" alt="UTS" width={34} height={34} priority />
-                        </span>
-                        <div className="min-w-0">
-                            <div className="text-[15px] font-bold tracking-tight text-white leading-tight">
-                                Umashakti
-                            </div>
-                            <div className="text-[10px] font-medium uppercase tracking-widest text-[#FF8A3D]">
-                                Transport
-                            </div>
+                <div className="relative flex items-center gap-3 px-4 py-2.5">
+                    <span className="flex shrink-0 items-center justify-center rounded-md bg-white p-1 shadow-sm">
+                        <Image src="/media/UTS-logo.png" alt="UTS" width={36} height={36} priority />
+                    </span>
+                    <div className="min-w-0">
+                        <div className="text-body-sm font-bold leading-tight tracking-tight text-white">
+                            Umashakti
+                        </div>
+                        <div className="text-overline font-semibold uppercase tracking-[0.18em] text-accent-300">
+                            Transport
                         </div>
                     </div>
-                ) : (
-                    <div className="relative flex items-center justify-center py-4">
-                        <span className="flex items-center justify-center shrink-0 rounded bg-white/95 p-1">
-                            <Image src="/media/UTS-logo.png" alt="UTS" width={22} height={22} priority />
-                        </span>
-                    </div>
-                )}
+                </div>
             </div>
 
-            {/* ── Role badge ────────────────────────────────────────────────────── */}
-            {/* {!isCollapsed ? (
-                <div className="px-4 py-2.5 border-b border-gray-100 dark:border-gray-800 shrink-0">
-                    <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded ${theme.roleBadgeBg} ${theme.roleBadgeText}`}
-                    >
-                        <RoleIcon size={12} />
-                        <span className="text-[11px] font-semibold">{theme.roleLabel}</span>
-                    </span>
-                </div>
-            ) : (
-                <div className="flex items-center justify-center py-2.5 border-b border-gray-100 dark:border-gray-800 shrink-0">
-                    <RoleIcon size={16} className={theme.roleBadgeText === 'text-white' ? theme.activeText : theme.roleBadgeText} aria-label={theme.roleLabel} />
-                </div>
-            )} */}
-
-            {/* ── Navigation ────────────────────────────────────────────────────── */}
-            <nav className="flex-1 overflow-y-auto overflow-x-hidden py-2 space-y-0">
-                {sidebarConfig?.sections?.map((section: any, index: number) => (
+            {/* Navigation */}
+            <nav className="flex-1 space-y-0 overflow-y-auto overflow-x-hidden py-3">
+                {sidebarConfig?.sections?.map((section, index) => (
                     <div key={index}>
                         {renderSectionDivider(section.name)}
-                        {section.items.map((item: any) => renderNavItem(item))}
+                        {section.items.map((item) => renderNavItem(item))}
                     </div>
                 ))}
             </nav>
 
-            {/* ── Collapse toggle (desktop only) ────────────────────────────────── */}
-            {/* FIX: re-enabled — the state already existed but had no control */}
-            {/* <div className="hidden md:flex shrink-0 border-t border-gray-100 dark:border-gray-800 p-2">
-                <button
-                    type="button"
-                    onClick={handleCollapseToggle}
-                    aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                    className="
-            flex items-center justify-center w-full py-2 rounded-md text-gray-400
-            hover:text-[#F2680E] hover:bg-gray-100 dark:hover:bg-gray-800
-            transition-all duration-150
-            outline-none focus-visible:ring-2 focus-visible:ring-[#F2680E]
-          "
-                >
-                    {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-                    {!isCollapsed && <span className="ml-2 text-[12px] font-medium">Collapse</span>}
-                </button>
-            </div> */}
+            {/* Footer tagline */}
+            <div className="shrink-0 border-t border-neutral-200 px-4 py-3 dark:border-brand-800">
+                <p className="text-caption leading-snug text-neutral-400 dark:text-neutral-500">
+                    Reliable freight & logistics
+                </p>
+            </div>
         </aside>
     );
 }
