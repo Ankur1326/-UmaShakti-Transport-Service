@@ -16,7 +16,6 @@ import { createFreightBill, getConsignmentForBill, getFreightBill, searchEligibl
 import { FreightBillHeader } from "@/components/bills/Freightbillheader";
 import { BillMetaSection } from "@/components/bills/Billmetasection";
 import { BilledToSection } from "@/components/bills/Billedtosection";
-import { CnsSelector } from "@/components/bills/Cnsselector";
 import { BillItemsTable } from "@/components/bills/Billitemstable";
 import { FreightBillFormActionsBar } from "@/components/bills/Freightbillformactionsbar";
 import { FreightBillPrintPreview } from "@/components/bills/Freightbillprintpreview";
@@ -155,7 +154,9 @@ function FreightBillForm() {
                 }
 
                 // if (c.remark) setValue("remark", c.remark);
-                if (c.vehicleNumber) setValue("vehicleNumber", c.vehicleNumber);
+                // Auto-fill vehicle number from selected consignment, but don't
+                // overwrite a value the user has already typed.
+                if (c.vehicleNumber && !getValues("vehicleNumber")) setValue("vehicleNumber", c.vehicleNumber);
             } else if (c.payment?.billingParty && c.payment.billingParty !== getValues("billedToType")) {
                 toast(
                     `Heads up: CNS ${c.consignmentNumber} is normally billed to ${c.payment.billingParty}, not ${getValues("billedToType")}.`,
@@ -239,11 +240,10 @@ function FreightBillForm() {
                             from the first consignment you add. Already-paid consignments won&apos;t appear in the picker.
                         </div>
 
-                        <BilledToSection />
+                        <BilledToSection excludeIds={excludeIds} onCnsSelect={handleCnsSelect} cnsDisabled={Boolean(addingId)} />
                         <BillMetaSection />
 
                         <div className="py-2">
-                            <CnsSelector excludeIds={excludeIds} onSelect={handleCnsSelect} disabled={Boolean(addingId)} />
                             <SelectedCnsChips fields={fields} onRemove={remove} />
                             <BillItemsTable fields={fields} onRemove={remove} />
                         </div>

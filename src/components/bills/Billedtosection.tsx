@@ -3,6 +3,13 @@
 import { useFormContext, useWatch } from "react-hook-form";
 import { BILLING_PARTIES } from "@/lib/validations/billing";
 import type { FreightBillFormValues } from "@/lib/bill/validations";
+import { CnsSelector } from "@/components/bills/Cnsselector";
+
+interface BilledToSectionProps {
+  excludeIds?: string[];
+  onCnsSelect?: (c: any) => void;
+  cnsDisabled?: boolean;
+}
 
 /**
  * Consigner / Consignee / Third Party toggle.
@@ -12,7 +19,7 @@ import type { FreightBillFormValues } from "@/lib/bill/validations";
  *   based on that consignment's own consignor/consignee sub-document.
  * - Third Party: fields unlock for manual entry.
  */
-export function BilledToSection() {
+export function BilledToSection({ excludeIds = [], onCnsSelect, cnsDisabled }: BilledToSectionProps) {
   const { register, control, formState: { errors } } = useFormContext<FreightBillFormValues>();
   const billedToType = useWatch({ control, name: "billedToType" });
   const isThirdParty = billedToType === "Third Party";
@@ -55,6 +62,12 @@ export function BilledToSection() {
         />
       </div>
       {errors.billedTo?.name && <p className="mt-1 text-[11px] text-red-600">{errors.billedTo.name.message}</p>}
+      {/* Show CNS selector immediately after choosing billed-to type */}
+      {onCnsSelect && (
+        <div className="mt-2">
+          <CnsSelector excludeIds={excludeIds} onSelect={onCnsSelect} disabled={Boolean(cnsDisabled)} />
+        </div>
+      )}
     </div>
   );
 }

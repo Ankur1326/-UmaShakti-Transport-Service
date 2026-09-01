@@ -4,13 +4,13 @@ import dbConnect from "@/lib/db";
 import FreightBillModel from "@/models/Bill";
 
 /**
- * One-time seed so numbering continues from your last physical bill (104/26-27)
+ * One-time seed so numbering continues from your last physical bill (101/26-27)
  * instead of restarting at 01 the first time this collection is empty for a
  * given fiscal year. Once the DB has at least one real bill for a year, this
  * fallback is never consulted again for that year — the real max takes over.
  */
 const FALLBACK_SEED_SEQ_BY_LABEL: Record<string, number> = {
-  "26-27": 104,
+  "26-27": 100,
 };
 
 function currentFiscalYearLabel(date: Date = new Date()): string {
