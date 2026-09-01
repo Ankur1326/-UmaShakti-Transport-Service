@@ -2,6 +2,7 @@
 "use client";
 
 import { CHARGE_KEYS, computeBillTotals, computeItemTotal, type BillItemValues } from "@/lib/bill/validations";
+import formatDate from "@/lib/formateDate";
 
 const CHARGE_LABELS: Record<(typeof CHARGE_KEYS)[number], string> = {
   freightAmt: "Freight Amt",
@@ -17,10 +18,10 @@ export function PrintItemsTable({ items }: { items: BillItemValues[] }) {
   const columnCount = 5 + CHARGE_KEYS.length + 1; // SR/STN/STN/CNS/Date + charges + Total (no action col)
 
   return (
-    <table className="w-full border-collapse text-[11px]">
-      <thead>
+    <table className="w-full border-collapse border-x border-slate-900 text-[11px]">
+      <thead className="">
         <tr className="bg-slate-100 text-left">
-          <th className="border border-slate-300 px-1 py-1">SR NO</th>
+          <th className="border-t border-slate-300 px-1 py-1">SR NO</th>
           <th className="border border-slate-300 px-1 py-1">Booking STN</th>
           <th className="border border-slate-300 px-1 py-1">To STN</th>
           <th className="border border-slate-300 px-1 py-1">CNS No</th>
@@ -28,7 +29,7 @@ export function PrintItemsTable({ items }: { items: BillItemValues[] }) {
           {CHARGE_KEYS.map((key) => (
             <th key={key} className="border border-slate-300 px-1 py-1">{CHARGE_LABELS[key]}</th>
           ))}
-          <th className="border border-slate-300 px-1 py-1">Total Charges</th>
+          <th className="border-y border-slate-300 px-1 py-1">Total Charges</th>
         </tr>
       </thead>
       <tbody>
@@ -41,27 +42,27 @@ export function PrintItemsTable({ items }: { items: BillItemValues[] }) {
         )}
         {items.map((item, index) => (
           <tr key={item.consignmentId ?? index}>
-            <td className="border border-slate-300 px-1 py-1 text-center">{index + 1}</td>
+            <td className="border-t border-slate-300 px-1 py-1 text-center">{index + 1}</td>
             <td className="border border-slate-300 px-1 py-1">{item.bookingStn}</td>
             <td className="border border-slate-300 px-1 py-1">{item.toStn}</td>
             <td className="border border-slate-300 px-1 py-1 font-semibold">{item.cnsNo}</td>
-            <td className="border border-slate-300 px-1 py-1">{item.date}</td>
+            <td className="border-t border-slate-300 px-1 py-1">{formatDate(item.date)}</td>
             {CHARGE_KEYS.map((key) => (
               <td key={key} className="border border-slate-300 px-1 py-1 text-right">
                 {Number(item[key] || 0).toFixed(2)}
               </td>
             ))}
-            <td className="border border-slate-300 px-1 py-1 text-right font-semibold">
+            <td className="border-y border-slate-300 px-1 py-1 text-right font-semibold">
               {computeItemTotal(item).toFixed(2)}
             </td>
           </tr>
         ))}
         <tr className="bg-slate-100 font-semibold">
-          <td className="border border-slate-300 px-1 py-1 text-right" colSpan={5}>Total</td>
+          <td className="border-y border-slate-300 px-1 py-1 text-right" colSpan={5}>Total</td>
           {CHARGE_KEYS.map((key) => (
             <td key={key} className="border border-slate-300 px-1 py-1 text-right">{totals[key].toFixed(2)}</td>
           ))}
-          <td className="border border-slate-300 px-1 py-1 text-right">{totals.totalCharges.toFixed(2)}</td>
+          <td className="border-y border-slate-300 px-1 py-1 text-right">{totals.totalCharges.toFixed(2)}</td>
         </tr>
       </tbody>
     </table>
