@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import type { ReactNode } from "react";
-import Image from "next/image";
 import { ArrowLeft, Printer } from "lucide-react";
 import { Button } from "@/components/Button"
 import { computeBillingTotals } from "@/lib/calculations/billing";
-import { amountToWords, formatINR } from "@/lib/numberToWords";
+import { amountToWords } from "@/lib/numberToWords";
 import { siteConfig } from "@/lib/site-config";
+import { useCompanySettings } from "@/hooks/useCompanySettings";
+import type { CompanySettingsValues, LRFormat } from "@/lib/company-settings";
 import type { BillingFormValues } from "@/lib/validations/billing";
 
 interface PrintPreviewProps {
-  values: any;
+  values: BillingFormValues;
   onClose: () => void;
 }
 
@@ -21,6 +22,12 @@ interface PrintPreviewProps {
 
 const ALL_COPY_NAMES = ["LORRY COPY", "CONSIGNEE COPY", "CONSIGNOR COPY", "FILE COPY"] as const;
 type CopyName = (typeof ALL_COPY_NAMES)[number];
+
+const LR_FORMAT_LABELS: Record<LRFormat, string> = {
+  classic: "Classic",
+  modern: "Modern",
+  compact: "Compact",
+};
 
 const DEFAULT_SELECTED_COPIES: readonly CopyName[] = ["LORRY COPY", "CONSIGNEE COPY"];
 
@@ -71,12 +78,41 @@ function LRField({ label, value, className = "" }: { label: string; value?: Reac
 /* Single Copy                                                                */
 /* -------------------------------------------------------------------------- */
 
-function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: CopyName }) {
+function LorryCopy({
+  values,
+  copyName,
+  company,
+  lrFormat,
+}: {
+  values: BillingFormValues;
+  copyName: CopyName;
+  company: CompanySettingsValues;
+  lrFormat: LRFormat;
+}) {
   const totals = computeBillingTotals(values.charges, values.tax);
   const segment = String(values.segment);
-  // console.log("values ", values)
+  const companyName = company.companyName || siteConfig.name;
+  const companyAddress = [
+    company.addressLine,
+    company.city,
+    company.state,
+    company.pinCode,
+    company.country,
+  ].filter(Boolean).join(", ");
+  const companyPhones = [company.mobile1, company.mobile2].filter(Boolean).join(" / ");
+  const background = company.lrFormatBackgrounds[lrFormat];
   return (
-    <div className="lr-page">
+    <div
+      className={`lr-page lr-format-${lrFormat}`}
+      style={{ backgroundColor: background.backgroundColor }}
+    >
+      {background.backgroundImage && (
+        <div
+          className="lr-background"
+          aria-hidden="true"
+          style={{ backgroundImage: `url("${background.backgroundImage}")` }}
+        />
+      )}
       {/* ================================================================== */}
       {/* HEADER                                                             */}
       {/* ================================================================== */}
@@ -85,49 +121,34 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
         <div className="lr-company-section">
           <div className="lr-company-top">
             <div className="lr-logo">
-              <Image
-                src="/media/UTS-logo-ver.png"
-                alt={siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}
-                width={60}
-                height={60}
-                priority
-              />
+              {company.companyLogo ? (
+                <img src={company.companyLogo} alt={`${companyName} logo`} className="h-[60px] w-[60px] object-contain" />
+              ) : (
+                <span className="text-center text-[10px] font-bold">{companyName.slice(0, 3).toUpperCase()}</span>
+              )}
             </div>
             <div className="lr-company-details">
-              <div className="lr-company-name !tracking-tight">{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
-              {/* <div className="lr-company-address">{text(siteConfig.address)}</div> */}
+              <div className="lr-company-name !tracking-tight">{companyName}</div>
               <div className="text-[13.4px]">
                 <div className="leading-tight tracking-tighter">
-                  <span className="font-bold">H.O. : </span>
-                  <span className="font-semibold">90, Shree Siddh Villa, Madhodar Road, Near New Post Office, Waghodia, Dist. Vadodara 391760 <span className="font-bold">Mob.:</span> 9662820706 / 9558008708</span>
-
+                  <span className="font-semibold">{companyAddress || siteConfig.address}</span>
                 </div>
                 <div className="leading-tight tracking-tighter">
-                  <span className="font-bold">B.O.: </span>
-                  <span className="font-semibold">Plot No. 104/A, Siddhi Industrial Park, Tal. Waghodia, Dist. Vadodara 391 760. E mail : umashakti.brd@gmail.com</span>
+                  {companyPhones && <span className="font-semibold">Mob.: {companyPhones} </span>}
+                  {company.email && <span className="font-semibold">Email: {company.email}</span>}
+                  {company.website && <span className="font-semibold"> · {company.website}</span>}
                 </div>
               </div>
-              {/* <div className="lr-company-contact">
-                        {text(siteConfig.phone)}
-                        {siteConfig.email ? ` • ${siteConfig.email}` : ""}
-                      </div> */}
             </div>
           </div>
-          <div className="lr-registration flex justify-between px-6  w-full">
-            <div className="flex flex-col">
-              <span>REG. NO. </span>
-              <span>24AAHFU8816H1ZX</span>
+          {company.gstNumber && (
+            <div className="lr-registration flex justify-end px-6 w-full">
+              <div className="flex flex-col">
+                <span>GSTIN</span>
+                <span>{company.gstNumber}</span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span>PAN NO. </span>
-              <span>AAHFU8816H</span>
-            </div>
-            {/* <div>PAN NO. AAHFU8816H</div> */}
-            <div className="flex flex-col ">
-              <span>MSME No.</span>
-              <span>UDYAM-GJ-24-0106951</span>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* FROM / TO */}
@@ -187,9 +208,18 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
           </div> */}
           <div className="leading-tighter">
             <div className="lr-bank-title lr-segment-title">BANK DETAILS</div>
-            <div className="font-semibold tracking-tight text-[12px]  pl-1">{siteConfig.name || "UMASHAKTI TRANSPORT SERVICE"}</div>
-            <div className="font-semibold tracking-tight text-[12px]  pl-1">HDFC BANK, Opp. Apollo Tyres, Limda, Waghodia.</div>
-            <div className="font-semibold tracking-tight text-[12px]  pl-1">IFSC Code: HDFC0007181 - A/c. No.: 50200983890449</div>
+            <div className="font-semibold tracking-tight text-[12px] pl-1">{companyName}</div>
+            {company.accountHolderName && <div className="font-semibold tracking-tight text-[12px] pl-1">A/c Holder: {company.accountHolderName}</div>}
+            {company.bankName && <div className="font-semibold tracking-tight text-[12px] pl-1">{company.bankName}{company.bankBranch ? `, ${company.bankBranch}` : ""}</div>}
+            {(company.ifscCode || company.accountNumber) && (
+              <div className="font-semibold tracking-tight text-[12px] pl-1">
+                {company.ifscCode && `IFSC: ${company.ifscCode}`}
+                {company.ifscCode && company.accountNumber && " · "}
+                {company.accountNumber && `A/c No.: ${company.accountNumber}`}
+              </div>
+            )}
+            {company.upiId && <div className="font-semibold tracking-tight text-[12px] pl-1">UPI: {company.upiId}</div>}
+            {company.upiQrCode && <img src={company.upiQrCode} alt="UPI payment QR code" className="ml-1 mt-1 h-12 w-12 object-contain" />}
           </div>
         </div>
       </div>
@@ -278,14 +308,12 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
                 <div className="lr-bottom-row-left">
                   <div className="lr-terms-cell relative">
                     <div className="lr-terms-text ">
-                      We hereby confirm that particulars of goods packed &amp; declared in invoice are same. Packing of the
-                      consignment was done under the supervision. We have read the terms &amp; conditions printed on the face
-                      &amp; overleaf of the consignment note.
+                      {company.lrTerms || "We hereby confirm that particulars of goods packed & declared in invoice are same. Packing of the consignment was done under the supervision. We have read the terms & conditions printed on the face & overleaf of the consignment note."}
                     </div>
                     <div className="lr-terms-caption">Description of the goods as declared by Consignor</div>
 
                     <div className="absolute bottom-0 left-0 w-full flex justify-between items-center px-2 py-1">
-                      <div className="lr-copy-sign absolute right-0 bottom-13 w-full text-end pt-32">Consignor's Signature &nbsp;</div>
+                      <div className="lr-copy-sign absolute right-0 bottom-13 w-full text-end pt-32">Consignor&apos;s Signature &nbsp;</div>
                       <div className="lr-copy-date border-t border-black w-full pt-3 absolute bottom-3 left-0">&nbsp; Expected Delivery Date: {values.vehicle.expectedDeliveryDate ? formatDate(values.vehicle.expectedDeliveryDate) : "_____________"}</div>
                     </div>
                   </div>
@@ -448,12 +476,12 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
 
           <div className="lr-authorized relative">
             <div className="lr-terms-text ">
-              Amount of GST are provisional actual amount shall be as per received
-              money received to be issued UTS of consionmen
-              freight payable by consignor or cons ghee at the time of delivery freicht pavable sbaation cf consignment
+              {company.lrTerms || "Amount of GST is provisional; actual amount shall be as per received money. Freight is payable by the consignor or consignee at the time of delivery."}
             </div>
-            <div className="lr-authorized-space" />
-            {/* <strong>For {siteConfig.name}</strong> */}
+            <div className="lr-authorized-space">
+              {company.signature && <img src={company.signature} alt="Authorized signature" className="ml-auto max-h-14 max-w-36 object-contain" />}
+            </div>
+            <strong>For {companyName}</strong>
             {/* <div className="lr-authorized-line" /> */}
             <div className="lr-copy-sign absolute left-2 bottom-6 w-full text-start">Signature of Staff___________________</div>
 
@@ -467,8 +495,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
       {/* ================================================================== */}
       <div className="lr-footer">
         <div className="lr-footer-text">
-          Subject to Vadodara Jurisdiction. Goods carried at owner&apos;s risk unless otherwise agreed. Claims must be made
-          according to the terms and conditions of the company.
+          {company.lrTerms || "Goods carried at owner’s risk unless otherwise agreed. Claims are subject to the company’s terms and conditions."}
         </div>
         <strong>{copyName}</strong>
       </div>
@@ -483,6 +510,7 @@ function LorryCopy({ values, copyName }: { values: BillingFormValues; copyName: 
 export function PrintPreview({ values, onClose }: PrintPreviewProps) {
   // Which copies the user wants printed — all four are selected by default.
   const [selectedCopies, setSelectedCopies] = useState<Set<CopyName>>(new Set(DEFAULT_SELECTED_COPIES));
+  const { settings } = useCompanySettings();
 
   function toggleCopy(name: CopyName) {
     setSelectedCopies((prev) => {
@@ -518,6 +546,9 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
 
         {/* COPY SELECTOR — choose which copies get printed */}
         <div className="lr-copy-selector">
+          <span className="rounded-full bg-brand-50 px-2.5 py-1 font-semibold text-brand-800">
+            {LR_FORMAT_LABELS[settings.lrFormat]} format
+          </span>
           <span className="lr-copy-selector-label">Copies:</span>
           {ALL_COPY_NAMES.map((name) => (
             <label key={name} className="lr-copy-option">
@@ -547,8 +578,13 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
       <div className="lr-document">
         {hasSelection ? (
           copiesToRender.map((name) => (
-            // <div key={name} className="lr-page-frame">
-            <LorryCopy values={values} copyName={name} />
+            <LorryCopy
+              key={name}
+              values={values}
+              copyName={name}
+              company={settings}
+              lrFormat={settings.lrFormat}
+            />
             // {/* </div> */}
           ))
         ) : (
@@ -683,6 +719,110 @@ export function PrintPreview({ values, onClose }: PrintPreviewProps) {
   display: flex;
   flex-direction: column;
 }
+
+        .lr-background {
+          position: absolute;
+          z-index: 0;
+          inset: 0;
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: cover;
+          opacity: 0.1;
+          pointer-events: none;
+        }
+
+        .lr-page > :not(.lr-background) {
+          position: relative;
+          z-index: 1;
+        }
+
+        .lr-page.lr-format-modern {
+          border-color: #0f766e;
+          font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .lr-format-modern .lr-header {
+          grid-template-columns: 40% 35% 25%;
+        }
+
+        .lr-format-modern .lr-company-section {
+          background: rgba(204, 251, 241, 0.55);
+        }
+
+        .lr-format-modern .lr-company-name,
+        .lr-format-modern .lr-party-name,
+        .lr-format-modern .lr-segment-info b,
+        .lr-format-modern .lr-charge-row > *:last-child,
+        .lr-format-modern .lr-amount-words > div:last-child,
+        .lr-format-modern .lr-authorized strong {
+          color: #0f766e;
+        }
+
+        .lr-format-modern .lr-segment-title,
+        .lr-format-modern .lr-route-title,
+        .lr-format-modern .lr-vertical-title,
+        .lr-format-modern .lr-charge-header {
+          background-color: #0f766e;
+        }
+
+        .lr-format-modern .lr-grand-total {
+          background: #0f766e;
+        }
+
+        .lr-format-modern .lr-copy-name {
+          color: #0f766e;
+        }
+
+        .lr-page.lr-format-compact {
+          font-size: 11px;
+          line-height: 1.12;
+          letter-spacing: 0;
+        }
+
+        .lr-format-compact .lr-header {
+          grid-template-columns: 35% 40% 25%;
+        }
+
+        .lr-format-compact .lr-company-section {
+          padding: 3px 4px;
+        }
+
+        .lr-format-compact .lr-company-name {
+          font-size: 16px;
+        }
+
+        .lr-format-compact .lr-parties {
+          min-height: 1.55in;
+        }
+
+        .lr-format-compact .lr-party-name {
+          font-size: 14px;
+          margin-bottom: 1px;
+        }
+
+        .lr-format-compact .lr-party-address {
+          font-size: 12px;
+          line-height: 1.2;
+        }
+
+        .lr-format-compact .lr-party-detail,
+        .lr-format-compact .lr-charges {
+          font-size: 10.5px;
+        }
+
+        .lr-format-compact .lr-label {
+          font-size: 8px;
+          margin-bottom: 1px;
+        }
+
+        .lr-format-compact .lr-charge-row {
+          min-height: 16px;
+        }
+
+        .lr-format-compact .lr-grand-total {
+          min-height: 24px;
+          font-size: 12px;
+        }
 
         /* ============================================================= */
         /* HEADER                                                         */

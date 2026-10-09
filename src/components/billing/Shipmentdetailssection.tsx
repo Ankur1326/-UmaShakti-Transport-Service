@@ -19,10 +19,11 @@ export function ShipmentDetailsSection() {
 
   return (
     <FormSection title="Shipment Details" description="What's being shipped, how it's packed, and its declared value.">
-      <div className="space-y-1.5">
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 xl:grid-cols-8">
+      <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <Input
             size="compact"
+            type="number"
             label="Packages"
             min={1}
             error={shipmentErrors?.packages?.message}
@@ -43,38 +44,28 @@ export function ShipmentDetailsSection() {
           />
           <Input
             size="compact"
-            type="text"
+            type="number"
+            min={0}
+            step="0.01"
             label="Declared Value (₹)"
             error={shipmentErrors?.declaredValue?.message}
             {...register("shipment.declaredValue")}
           />
-          {/* <Input
-            size="compact"
-            label="Invoice Number"
-            error={shipmentErrors?.invoiceNumber?.message}
-            {...register("shipment.invoiceNumber")}
-          /> */}
           <Input size="compact" label="Invoice Number" error={errors.invoiceNumber?.message} {...register("invoiceNumber")} />
 
           <Input size="compact" type="date" label="Invoice Date" error={errors.invoiceDate?.message} {...register("invoiceDate")} />
           <Input
             size="compact"
-            type="text"
+            type="number"
             label="Volume LxBXH = CFT"
             min={0}
+            step="0.01"
             error={shipmentErrors?.volume?.message}
             {...register("shipment.volume")}
           />
-          {/* <Select
-            size="compact"
-            label="Volume Unit"
-            options={toOptions(VOLUME_UNITS)}
-            error={shipmentErrors?.volumeUnit?.message}
-            {...register("shipment.volumeUnit")}
-          /> */}
           <Input
             size="compact"
-            type="text"
+            type="number"
             label="Actual Weight"
             min={0}
             step="0.01"
@@ -84,7 +75,7 @@ export function ShipmentDetailsSection() {
 
           <Input
             size="compact"
-            type="text"
+            type="number"
             label="Charged Wt. as agreed"
             min={0}
             step="0.01"
@@ -104,15 +95,15 @@ export function ShipmentDetailsSection() {
             label="Expected Delivery Date"
             {...register("vehicle.expectedDeliveryDate")}
           />
-        <Textarea
-          size="compact"
-          rows={2}
-          className="w-[400px]"
-          label="Description of Goods"
-          placeholder="e.g. Activated Carbon"
-          error={shipmentErrors?.description?.message}
-          {...register("shipment.description")}
-        />
+          <Textarea
+            size="compact"
+            rows={3}
+            className="col-span-full w-full"
+            label="Description of Goods"
+            placeholder="e.g. Activated Carbon"
+            error={shipmentErrors?.description?.message}
+            {...register("shipment.description")}
+          />
         </div>
 
       </div>

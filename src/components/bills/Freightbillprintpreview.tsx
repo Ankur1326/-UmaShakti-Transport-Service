@@ -5,14 +5,8 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { amountInWords, BillItemValues, computeBillTotals, type FreightBillFormValues } from "@/lib/bill/validations";
 import { PrintItemsTable } from "@/components/bills/PrintItemsTable";
 import formatDate from "@/lib/formateDate";
-
-const COMPANY_BANK_DETAILS = {
-    companyName: "UMASHAKTI TRANSPORT SERVICE",
-    bankName: "HDFC BANK",
-    acNo: "50200083890449",
-    ifsc: "HDFC0007181",
-    branchAddress: "OPP APOLLO TYRES LIMDA WAGHODIA -391760",
-};
+import { useCompanySettings } from "@/hooks/useCompanySettings";
+import { siteConfig } from "@/lib/site-config";
 
 interface FreightBillPrintPreviewProps {
     onClose: () => void;
@@ -21,6 +15,7 @@ interface FreightBillPrintPreviewProps {
 export function FreightBillPrintPreview({ onClose }: FreightBillPrintPreviewProps) {
     const { control } = useFormContext<FreightBillFormValues>();
     const values = useWatch({ control });
+    const { settings } = useCompanySettings();
     const items = values.items ?? [];
     const totals = computeBillTotals(items as never);
 
@@ -50,7 +45,7 @@ export function FreightBillPrintPreview({ onClose }: FreightBillPrintPreviewProp
                 {/* Outer frame — the reference bill is a single bordered box top to
             bottom, not a set of loosely bottom-ruled sections. */}
                 <div className="p-1">
-                    <FreightBillHeader />
+                    <FreightBillHeader company={settings} />
 
                     <div className="grid grid-cols-2 border-x border-slate-900 text-sm">
                         <div className="border-r border-slate-400 p-3">
@@ -84,17 +79,28 @@ export function FreightBillPrintPreview({ onClose }: FreightBillPrintPreviewProp
                     </div>
 
                     <div className="grid grid-cols-2 border-t border-t-slate-400 border-x border-x-slate-900 text-sm">
-                        <div className="space-y-1 p-3 w-2xl">
-                            <p><span className="inline-block w-32 font-bold">Company Name</span>{COMPANY_BANK_DETAILS.companyName}</p>
-                            <p><span className="inline-block w-32 font-bold">Bank Name</span>{COMPANY_BANK_DETAILS.bankName}</p>
-                            <p><span className="inline-block w-32 font-bold">A/c No</span>{COMPANY_BANK_DETAILS.acNo}</p>
-                            <p><span className="inline-block w-32 font-bold">IFSC</span>{COMPANY_BANK_DETAILS.ifsc}</p>
-                            <p><span className="inline-block w-32 font-bold">Branch Address</span>{COMPANY_BANK_DETAILS.branchAddress}</p>
+                        <div className="space-y-1 p-3">
+                            <p><span className="inline-block w-32 font-bold">Company Name</span>{settings.companyName || siteConfig.name}</p>
+                            {settings.accountHolderName && <p><span className="inline-block w-32 font-bold">Account Holder</span>{settings.accountHolderName}</p>}
+                            {settings.bankName && <p><span className="inline-block w-32 font-bold">Bank Name</span>{settings.bankName}</p>}
+                            {settings.accountNumber && <p><span className="inline-block w-32 font-bold">A/c No</span>{settings.accountNumber}</p>}
+                            {settings.ifscCode && <p><span className="inline-block w-32 font-bold">IFSC</span>{settings.ifscCode}</p>}
+                            {settings.bankBranch && <p><span className="inline-block w-32 font-bold">Bank Branch</span>{settings.bankBranch}</p>}
+                            {settings.upiId && <p><span className="inline-block w-32 font-bold">UPI ID</span>{settings.upiId}</p>}
                         </div>
-                        {/* <div className="flex items-end justify-end p-3 text-base font-bold">
-                            For, Umashakti Transport Service
-                        </div> */}
+                        <div className="flex flex-col items-end justify-between p-3 text-right">
+                            {settings.upiQrCode && <img src={settings.upiQrCode} alt="UPI payment QR code" className="h-24 w-24 object-contain" />}
+                            {settings.signature && <img src={settings.signature} alt="Authorized signature" className="max-h-16 max-w-40 object-contain" />}
+                            <strong>For, {settings.companyName || siteConfig.name}</strong>
+                        </div>
                     </div>
+
+                    {settings.invoiceTerms && (
+                        <div className="border-x border-slate-900 px-3 py-2 text-xs whitespace-pre-wrap">
+                            <strong>Terms and Conditions</strong>
+                            <p className="mt-1">{settings.invoiceTerms}</p>
+                        </div>
+                    )}
 
                     {values.vehicleNumber && (
                         <p className={`border-t border-t-slate-400 border-x border-x-slate-900 px-3 py-2 text-sm border-b ${values.remark ? "border-b-slate-400" : "border-b-slate-900"}`}>Vehicle Number :- {values.vehicleNumber}</p>
@@ -131,10 +137,10 @@ export function FreightBillPrintPreview({ onClose }: FreightBillPrintPreviewProp
                 </div>
 
                 <div className="flex items-end justify-end p-3 text-[12px] font-semibold">
-                    For, Umashakti Transport Service
+                    For, {settings.companyName || siteConfig.name}
                 </div>
                 <div className="flex items-end justify-end px-12  pt-15 pb-52 text-sm">
-                    Signature
+                    {!settings.signature && "Signature"}
                 </div>
             </div>
         </div>

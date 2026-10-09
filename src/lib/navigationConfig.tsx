@@ -1,10 +1,10 @@
 import React from "react";
 import {
   LuCalendarCheck,
-  LuCircleUserRound,
   LuFilePlus2,
   LuLayoutDashboard,
   LuReceiptText,
+  LuSettings,
   LuSend,
   LuUsersRound,
 } from "react-icons/lu";
@@ -118,10 +118,10 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
         name: "Account",
         items: [
           {
-            id: "profile",
-            title: "My Profile",
-            icon: <LuCircleUserRound className="h-[18px] w-[18px]" />,
-            route: "/user/profile",
+            id: "company-settings",
+            title: "Company Settings",
+            icon: <LuSettings className="h-[18px] w-[18px]" />,
+            route: "/admin/settings",
           },
         ],
       },

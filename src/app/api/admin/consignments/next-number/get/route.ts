@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { getAuthenticatedCompanyId } from "@/lib/company-auth";
 import dbConnect from "@/lib/db";
+import CompanySettings from "@/models/CompanySettings";
 import ConsignmentModel from "@/models/Consignment";
-
-/** The very first consignment ever created should be numbered 2051. */
-const START_NUMBER = 2051;
 
 /**
  * GET /api/consignments/next-number
@@ -18,9 +17,18 @@ const START_NUMBER = 2051;
  * stay sequential across users/devices/browsers.
  */
 export async function GET() {
-  await dbConnect();
-
   try {
+    const companyId = await getAuthenticatedCompanyId();
+    if (!companyId) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    await dbConnect();
+    const companySettings = await CompanySettings.findOne({ ownerId: companyId })
+      .select("consignmentStartNumber")
+      .lean();
+    const startNumber = companySettings?.consignmentStartNumber ?? 2051;
+
     const result = await ConsignmentModel.aggregate<{ maxNumber: number | null }>([
       // Only consider consignment numbers that are plain digits — anything
       // hand-edited into a non-numeric format is ignored for sequencing.
@@ -30,7 +38,7 @@ export async function GET() {
     ]);
 
     const highest = result[0]?.maxNumber ?? null;
-    const nextNumber = highest !== null && highest >= START_NUMBER ? highest + 1 : START_NUMBER;
+    const nextNumber = Math.max(startNumber, highest !== null ? highest + 1 : startNumber);
 
     return NextResponse.json(
       {

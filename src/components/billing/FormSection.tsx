@@ -12,14 +12,14 @@ interface FormSectionProps {
 
 export function FormSection({ title, description, children, className, headerAction }: FormSectionProps) {
   return (
-    <Card padding="xs" className={cn("scroll-mt-20 rounded-lg relative", className)}>
-      <CardHeader className="mb-2 flex flex-row items-start justify-between gap-2">
+    <Card padding="sm" className={cn("scroll-mt-20 relative rounded-xl border-slate-200 shadow-sm", className)}>
+      <CardHeader className="mb-3 flex flex-row items-start justify-between gap-3">
         <div>
-          <CardTitle className="text-[11.5px] font-bold uppercase tracking-[0.03em] text-brand-800">
+          <CardTitle className="text-sm font-bold text-slate-900">
             {title}
           </CardTitle>
           {description && (
-            <CardDescription className="mt-0 text-[10px] leading-snug">{description}</CardDescription>
+            <CardDescription className="mt-1 text-xs leading-snug">{description}</CardDescription>
           )}
         </div>
         {headerAction}

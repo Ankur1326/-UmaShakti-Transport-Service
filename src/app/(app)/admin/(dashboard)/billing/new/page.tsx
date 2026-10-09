@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useFieldArray, useWatch } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -11,7 +11,7 @@ import {
     type BillItemValues,
 } from "@/lib/bill/validations";
 import { fetchNextBillNumber, saveLastBillNumber } from "@/lib/bill/Generatebillnumber";
-import { createFreightBill, getConsignmentForBill, getFreightBill, searchEligibleConsignments, updateFreightBill } from "@/lib/bill/api";
+import { createFreightBill, getConsignmentForBill, getFreightBill, updateFreightBill } from "@/lib/bill/api";
 
 import { FreightBillHeader } from "@/components/bills/Freightbillheader";
 import { BillMetaSection } from "@/components/bills/Billmetasection";
@@ -23,6 +23,7 @@ import { ConsignmentListItem, ConsignmentRecord, getApiErrorMessage } from "@/li
 import SelectedCnsChips from "@/components/bills/SelectedCnsChips";
 import { useSearchParams } from "next/navigation";
 import { Loading } from "@/components/ui/Loading";
+import { useCompanySettings } from "@/hooks/useCompanySettings";
 
 function buildDefaultValues(billNo: string): FreightBillFormValues {
     return {
@@ -60,6 +61,7 @@ function consignmentToBillItem(c: ConsignmentRecord, srNo: number): BillItemValu
 function FreightBillForm() {
     const searchParams = useSearchParams();
     const billId = searchParams.get("id"); // null when creating a new bill
+    const { settings: companySettings } = useCompanySettings();
 
     const [previewOpen, setPreviewOpen] = useState(false);
     const [addingId, setAddingId] = useState<string | null>(null);
@@ -76,11 +78,13 @@ function FreightBillForm() {
         mode: "onBlur",
     });
 
+    const {
+        handleSubmit, reset, setValue, getValues, formState: { isSubmitting, dirtyFields }, } = methods;
     const billedToType = useWatch({ control: methods.control, name: "billedToType" });
 
-    function applyBilledToFromParty(source?: {
+    const applyBilledToFromParty = useCallback((source?: {
         name?: string; address?: string; city?: string; state?: string; pincode?: string; gstin?: string; mobile?: string;
-    }) {
+    }) => {
         setValue("billedTo", {
             name: source?.name ?? "",
             address: source?.address ?? "",
@@ -90,16 +94,14 @@ function FreightBillForm() {
             gstin: source?.gstin ?? "",
             mobile: source?.mobile ?? "",
         });
-    }
+    }, [setValue]);
 
-    const {
-        handleSubmit, reset, setValue, getValues, formState: { isSubmitting, dirtyFields }, } = methods;
     const { fields, append, remove } = useFieldArray({ control: methods.control, name: "items" });
 
     useEffect(() => {
         if (billId) {
             getFreightBill(billId)
-                .then((bill: any) => {
+                .then((bill) => {
                     reset(bill); // bill already matches FreightBillFormValues shape (FreightBillRecord extends it)
                     // useFieldArray needs `reset` with the same field name to pick up `items` —
                     // this works because `items` is part of `bill` and reset() re-syncs the array.
@@ -128,7 +130,7 @@ function FreightBillForm() {
         if (billedToType === "Consignor") applyBilledToFromParty(firstConsignmentParties.consignor);
         else if (billedToType === "Consignee") applyBilledToFromParty(firstConsignmentParties.consignee);
         // Third Party: leave the fields alone — that's manual entry, don't clobber what's been typed.
-    }, [billedToType, firstConsignmentParties]);
+    }, [applyBilledToFromParty, billedToType, firstConsignmentParties]);
 
     const excludeIds = fields.map((f) => f.consignmentId);
 
@@ -233,7 +235,7 @@ function FreightBillForm() {
             ) : (
                 <form className="mx-auto max-w-3xl pb-24 text-[12px]" onSubmit={(e) => e.preventDefault()}>
                     <div className="rounded-lg border border-slate-300 p-4 shadow-sm">
-                        <FreightBillHeader />
+                        <FreightBillHeader company={companySettings} />
 
                         <div className="border-b border-slate-300 py-2 text-[12px] text-slate-500">
                             Select a CNS No. below — Consignor/Consignee/Third Party and their details fill in automatically

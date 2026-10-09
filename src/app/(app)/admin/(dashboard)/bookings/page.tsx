@@ -16,8 +16,10 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   deleteConsignment,
+  getConsignment,
   getApiErrorMessage,
   listConsignments,
+  type ConsignmentRecord,
   type ConsignmentListItem,
   type MongoDate,
 } from "@/lib/api/consignments";
@@ -80,12 +82,24 @@ export default function BookingsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // The row clicked for "View Details".
-  const [viewTarget, setViewTarget] = useState<any | null>(null);
+  const [viewTarget, setViewTarget] = useState<ConsignmentListItem | null>(null);
 
   // The row clicked for "Print" — was a bare `previewOpen` boolean before, which
   // meant every row's print button opened the same preview with no data behind
   // it (`values` wasn't even defined). Tracking the actual item fixes both.
-  const [printTarget, setPrintTarget] = useState<ConsignmentListItem | null>(null);
+  const [printTarget, setPrintTarget] = useState<ConsignmentRecord | null>(null);
+  const [loadingPrintId, setLoadingPrintId] = useState<string | null>(null);
+
+  const handlePrint = async (item: ConsignmentListItem) => {
+    setLoadingPrintId(item._id);
+    try {
+      setPrintTarget(await getConsignment(item._id));
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Couldn't load this consignment for printing."));
+    } finally {
+      setLoadingPrintId(null);
+    }
+  };
 
   // Debounce the search box so we're not firing a request on every keystroke.
   useEffect(() => {
@@ -235,7 +249,7 @@ export default function BookingsPage() {
                       <tr
                         key={item._id}
                         className="cursor-pointer border-b border-neutral-100 last:border-0 hover:bg-neutral-50"
-                        onClick={() => setViewTarget(item as any)}
+                        onClick={() => setViewTarget(item)}
                       >
                         <td className="px-4 py-3">
                           <div className="font-semibold text-brand-700">{item.consignmentNumber}</div>
@@ -275,7 +289,8 @@ export default function BookingsPage() {
                               variant="ghost"
                               size="icon"
                               aria-label="Print consignment"
-                              onClick={() => setPrintTarget(item)}
+                              onClick={() => handlePrint(item)}
+                              disabled={loadingPrintId !== null}
                             >
                               <Printer className="h-4 w-4" aria-hidden="true" />
                             </Button>
@@ -352,7 +367,8 @@ export default function BookingsPage() {
                           variant="ghost"
                           size="icon"
                           aria-label="Print consignment"
-                          onClick={() => setPrintTarget(item)}
+                          onClick={() => handlePrint(item)}
+                          disabled={loadingPrintId !== null}
                         >
                           <Printer className="h-4 w-4" aria-hidden="true" />
                         </Button>

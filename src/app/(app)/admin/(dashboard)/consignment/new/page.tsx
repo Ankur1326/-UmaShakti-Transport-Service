@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { X } from "lucide-react";
+import { ArrowDown, FilePlus2, X } from "lucide-react";
 
 import {
   createConsignment,
@@ -15,14 +15,12 @@ import {
 } from "@/lib/api/consignments";
 import { Loading } from "@/components/ui/Loading";
 
-import { CompanyHeader } from "@/components/billing/CompanyHeader";
 import { ConsignmentInfoSection } from "@/components/billing/ConsignmentInfoSection";
 import { RouteSection } from "@/components/billing/RouteSection";
 import { PartyCard } from "@/components/billing/PartyCard";
 import { ShipmentDetailsSection } from "@/components/billing/Shipmentdetailssection";
-// import { ShipmentDetailsSection } from "@/components/billing/ShipmentDetailsSection";
 import { LoadTypeSection } from "@/components/billing/Loadtypesection";
-// import { TransportDetailsSection } from "@/components/billing/Transportdetailssection";
+import { TransportDetailsSection } from "@/components/billing/Transportdetailssection";
 import { ChargesSection } from "@/components/billing/Chargessection";
 import { GstSection } from "@/components/billing/Gstsection";
 import { BillingSummary } from "@/components/billing/Billingsummary";
@@ -37,6 +35,14 @@ import { fetchNextConsignmentNumber, generateConsignmentNumber, saveConsignmentN
 
 const DRAFT_STORAGE_KEY = "uts:billing-draft:v1";
 const AUTOSAVE_DEBOUNCE_MS = 1200;
+const FORM_SECTIONS = [
+  { id: "consignment-details", label: "LR details" },
+  { id: "consignment-parties", label: "Parties" },
+  { id: "consignment-route", label: "Route" },
+  { id: "consignment-shipment", label: "Goods & vehicle" },
+  { id: "consignment-billing", label: "Charges & payment" },
+  { id: "consignment-additional", label: "Optional details" },
+] as const;
 
 function readDraft(): BillingFormValues | null {
   if (typeof window === "undefined") return null;
@@ -170,14 +176,13 @@ function TransportBillingForm() {
 
   /** Creates the consignment on first save, updates it on every save after that. */
   const persistToBackend = async (values: BillingFormValues) => {
-    console.log("recordId ", recordId)
     if (recordId) {
       const updated = await updateConsignment(recordId, values);
       return updated;
     }
     const created = await createConsignment(values);
     setRecordId(created._id);
-    router.replace(`/admin/billing/new?id=${created._id}`);
+    router.replace(`/admin/consignment/new?id=${created._id}`);
     return created;
   };
 
@@ -192,20 +197,6 @@ function TransportBillingForm() {
       }
     },
     () => toast.error("Please fix the highlighted fields before saving.")
-  );
-
-  const onGenerateLR = handleSubmit(
-    async (values) => {
-      cacheDraftLocally(values);
-      try {
-        await persistToBackend(values);
-        window.localStorage.removeItem(DRAFT_STORAGE_KEY);
-        toast.success(`Consignment saved successfully\nConsignment No: ${values.consignmentNumber}`);
-      } catch (error) {
-        toast.error(getApiErrorMessage(error, "Couldn't generate the LR. Please try again."));
-      }
-    },
-    () => toast.error("Please fix the highlighted fields before generating the LR.")
   );
 
   const onSaveAndPrint = handleSubmit(
@@ -228,11 +219,32 @@ function TransportBillingForm() {
     reset(fresh);
     setRecordId(null);
     window.localStorage.removeItem(DRAFT_STORAGE_KEY);
-    if (editId) router.replace("/admin/billing/new");
+    if (editId) router.replace("/admin/consignment/new");
     toast.success("Form reset.");
   };
 
   const values = watch();
+  const sectionNav = (
+    <nav
+      aria-label="Consignment form sections"
+      className="sticky top-0 z-20 -mx-2 mb-5 border-y border-slate-200 bg-white/95 px-2 py-2 shadow-sm backdrop-blur sm:mx-0 sm:rounded-xl sm:border sm:px-3"
+    >
+      <div className="flex gap-2 overflow-x-auto">
+        {FORM_SECTIONS.map((section, index) => (
+          <a
+            key={section.id}
+            href={`#${section.id}`}
+            className="focus-ring inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-brand-50 hover:text-brand-800"
+          >
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] text-slate-600">
+              {index + 1}
+            </span>
+            {section.label}
+          </a>
+        ))}
+      </div>
+    </nav>
+  );
 
   if (isLoadingRecord) {
     return <Loading fullPage label="Loading consignment…" />;
@@ -303,148 +315,116 @@ function TransportBillingForm() {
         />
       ) : (
         <form
-          className="pb-20 text-[12px]"
+          className="mx-auto max-w-[1320px] space-y-4 pb-24 text-[12px]"
           onSubmit={(e) => e.preventDefault()}
         >
-          {/* ============================================================ */}
-          {/* PAGE HEADER                                                   */}
-          {/* ============================================================ */}
+          <header className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-brand-50/60 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-700 text-white shadow-sm">
+                <FilePlus2 className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-700">
+                  Transport documents
+                </p>
+                <h1 className="mt-1 text-xl font-bold text-slate-950 sm:text-2xl">
+                  {editId ? "Edit Consignment" : "Create Lorry Receipt"}
+                </h1>
+                <p className="mt-1 text-sm text-slate-600">
+                  Enter the shipment, parties, route and charges. Your draft is saved automatically in this browser.
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2 sm:self-center">
+              <span className="text-xs font-medium text-slate-500">LR No.</span>
+              <span className="text-base font-bold text-brand-800">{values.consignmentNumber || "—"}</span>
+            </div>
+          </header>
 
+          {sectionNav}
 
-          {/* ============================================================ */}
-          {/* BILLING SUMMARY                                                */}
-          {/* ============================================================ */}
-
-          <div className="mb-2">
-            <BillingSummary />
+          <div id="consignment-details" className="scroll-mt-24">
+            <ConsignmentInfoSection />
           </div>
 
-          {/* ============================================================ */}
-          {/* MAIN FORM                                                      */}
-          {/* ============================================================ */}
-
-          <div className="flex flex-wrap items-start gap-2">
-            {/* ========================================================== */}
-            {/* CONSIGNMENT INFORMATION                                    */}
-            {/* ========================================================== */}
-
-            <section className="w-full">
-              <ConsignmentInfoSection />
-            </section>
-
-            {/* ========================================================== */}
-            {/* ROUTE                                                       */}
-            {/* ========================================================== */}
-
-            <section className="w-full md:w-[calc(60%-0.5rem)]">
-              <RouteSection />
-            </section>
-
-            {/* ========================================================== */}
-            {/* LOAD TYPE                                                   */}
-            {/* ========================================================== */}
-
-            <section className="w-full md:w-[calc(40%-0.5rem)]">
-              <LoadTypeSection />
-            </section>
-
-            {/* ========================================================== */}
-            {/* CONSIGNOR                                                   */}
-            {/* ========================================================== */}
-
-            <section className="w-full md:w-[calc(50%-0.5rem)]">
+          <section id="consignment-parties" className="scroll-mt-24">
+            <div className="mb-2 flex items-end justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Parties</h2>
+                <p className="mt-0.5 text-xs text-slate-500">Select a saved customer or enter new party details.</p>
+              </div>
+              <span className="hidden text-[11px] text-slate-500 sm:inline">Consignor → Consignee</span>
+            </div>
+            <div className="grid items-start gap-3 lg:grid-cols-2">
               <PartyCard
                 prefix="consignor"
                 title="Consignor"
                 description="Party sending the goods."
               />
-            </section>
-
-            {/* ========================================================== */}
-            {/* CONSIGNEE                                                   */}
-            {/* ========================================================== */}
-
-            <section className="w-full md:w-[calc(50%-0.5rem)]">
               <PartyCard
                 prefix="consignee"
                 title="Consignee"
                 description="Party receiving the goods."
               />
-            </section>
+            </div>
+          </section>
 
-            {/* ========================================================== */}
-            {/* SHIPMENT DETAILS                                            */}
-            {/* ========================================================== */}
+          <section id="consignment-route" className="scroll-mt-24">
+            <div className="grid items-start gap-3 lg:grid-cols-[1.5fr_1fr]">
+              <RouteSection />
+              <LoadTypeSection />
+            </div>
+          </section>
 
-            <section className="w-full">
+          <section id="consignment-shipment" className="scroll-mt-24">
+            <div className="mb-2">
+              <h2 className="text-sm font-bold text-slate-900">Goods & transport</h2>
+              <p className="mt-0.5 text-xs text-slate-500">Add package, weight, invoice and vehicle information.</p>
+            </div>
+            <div className="grid items-start gap-3 xl:grid-cols-2">
               <ShipmentDetailsSection />
-            </section>
-
-            {/* ========================================================== */}
-            {/* TRANSPORT DETAILS                                           */}
-            {/* ========================================================== */}
-
-            {/* <section className="w-full md:w-[calc(50%-0.5rem)]">
               <TransportDetailsSection />
-            </section> */}
+            </div>
+          </section>
 
-            {/* ========================================================== */}
-            {/* CHARGES                                                     */}
-            {/* ========================================================== */}
-
-            <section className="w-full lg:w-[calc(66.666%-0.35rem)]">
+          <section id="consignment-billing" className="scroll-mt-24">
+            <div className="mb-2">
+              <h2 className="text-sm font-bold text-slate-900">Charges & payment</h2>
+              <p className="mt-0.5 text-xs text-slate-500">Enter freight and tax; totals update as you type.</p>
+            </div>
+            <div className="grid items-start gap-3 xl:grid-cols-[1.4fr_1fr]">
               <ChargesSection />
-            </section>
-
-            {/* ========================================================== */}
-            {/* GST                                                         */}
-            {/* ========================================================== */}
-
-            <section className="w-full lg:w-[calc(33.333%-0.65rem)]">
-              <GstSection />
-            </section>
-
-            {/* ========================================================== */}
-            {/* PAYMENT                                                     */}
-            {/* ========================================================== */}
-
-            <section className="w-full md:w-[calc(40%-0.5rem)]">
+              <div className="space-y-3">
+                <BillingSummary />
+                <GstSection />
+              </div>
+            </div>
+            <div className="mt-3">
               <PaymentSection />
-            </section>
+            </div>
+          </section>
 
-            {/* ========================================================== */}
-            {/* INSURANCE                                                   */}
-            {/* ========================================================== */}
-
-            <section className="w-full md:w-[calc(50%-0.5rem)]">
-              <InsuranceSection />
-            </section>
-
-            {/* ========================================================== */}
-            {/* ADDITIONAL INFORMATION                                      */}
-            {/* ========================================================== */}
-
-            <section className="w-full md:w-[calc(50%-0.5rem)]">
-              <AdditionalInfoSection />
-            </section>
-          </div>
-
-          {/* ============================================================ */}
-          {/* VISUAL SPACER                                                 */}
-          {/* ============================================================ */}
-
-          <div className="hidden h-4 xl:block" />
-
-          {/* ============================================================ */}
-          {/* ACTION BAR                                                    */}
-          {/* ============================================================ */}
+          <section id="consignment-additional" className="scroll-mt-24">
+            <details className="group rounded-xl border border-slate-200 bg-white shadow-sm">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 [&::-webkit-details-marker]:hidden">
+                <span>
+                  <span className="block text-sm font-bold text-slate-900">Optional details</span>
+                  <span className="mt-0.5 block text-xs text-slate-500">Insurance and private internal notes</span>
+                </span>
+                <ArrowDown className="h-4 w-4 shrink-0 text-slate-500 transition-transform group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <div className="grid items-start gap-3 border-t border-slate-100 p-3 lg:grid-cols-2">
+                <InsuranceSection />
+                <AdditionalInfoSection />
+              </div>
+            </details>
+          </section>
 
           <FormActionsBar
             isDirty={isDirty}
             isSubmitting={isSubmitting}
             draftSavedLabel={timeAgoLabel(lastSavedAt)}
             onSaveDraft={onSaveDraft}
-            onGenerateLR={onGenerateLR}
             onSaveAndPrint={onSaveAndPrint}
             onPreview={() => setPreviewOpen(true)}
             onReset={onReset}

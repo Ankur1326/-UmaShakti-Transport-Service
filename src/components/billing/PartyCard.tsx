@@ -79,7 +79,7 @@ export function PartyCard({ prefix, title, description }: PartyCardProps) {
 
   return (
     <FormSection title={title} description={description}>
-      <div className="space-y-1.5">
+      <div className="space-y-3">
         <Combobox
           size="compact"
           label="Select existing customer"
@@ -107,22 +107,22 @@ export function PartyCard({ prefix, title, description }: PartyCardProps) {
           createNewLabel="+ Add New Customer"
         />
 
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Input size="compact" label="Company / Customer Name" required error={sectionErrors?.name?.message} {...register(`${prefix}.name`)} />
           <Input size="compact" label="Address" required error={sectionErrors?.address?.message} {...register(`${prefix}.address`)} />
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Input size="compact" required label="City" error={sectionErrors?.city?.message} {...register(`${prefix}.city`)} />
           <Input size="compact" required label="State" error={sectionErrors?.state?.message} {...register(`${prefix}.state`)} />
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Input size="compact" label="PIN Code" error={sectionErrors?.pincode?.message} {...register(`${prefix}.pincode`)} />
           <Input size="compact" required label="GSTIN" error={sectionErrors?.gstin?.message} {...register(`${prefix}.gstin`)} />
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Input size="compact" label="Mobile Number" error={sectionErrors?.mobile?.message} {...register(`${prefix}.mobile`)} />
           <Input size="compact" type="email" label="Email" error={sectionErrors?.email?.message} {...register(`${prefix}.email`)} />
         </div>

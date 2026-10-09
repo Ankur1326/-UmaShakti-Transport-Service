@@ -16,15 +16,15 @@ export function BillingSummary({ className }: { className?: string }) {
   const nonZeroLines = totals.lineItems.filter((item) => item.amount > 0);
 
   return (
-    <Card padding="xs" className={cn("rounded-lg", className)}>
-      <CardHeader className="mb-1.5">
-        <CardTitle className="text-[11.5px] font-bold uppercase tracking-[0.03em] text-brand-800">
-          Billing Summary
+    <Card padding="sm" className={cn("rounded-xl border-brand-200 bg-brand-50/40 shadow-sm", className)}>
+      <CardHeader className="mb-3">
+        <CardTitle className="text-sm font-bold text-slate-900">
+          Live billing summary
         </CardTitle>
       </CardHeader>
 
       {nonZeroLines.length === 0 ? (
-        <p className="text-[10.5px] text-neutral-500">Enter charges below to see the calculated total.</p>
+        <p className="text-xs text-neutral-500">Enter charges to see the calculated total.</p>
       ) : (
         <dl className="flex flex-wrap gap-x-4 gap-y-0.5">
           {nonZeroLines.map((item) => (
@@ -36,24 +36,24 @@ export function BillingSummary({ className }: { className?: string }) {
         </dl>
       )}
 
-      <div className="my-1.5 h-px bg-neutral-200" />
+      <div className="my-3 h-px bg-neutral-200" />
 
       <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
-        <div className="flex items-center gap-1.5 text-[10.5px]">
+        <div className="flex items-center gap-1.5 text-xs">
           <span className="text-neutral-500">Subtotal:</span>
           <span className="font-medium text-neutral-900">{formatINR(totals.subtotal)}</span>
         </div>
-        <div className="flex items-center gap-1.5 text-[10.5px]">
+        <div className="flex items-center gap-1.5 text-xs">
           <span className="text-neutral-500">GST ({totals.gstPercentage}%):</span>
           <span className="font-medium text-neutral-900">{formatINR(totals.gstAmount)}</span>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-[11px] font-semibold text-neutral-900">Grand Total</span>
-          <span className="text-[15px] font-bold text-brand-700">{formatINR(totals.grandTotal)}</span>
+          <span className="text-xs font-semibold text-neutral-900">Grand Total</span>
+          <span className="text-lg font-bold text-brand-700">{formatINR(totals.grandTotal)}</span>
         </div>
       </div>
 
-      <p className="mt-1.5 rounded-md bg-neutral-50 px-2 py-1 text-[10px] leading-snug text-neutral-600">
+      <p className="mt-3 rounded-lg bg-white px-3 py-2 text-xs leading-snug text-neutral-600">
         <span className="font-semibold text-neutral-700">Amount in Words: </span>
         {amountToWords(totals.grandTotal)}
       </p>

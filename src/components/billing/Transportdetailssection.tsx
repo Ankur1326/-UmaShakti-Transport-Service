@@ -21,14 +21,15 @@ export function TransportDetailsSection() {
   const vehicleErrors = errors.vehicle;
 
   return (
-    <FormSection title="Booking & Transport Details" description="Driver, transport mode, and delivery route.">
-      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-        
+    <FormSection title="Vehicle & transport" description="Transport mode, vehicle route and operating branches.">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Select size="compact" label="Transport Mode" options={TRANSPORT_MODES} error={vehicleErrors?.transportMode?.message} {...register("vehicle.transportMode")} />
         <Input size="compact" label="Route" placeholder="e.g. Baddi → Solan" error={vehicleErrors?.route?.message} {...register("vehicle.route")} />
 
         <Input size="compact" label="Booking Branch" error={vehicleErrors?.branch?.message} {...register("vehicle.branch")} />
         <Input size="compact" label="Delivery Branch" error={vehicleErrors?.deliveryBranch?.message} {...register("vehicle.deliveryBranch")} />
+        <Input size="compact" label="Driver Name" error={vehicleErrors?.driverName?.message} {...register("vehicle.driverName")} />
+        <Input size="compact" type="tel" label="Driver Mobile" error={vehicleErrors?.driverMobile?.message} {...register("vehicle.driverMobile")} />
       </div>
     </FormSection>
   );
