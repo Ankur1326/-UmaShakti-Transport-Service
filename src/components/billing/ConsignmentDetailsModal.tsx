@@ -484,7 +484,7 @@ export function ConsignmentDetailsModal({
           <Button variant="outline" size="sm" onClick={onClose}>
             Close
           </Button>
-          <Link href={`/admin/billing/new?id=${c._id}`}>
+          <Link href={`/admin/consignment/new?id=${c._id}`}>
             <Button variant="primary" size="sm">
               <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
               Edit Consignment
