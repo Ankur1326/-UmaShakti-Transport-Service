@@ -9,7 +9,7 @@ import '../globals.css';
 import { useSession } from "next-auth/react";
 import type { DefaultSession } from "next-auth";
 
-type UserRole = 'admin' | 'superAdmin' | 'customer';
+type UserRole = 'transporter';
 
 declare module "next-auth" {
   interface Session {
@@ -22,7 +22,7 @@ declare module "next-auth" {
 function RootLayoutContent({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const userRole: UserRole = session?.user?.role ?? 'admin';
+  const userRole: UserRole = 'transporter';
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
@@ -41,7 +41,6 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
           <AdminHeader
             isSidebarOpen={isSidebarOpen}
             onToggleSidebar={toggleSidebar}
-            userRole={userRole}
           />
         )}
 

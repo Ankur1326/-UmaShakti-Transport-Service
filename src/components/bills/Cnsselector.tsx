@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { searchEligibleConsignments, type ConsignmentListItem } from "@/lib/bill/api";
 import { getApiErrorMessage } from "@/lib/api/consignments";
+import { useFormContext, useWatch } from "react-hook-form";
 
 interface CnsSelectorProps {
   excludeIds: string[];
@@ -11,22 +12,43 @@ interface CnsSelectorProps {
   disabled?: boolean;
 }
 
-/**
- * Type-ahead for CNS No. Only shows consignments that are NOT already on the
- * bill and whose payment.status !== "Paid" (filtering for the latter happens
- * inside searchEligibleConsignments).
- */
 export function CnsSelector({ excludeIds, onSelect, disabled }: CnsSelectorProps) {
+  const { control } = useFormContext() as any;
+  const billedToType = useWatch({ control, name: "billedToType" }) as string | undefined;
+
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ConsignmentListItem[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [partyQuery, setPartyQuery] = useState("");
+  const [partySuggestions, setPartySuggestions] = useState<string[]>([]);
+  const [partyLoading, setPartyLoading] = useState(false);
+  const [selectedParty, setSelectedParty] = useState<string | null>(null);
+  const [partyFocused, setPartyFocused] = useState(false);
+
+  // Fetch CNS results. If a selectedParty exists and billing type is Consignor
+  // or Consignee, pass those to the API so the server can filter by party and
+  // exclude already-billed consignments.
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    searchEligibleConsignments(query)
+
+    const opts: any = { excludeBilled: true };
+    if (billedToType === "Consignor" || billedToType === "Consignee") {
+      if (selectedParty) {
+        opts.partyType = billedToType;
+        opts.partyName = selectedParty;
+      } else {
+        // No selected party: don't fetch CNS results yet — user must pick a party
+        setResults([]);
+        setLoading(false);
+        return;
+      }
+    }
+
+    searchEligibleConsignments(query, opts)
       .then((res) => {
         if (cancelled) return;
         setResults(res.filter((c) => !excludeIds.includes(c._id)));
@@ -37,10 +59,44 @@ export function CnsSelector({ excludeIds, onSelect, disabled }: CnsSelectorProps
         setResults([]);
       })
       .finally(() => !cancelled && setLoading(false));
+
     return () => {
       cancelled = true;
     };
-  }, [query, excludeIds]);
+  }, [query, excludeIds, selectedParty, billedToType]);
+
+  // Party-name suggestions: search consignments by name and extract distinct
+  // party names to suggest to the user.
+  useEffect(() => {
+    if (!(billedToType === "Consignor" || billedToType === "Consignee")) return;
+    // Fetch when user types or when the input is focused (to show all names)
+    if (!partyQuery && !partyFocused) {
+      setPartySuggestions([]);
+      return;
+    }
+
+    let cancelled = false;
+    setPartyLoading(true);
+    const opts: any = { partyType: billedToType, excludeBilled: true, limit: 100 };
+    if (partyQuery) opts.partyName = partyQuery;
+    // Query for consignments (possibly unfiltered) and derive unique party names
+    searchEligibleConsignments("", opts)
+      .then((res) => {
+        if (cancelled) return;
+        const names = new Set<string>();
+        res.forEach((c) => {
+          const n = billedToType === "Consignor" ? c.consignor?.name : c.consignee?.name;
+          if (n) names.add(n);
+        });
+        setPartySuggestions(Array.from(names));
+      })
+      .catch(() => setPartySuggestions([]))
+      .finally(() => !cancelled && setPartyLoading(false));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [partyQuery, billedToType, partyFocused]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -52,15 +108,57 @@ export function CnsSelector({ excludeIds, onSelect, disabled }: CnsSelectorProps
 
   return (
     <div ref={containerRef} className="relative mb-2 w-full max-w-xs print:hidden">
+      {(billedToType === "Consignor" || billedToType === "Consignee") && (
+        <div className="mb-2">
+          <input
+            value={selectedParty ?? partyQuery}
+            onChange={(e) => {
+              setSelectedParty(null);
+              setPartyQuery(e.target.value);
+              setOpen(false);
+            }}
+            onFocus={() => setPartyFocused(true)}
+            onBlur={() => setTimeout(() => setPartyFocused(false), 150)}
+            placeholder={`Search ${billedToType} name…`}
+            className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-1.5 text-[12px]"
+            disabled={disabled}
+          />
+
+          {partyLoading && <p className="text-[12px] text-slate-400">Searching parties…</p>}
+          {!partyLoading && partySuggestions.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-1">
+              {partySuggestions.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => {
+                    setSelectedParty(p);
+                    setPartyQuery("");
+                    setOpen(false);
+                  }}
+                  className="rounded bg-slate-100 px-2 py-1 text-[12px]"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <input
         value={query}
-        disabled={disabled}
+        disabled={disabled || ((billedToType === "Consignor" || billedToType === "Consignee") && !selectedParty)}
         onChange={(e) => {
           setQuery(e.target.value);
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
-        placeholder="Enter CNS No. to add…"
+        placeholder={
+          (billedToType === "Consignor" || billedToType === "Consignee") && !selectedParty
+            ? `Select ${billedToType} first…`
+            : "Enter CNS No. to add…"
+        }
         className="focus-ring w-full rounded-lg border border-slate-300 px-3 py-1.5 text-[12px] disabled:bg-slate-100"
       />
 

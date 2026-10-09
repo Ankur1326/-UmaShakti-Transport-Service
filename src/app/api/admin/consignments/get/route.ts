@@ -25,6 +25,9 @@ export async function GET(request: NextRequest) {
         const search = searchParams.get("search")?.trim();
         const paymentStatus = searchParams.get("paymentStatus")?.trim();
         const segment = searchParams.get("segment")?.trim();
+        const partyType = searchParams.get("partyType")?.trim();
+        const partyName = searchParams.get("partyName")?.trim();
+        const excludeBilled = searchParams.get("excludeBilled") === "true";
         const page = Math.max(1, Number(searchParams.get("page")) || 1);
         const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit")) || 20));
 
@@ -43,6 +46,16 @@ export async function GET(request: NextRequest) {
 
         if (paymentStatus) query["payment.status"] = paymentStatus;
         if (segment) query.segment = segment;
+        if (partyType && partyName && (partyType === "Consignor" || partyType === "Consignee")) {
+            const key = partyType === "Consignor" ? "consignor.name" : "consignee.name";
+            query[key] = new RegExp(partyName, "i");
+        }
+
+        // If requested, exclude consignments that already appear on a FreightBill
+        if (excludeBilled) {
+            const billedIds: any[] = await (await import("@/models/Bill")).default.distinct("items.consignmentId");
+            if (billedIds.length) query._id = { $nin: billedIds };
+        }
 
         const [consignments, total] = await Promise.all([
             ConsignmentModel.find(query)

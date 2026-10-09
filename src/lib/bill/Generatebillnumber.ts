@@ -1,7 +1,7 @@
 /**
  * Freight bill numbering.
  *
- * Format: "<seq>/<FYstart>-<FYend>", e.g. "104/26-27", "105/26-27", then "01/27-28"
+ * Format: "<seq>/<FYstart>-<FYend>", e.g. "100/26-27", "101/26-27", then "01/27-28"
  * once the fiscal year rolls over on 1 April.
  *
  * This mirrors your existing `generateConsignmentNumber.ts` local-cache pattern:
@@ -54,16 +54,16 @@ export function saveLastBillNumber(billNo: string) {
 /**
  * Synchronous placeholder — used only for the very first paint before the
  * (eventual) backend lookup resolves. `startingSeq`/`startingLabel` let you
- * seed it once from your last real bill (104/26-27) the first time this runs
+ * seed it once from your last real bill (101/26-27) the first time this runs
  * with no cache yet.
  */
-export function generateBillNumber(seedSeq = 104, seedLabel = currentFiscalYearLabel().label): string {
+export function generateBillNumber(seedSeq = 101, seedLabel = currentFiscalYearLabel().label): string {
   const { label: nowLabel } = currentFiscalYearLabel();
   const last = readLastBillNumber();
   const parsed = last ? parseBillNumber(last) : null;
 
   if (!parsed) {
-    // No cache yet — seed from the known last physical bill (104/26-27) if we're
+    // No cache yet — seed from the known last physical bill (101/26-27) if we're
     // still in that fiscal year, otherwise start the new year at 01.
     return nowLabel === seedLabel ? formatBillNumber(seedSeq + 1, seedLabel) : formatBillNumber(1, nowLabel);
   }

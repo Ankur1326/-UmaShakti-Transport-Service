@@ -3,9 +3,7 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 
 enum UserRole {
-    customer = 'customer',
-    Admin = 'admin',
-    superAdmin = 'superAdmin',
+    transporter = 'transporter',
 }
 
 interface IUser extends Document {

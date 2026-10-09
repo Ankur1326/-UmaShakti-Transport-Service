@@ -4,6 +4,11 @@ import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import { authOptions } from '../[...nextauth]/options';
 
+function clearSessionCookies(response: NextResponse) {
+    response.cookies.delete('next-auth.session-token');
+    response.cookies.delete('__Secure-next-auth.session-token');
+}
+
 export async function POST(req: NextRequest) {
     try {
         await dbConnect();
@@ -17,15 +22,6 @@ export async function POST(req: NextRequest) {
             }, { status: 401 });
         }
 
-        // Get the role from the request body
-        const { role } = await req.json();
-        if (!role || !['superAdmin', 'customer', 'admin'].includes(role)) {
-            return NextResponse.json({
-                success: false,
-                message: 'Invalid role'
-            }, { status: 400 });
-        }
-
         // Check if user already exists
         const { email, image } = session.user;
         const existingUser: any = await User.findOne({ email });
@@ -35,16 +31,18 @@ export async function POST(req: NextRequest) {
             const isApproved = existingUser.isApproved;
 
             // User exists, return success with redirect and approval status
-            return NextResponse.json({
+            const response = NextResponse.json({
                 success: true,
                 message: 'User already exists',
                 userData: {
                     email: existingUser.email,
-                    role: existingUser.role,
+                    role: 'transporter',
                     profilePicture: existingUser.profilePicture,
                     isApproved
                 }
             });
+            clearSessionCookies(response);
+            return response;
         }
 
         const name = `${email?.split('@')[0]}${Math.floor(Math.random() * 100000)}`;
@@ -56,7 +54,7 @@ export async function POST(req: NextRequest) {
         const newUser: any = new User({
             email,
             profilePicture: image || '',
-            role,
+            role: 'transporter',
             isVerified: true, // Google accounts are pre-verified
             isApproved: false, // CRITICAL FIX: Always set new users to not approved
             googleAuth: true,
@@ -67,8 +65,7 @@ export async function POST(req: NextRequest) {
 
         await newUser.save();
 
-        // CRITICAL FIX: Remove redirectTo - always redirect to waiting-approval in the callback
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             message: 'User created successfully',
             userData: {
@@ -78,6 +75,8 @@ export async function POST(req: NextRequest) {
                 isApproved: false
             }
         });
+        clearSessionCookies(response);
+        return response;
 
     } catch (error) {
         console.error('Error creating user:', error);

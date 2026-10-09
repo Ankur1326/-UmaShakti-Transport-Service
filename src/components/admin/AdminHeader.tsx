@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { HiOutlineMenuAlt2 } from "react-icons/hi";
-import { Shield } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { getAdminPageTitle } from "@/lib/admin-page-meta";
 import { cn } from "@/lib/utils";
@@ -10,13 +9,11 @@ import { cn } from "@/lib/utils";
 interface AdminHeaderProps {
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
-  userRole?: string;
 }
 
 export default function AdminHeader({
   isSidebarOpen,
   onToggleSidebar,
-  userRole = "admin",
 }: AdminHeaderProps) {
   const pathname = usePathname();
   const pageTitle = getAdminPageTitle(pathname);
@@ -55,25 +52,13 @@ export default function AdminHeader({
 
         <div className="min-w-0">
           <p className="text-caption font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-            Admin Panel
+            Transporter Panel
           </p>
           <h1 className="truncate text-body-sm font-semibold text-brand-900 dark:text-white">
             {pageTitle}
           </h1>
         </div>
 
-        {/* {userRole === "admin" && (
-          <span
-            className={cn(
-              "ml-2 hidden items-center gap-1.5 rounded-md px-2.5 py-1 text-caption font-semibold md:inline-flex",
-              "bg-accent-50 text-accent-700 ring-1 ring-accent-200/80",
-              "dark:bg-accent-500/10 dark:text-accent-300 dark:ring-accent-500/20"
-            )}
-          >
-            <Shield size={12} aria-hidden="true" />
-            Admin
-          </span>
-        )} */}
       </div>
 
       <div className="flex shrink-0 items-center px-4 md:px-6">

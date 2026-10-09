@@ -31,7 +31,7 @@ export interface NavigationConfig {
 
 // Admin sidebar navigation
 export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
-  admin: {
+  transporter: {
     sections: [
       // ─────────────────────────────────────────
       // General

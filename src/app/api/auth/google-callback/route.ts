@@ -17,30 +17,15 @@ export async function GET(req: Request) {
         const email = session.user.email;
         const existingUser = await User.findOne({ email });
 
-        // CRITICAL FIX: Check if this is a limited access session (unapproved user)
+        // An unapproved Google account must not continue into the app.
         if (session.limitedAccess || (existingUser && !existingUser.isApproved)) {
-            // Redirect unapproved users to waiting approval page with user data
-            const userData = {
-                email: email,
-                role: existingUser?.role || 'admin',
-                profilePicture: existingUser?.profilePicture || session.user.image
-            };
-
             return NextResponse.redirect(
-                new URL(`/waiting-approval?userData=${encodeURIComponent(JSON.stringify(userData))}`, req.url)
+                new URL('/sign-in?error=AccountNotApproved', req.url)
             );
         }
 
         if (existingUser && existingUser.isApproved) {
-            // User already exists and is approved, redirect to appropriate dashboard
-            if (existingUser.role === 'admin') {
-                return NextResponse.redirect(new URL('/admin/dashboard', req.url));
-            }
-            // else if (existingUser.role === 'instructor') {
-            //     return NextResponse.redirect(new URL('/instructor/dashboard', req.url));
-            // } else {
-            //     return NextResponse.redirect(new URL('/student/dashboard', req.url));
-            // }
+            return NextResponse.redirect(new URL('/admin/dashboard', req.url));
         }
 
         // Return a special HTML page that will execute JavaScript to create the user
@@ -70,10 +55,8 @@ export async function GET(req: Request) {
                                 // Clear the role and signup flow flags from storage
                                 localStorage.removeItem('googleSignUpRole');
                                 sessionStorage.removeItem('googleSignUpFlow');
-                                
-                                // CRITICAL FIX: Always redirect to waiting-approval for new accounts
-                                const userData = encodeURIComponent(JSON.stringify(data.userData));
-                                window.location.href = '/waiting-approval?userData=' + userData;
+
+                                window.location.href = '/sign-in?error=AccountNotApproved';
                             } else {
                                 window.location.href = '/sign-up?error=' + encodeURIComponent(data.message || 'Error creating user');
                             }

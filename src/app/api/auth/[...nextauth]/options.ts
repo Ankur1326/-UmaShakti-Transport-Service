@@ -3,7 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import dbConnect from "@/lib/db";
 import User from "@/models/User";
-import jwt from 'jsonwebtoken';
 import axios from "axios";
 
 async function verifyCaptcha(token: string): Promise<boolean> {
@@ -21,7 +20,7 @@ async function verifyCaptcha(token: string): Promise<boolean> {
             }
         );
 
-        return verificationResponse.data;
+        return verificationResponse.data.success === true;
     } catch (error) {
         console.error('Captcha verification error:', error);
         throw new Error('Captcha verification failed');
@@ -49,11 +48,11 @@ export const authOptions: NextAuthOptions = {
 
                 try {
                     // Check if captchaToken is provided
-                    if (credentials.captchaToken) {
+                    if (credentials?.captchaToken) {
                         // Verify captcha only if token is provided
-                        const captchaResponse: any = await verifyCaptcha(credentials.captchaToken);
+                        const captchaResponse = await verifyCaptcha(credentials.captchaToken);
 
-                        if (!captchaResponse.success) {
+                        if (!captchaResponse) {
                             throw new Error("Captcha verification failed");
                         }
                     }
@@ -66,8 +65,13 @@ export const authOptions: NextAuthOptions = {
                     //     throw new Error("Captcha verification failed");
                     // }
 
-                    const user = await User.findOne({ email: credentials.identifier })
-                    console.log("user -> ", user);
+                    const email = (credentials?.email ?? credentials?.identifier ?? '').trim().toLowerCase();
+                    const password = credentials?.password;
+                    if (!email || !password) {
+                        throw new Error("Email and password are required");
+                    }
+
+                    const user = await User.findOne({ email });
 
                     if (!user) {
                         throw new Error("User Not found");
@@ -78,20 +82,28 @@ export const authOptions: NextAuthOptions = {
                     }
 
                     if (!user.isApproved) {
-                        throw new Error("You can't logged-in without the approval of admin")
+                        throw new Error("AccountNotApproved");
                     }
 
-                    const isPasswordCorrect = await user.comparePassword(credentials.password.trim());
+                    const isPasswordCorrect = await user.comparePassword(password);
 
                     if (isPasswordCorrect) {
-                        // Return user with access token
-                        return user
+                        return {
+                            id: user._id.toString(),
+                            _id: user._id.toString(),
+                            email: user.email,
+                            name: user.fullName,
+                            role: "transporter",
+                            isVerified: user.isVerified,
+                            isApproved: user.isApproved,
+                        };
                     } else {
                         throw new Error('Incorrect Password')
                     }
 
                 } catch (err: any) {
-                    throw new Error(err);
+                    const message = err instanceof Error ? err.message : 'Authentication failed';
+                    throw new Error(message);
                 }
             }
         }),
@@ -149,37 +161,18 @@ export const authOptions: NextAuthOptions = {
                     // Check if this is potentially a new user (no pre-existing account)
                     const existingUser = await User.findOne({ email: user.email });
 
-                    // Get signUp role from the session storage (if this is a signup flow)
-                    const isSignUp = typeof window !== 'undefined' &&
-                        window.sessionStorage &&
-                        window.sessionStorage.getItem('googleSignUpFlow') === 'true';
-
-                    const signUpRole = typeof window !== 'undefined' ?
-                        window.sessionStorage.getItem('googleSignUpRole') : null;
-
                     if (!existingUser) {
                         console.log("New Google user - needs registration:", user.email);
                         // Set a flag in user object to identify the user needs registration
                         user.pendingGoogleSignup = true;
                         user.needsRegistration = true;
-                        user.role = signUpRole || "pending"; // Set role from session storage
+                        user.role = "transporter";
                         return true; // Allow sign-in to continue to callbacks
                     }
 
                     // For existing users, check approval status
                     if (!existingUser.isApproved) {
-                        console.log("Blocking login for unapproved user:", user.email);
-
-                        // Mark the user for redirection to waiting approval page
-                        user.needsApproval = true;
-                        user.isApproved = false;
-
-                        // Always redirect unapproved users to waiting approval page
-                        return `/waiting-approval?userData=${encodeURIComponent(JSON.stringify({
-                            email: existingUser.email,
-                            role: existingUser.role,
-                            profilePicture: existingUser.profilePicture || profile.picture
-                        }))}`;
+                        return "/sign-in?error=AccountNotApproved";
                     }
 
                     // If this is an approved existing user, allow the sign-in
@@ -200,36 +193,26 @@ export const authOptions: NextAuthOptions = {
 
                     // If Google sign-in
                     if (account.provider === 'google') {
-                        console.log("token, user, account : ", token, user, account);
-
                         // Find the user in database based on email
                         const dbUser: any = await User.findOne({ email: user.email });
-                        console.log("dbUser : ", dbUser);
 
                         if (dbUser) {
                             // User exists, add details to token
                             token._id = dbUser._id.toString();
-                            token.role = dbUser.role;
+                            token.role = "transporter";
                             token.isVerified = dbUser.isVerified || false;
                             token.isApproved = dbUser.isApproved || false;
                             token.googleAuth = true;
 
-                            // Explicitly block unapproved users
                             if (!dbUser.isApproved) {
                                 token.needsApproval = true;
                                 token.limitedAccess = true;
-                                // This is critical - set a special flag to ensure middleware handles it correctly
-                                token.redirectToWaitingApproval = true;
                             }
                         } else {
-                            // User doesn't exist yet
-                            // Get the role from sessionStorage if in signup flow
-                            const signUpRole = typeof window !== 'undefined' ?
-                                window.sessionStorage.getItem('googleSignUpRole') : null;
-
                             token.pendingGoogleSignup = true;
                             token.googleAuth = true;
-                            token.role = signUpRole || "pending"; // Default to pending if no role is set
+                            token.role = "transporter";
+                            token.isApproved = false;
                             token.redirectToCompleteRegistration = true;
                         }
                     } else {
@@ -237,14 +220,11 @@ export const authOptions: NextAuthOptions = {
                         token._id = user._id?.toString();
                         token.isVerified = user.isVerified;
                         token.isApproved = user.isApproved;
-                        token.role = user.role || "pending";
+                        token.role = "transporter";
 
-                        // Block unapproved users entirely for credential login
                         if (!user.isApproved) {
-                            console.log("JWT validation failed - user not approved (credentials)");
                             token.needsApproval = true;
                             token.limitedAccess = true;
-                            token.redirectToWaitingApproval = true;
                         }
                     }
                 } catch (error) {
@@ -262,7 +242,7 @@ export const authOptions: NextAuthOptions = {
                 session.user._id = token._id;
                 session.user.isVerified = token.isVerified;
                 session.user.isApproved = token.isApproved;
-                session.user.role = token.role || "pending";
+                session.user.role = token.role;
                 session.user.pendingGoogleSignup = token.pendingGoogleSignup;
                 session.user.needsRegistration = token.needsRegistration || false;
                 session.user.googleAuth = token.googleAuth;
@@ -273,9 +253,7 @@ export const authOptions: NextAuthOptions = {
                 // console.log("Session user role:", session.user.role);
                 // console.log("Session user registration status:", session.user.needsRegistration);
 
-                // If this is a limited access token (unapproved user)
                 if (token.limitedAccess) {
-                    console.log("Session is limited access only (requires approval)");
                     session.limitedAccess = true;
                 }
 
@@ -289,11 +267,6 @@ export const authOptions: NextAuthOptions = {
                             session.user.isApproved = false;
                             session.needsApproval = true;
                             session.limitedAccess = true;
-                        }
-
-                        // Ensure role is always set to something valid
-                        if (!session.user.role && currentUser) {
-                            session.user.role = currentUser.role || "pending";
                         }
 
                     } catch (error) {

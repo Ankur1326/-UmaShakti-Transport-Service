@@ -19,14 +19,9 @@ export function PublicHeader() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
-  const dashboardHref =
-    session?.user?.role === "admin" || session?.user?.role === "superAdmin"
-      ? "/admin/dashboard"
-      : session?.user
-        ? "/waiting-approval"
-        : "/sign-in";
+  const dashboardHref = session?.user ? "/admin/dashboard" : "/sign-in";
 
-  const authButtonLabel = session?.user ? "Go to Dashboard" : "Admin Login";
+  const authButtonLabel = session?.user ? "Go to Dashboard" : "Transporter Login";
 
   return (
     <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/95 backdrop-blur">

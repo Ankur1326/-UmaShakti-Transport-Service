@@ -3,7 +3,7 @@
 import axios from "axios"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { redirect, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 // import ReCAPTCHA from "react-google-recaptcha"
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -17,15 +17,12 @@ export default function Page() {
     const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
 
     const [isSubmitting, setSubmitting] = useState<boolean>(false)
-    const [selectedRole, setSelectedRole] = useState<string>('admin')
-    const [isLoading, setIsLoading] = useState<boolean>(false)
     const router = useRouter()
 
     const onSubmit = async (e: any) => {
         e.preventDefault()
         setSubmitting(true)
-        console.log("selectedRole : ", selectedRole)
-        if (!email || !password || !selectedRole) {
+        if (!email || !password) {
             // toast.error("All fields required")
             setSubmitting(false)
             return
@@ -42,17 +39,13 @@ export default function Page() {
             setSubmitting(false)
             return
         }
-        console.log(email, password, selectedRole)
-
         try {
             const response = await axios.post("/api/auth/sign-up", {
                 email,
                 password,
-                role: selectedRole,
             });
 
             if (response.data.success) {
-                console.log("response.data.success: ", response.data.success)
                 // toast.success(response.data.message)
                 router.push("/sign-in");
             }
@@ -153,42 +146,6 @@ export default function Page() {
                     {password !== confirmPassword && password && confirmPassword && (
                         <p className="text-sm text-red-500 -mt-2">Passwords do not match</p>
                     )}
-
-                    {/* <div className="flex flex-wrap gap-4 mt-3">
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="role"
-                                    value="student"
-                                    checked={selectedRole === 'student'}
-                                    onChange={(e) => setSelectedRole(e.target.value)}
-                                    className="form-radio h-4 w-4 text-[#66B788]"
-                                />
-                                <span className="text-sm text-gray-600">Student</span>
-                            </label>
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="role"
-                                    value="instructor"
-                                    checked={selectedRole === 'instructor'}
-                                    onChange={(e) => setSelectedRole(e.target.value)}
-                                    className="form-radio h-4 w-4 text-[#66B788]"
-                                />
-                                <span className="text-sm text-gray-600">Instructor</span>
-                            </label>
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="role"
-                                    value="admin"
-                                    checked={selectedRole === 'admin'}
-                                    onChange={(e) => setSelectedRole(e.target.value)}
-                                    className="form-radio h-4 w-4 text-[#66B788]"
-                                />
-                                <span className="text-sm text-gray-600">Admin</span>
-                            </label>
-                        </div> */}
 
                     {/* <div className="flex justify-center mt-5">
                             <ReCAPTCHA

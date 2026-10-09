@@ -20,8 +20,7 @@ export async function DELETE(request: Request) {
         );
     }
 
-    // Check if the user has admin role
-    if (session.user?.role !== "admin") {
+    if (session.user?.role !== "transporter") {
         return Response.json(
             {
                 success: false,

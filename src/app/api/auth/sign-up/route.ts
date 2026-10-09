@@ -6,11 +6,17 @@ export async function POST(request: Request) {
     await dbConnect()
 
     try {
-        const { email, password, role } = await request.json()
+        const { email, password } = await request.json()
 
-        console.log("email, password, role : ", email, password, role)
+        const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+        if (!normalizedEmail || typeof password !== "string" || !password) {
+            return Response.json({
+                success: false,
+                message: "Email and password are required",
+            }, { status: 400 });
+        }
 
-        const existingUserByEmail = await UserModel.findOne({ email })
+        const existingUserByEmail = await UserModel.findOne({ email: normalizedEmail })
 
         if (existingUserByEmail) {
             if (existingUserByEmail.isVerified) {
@@ -31,15 +37,14 @@ export async function POST(request: Request) {
             // }
         } else {
             const newUser = new UserModel({
-                email,
+                email: normalizedEmail,
                 password,
-                role,
+                role: "transporter",
                 isVerified: true
             })
 
             await newUser.save()
 
-            console.log("User created successfully")
             return Response.json({
                 success: true,
                 message: "User created successfully",

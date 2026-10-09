@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     // }
 
     // Check if the user has admin role
-    // if (session.user?.role !== "admin") {
+    // if (session.user?.role !== "transporter") {
     //     return res.status(403).json({ error: "Forbidden. You do not have permission to perform this action." });
     // }
 

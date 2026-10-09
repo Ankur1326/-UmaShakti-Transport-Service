@@ -3,91 +3,58 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Eye, EyeOff, Loader2, Truck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/Button";
-import { Container } from "@/components/layout/Container";
 import { signIn } from "next-auth/react";
-import toast from "react-hot-toast"
+import toast from "react-hot-toast";
 
 export default function Page() {
-    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const [identifier, setIdentifier] = useState("")
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
-    const [isLoading, setLoading] = useState(false)
     const [isSubmitting, setSubmitting] = useState(false);
     const router = useRouter()
-    const [isForgotPasswordModalShow, setForgotPasswordModalShow] = useState(false)
-    console.log("process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY :::::: ", process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY)
-    // Add these state declarations at the top with other states
-    const [loginAttempts, setLoginAttempts] = useState(0);
-    const MAX_ATTEMPTS = 3;
+
+    useEffect(() => {
+        const error = new URLSearchParams(window.location.search).get("error");
+        if (error === "AccountNotApproved") {
+            toast.error("Your account requires admin approval before you can sign in.");
+        }
+    }, []);
 
     const onSubmit = async (e: any) => {
         e.preventDefault();
         setSubmitting(true);
 
-        // Only check captcha if we've exceeded login attempts
-        if (loginAttempts >= MAX_ATTEMPTS && !captchaToken) {
-            // toast.error('Please complete the captcha verification');
-            setSubmitting(false);
-            return;
-        }
-
         try {
-
-            // Prepare credentials object without captchaToken initially
             const credentials: any = {
                 redirect: false,
-                identifier: identifier,
+                email: identifier.trim(),
                 password: password,
             };
 
-            // Only add captchaToken if we're past the attempt threshold
-            if (loginAttempts >= MAX_ATTEMPTS) {
-                if (!captchaToken) {
-                    // toast.error('Please complete the captcha verification');
-                    setSubmitting(false);
-                    return;
-                }
-                // Add the captcha token to credentials
-                credentials.captchaToken = captchaToken;
-            }
-
-            // Call signIn with appropriate credentials
             const result = await signIn('credentials', credentials);
-            console.log("result : ", result)
 
             if (result?.error) {
-                setLoginAttempts(prev => prev + 1);
-                toast.error(result?.error);
+                toast.error(
+                    result.error === "AccountNotApproved"
+                        ? "Your account requires admin approval before you can sign in."
+                        : result.error
+                );
             }
 
             if (result?.ok) {
                 const response = await fetch('/api/auth/session');
-                console.log("response : ", response)
                 const session = await response.json();
-                console.log("session : ", session)
-                const userRole = session?.user?.role;
-                console.log("userRole : ", userRole)
-
-                if (userRole === 'admin') {
+                if (session?.user?.role === "transporter") {
                     router.replace("/admin/dashboard");
-                }
-                else if (userRole === 'superAdmin') {
-                    router.replace("/superAdmin/dashboard");
-                }
-                // else if (userRole === 'student') {
-                //     router.replace("/student/dashboard");
-                // } 
-                else {
-                    router.replace("/403");
+                } else {
+                    toast.error("Your account does not have access to a dashboard.");
                 }
             }
         } catch (error) {
-            setLoginAttempts(prev => prev + 1);
             console.error("Error during sign-in:", error);
             toast.error("An unexpected error occurred. Please try again later.");
         } finally {
@@ -117,12 +84,12 @@ export default function Page() {
                     <section className="bg-white rounded-xl shadow p-8 md:p-10">
                         <div className="mb-6">
                             <h1 className="text-2xl font-semibold">Sign in to your account</h1>
-                            <p className="mt-1 text-sm text-neutral-600">Use your administrator credentials to continue.</p>
+                            <p className="mt-1 text-sm text-neutral-600">Use your transporter account credentials to continue.</p>
                         </div>
 
                         <form onSubmit={onSubmit} className="space-y-4">
                             <Input
-                                label="Email" type="email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required placeholder="admin@company.com" />
+                                label="Email" type="email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required placeholder="you@company.com" />
 
                             <div>
                                 <label className="mb-1.5 block text-body-sm font-medium text-neutral-800">Password</label>

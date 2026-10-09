@@ -7,7 +7,7 @@ import { NAVIGATION_CONFIG, NavigationConfig } from '@/lib/navigationConfig';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
-type UserRole = 'admin' | 'superAdmin' | 'customer';
+type UserRole = 'transporter';
 
 interface SidebarProps {
     isSidebarOpen: boolean;
@@ -17,7 +17,7 @@ interface SidebarProps {
 
 export default function Sidebar({
     isSidebarOpen,
-    userRole = 'admin',
+    userRole = 'transporter',
 }: SidebarProps) {
     const router = useRouter();
     const currentRoute = usePathname();
@@ -25,7 +25,7 @@ export default function Sidebar({
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
     const sidebarConfig: NavigationConfig =
-        NAVIGATION_CONFIG[userRole] || NAVIGATION_CONFIG.admin;
+        NAVIGATION_CONFIG[userRole];
 
     useEffect(() => {
         if (!sidebarConfig?.sections) return;

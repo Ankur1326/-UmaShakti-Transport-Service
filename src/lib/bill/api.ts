@@ -33,8 +33,20 @@ const BILLS_BASE_URL = "/api/admin/bills";
  * fetching. That also protects against older records where payment.status
  * might be blank/undefined.
  */
-export async function searchEligibleConsignments(query: string): Promise<ConsignmentListItem[]> {
-  const { data } = await listConsignments({ search: query.trim() || undefined, limit: 20 });
+export interface SearchEligibleOptions {
+  partyType?: "Consignor" | "Consignee";
+  partyName?: string;
+  excludeBilled?: boolean;
+  limit?: number;
+}
+
+export async function searchEligibleConsignments(query: string, opts: SearchEligibleOptions = {}): Promise<ConsignmentListItem[]> {
+  const params: any = { search: query.trim() || undefined, limit: opts.limit || 20 };
+  if (opts.partyType) params.partyType = opts.partyType;
+  if (opts.partyName) params.partyName = opts.partyName;
+  if (opts.excludeBilled) params.excludeBilled = "true";
+
+  const { data } = await listConsignments(params);
   return data.filter((c) => c.payment?.status !== "Paid");
 }
 

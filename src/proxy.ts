@@ -14,9 +14,19 @@ const publicPaths = [
   '/sign-in',
   '/sign-up',
   '/verify',
-  '/waiting-approval',
   '/complete-registration',
 ];
+
+function clearSessionCookies(response: NextResponse) {
+  response.cookies.delete('next-auth.session-token');
+  response.cookies.delete('__Secure-next-auth.session-token');
+  response.cookies.delete('next-auth.csrf-token');
+  response.cookies.delete('__Secure-next-auth.csrf-token');
+}
+
+function getDashboardPath(role: unknown): string | null {
+  return role === 'transporter' ? '/admin/dashboard' : null;
+}
 
 function isPublicRoute(pathname: string) {
   return publicPaths.some((route) => pathname === route || pathname.startsWith(`${route}/`)) ||
@@ -34,43 +44,16 @@ export async function proxy(request: NextRequest & NextRequestWithAuth) {
 
   if (url.pathname === '/sign-out') {
     const response = NextResponse.redirect(new URL("/sign-in", request.url));
-    // Clear auth cookies
-    response.cookies.delete('next-auth.session-token');
-    response.cookies.delete('__Secure-next-auth.session-token');
-    response.cookies.delete('next-auth.csrf-token');
-    response.cookies.delete('__Secure-next-auth.csrf-token');
+    clearSessionCookies(response);
     response.cookies.delete('next-auth.callback-url');
     response.cookies.delete('__Secure-next-auth.callback-url');
     return response;
   }
 
-  // Always allow access to the waiting-approval page
-  if (url.pathname === '/waiting-approval') {
-    return NextResponse.next();
-  }
-
-  // Special case: if trying to access the waiting-approval -> sign-in flow, clear cookies first
-  if (url.searchParams.has('from') && url.searchParams.get('from') === 'waiting-approval' &&
-    url.pathname === '/sign-in') {
-    const response = NextResponse.next();
-    response.cookies.delete('next-auth.session-token');
-    response.cookies.delete('__Secure-next-auth.session-token');
-    response.cookies.delete('next-auth.csrf-token');
-    response.cookies.delete('__Secure-next-auth.csrf-token');
-    return response;
-  }
-
   // Handle pending/dashboard route - clear token and redirect to sign-in
   if (url.pathname === '/pending/dashboard') {
-    // Create response that will redirect to sign-in
     const response = NextResponse.redirect(new URL("/sign-in", request.url));
-
-    // Clear the auth cookie to remove the token
-    response.cookies.delete('next-auth.session-token');
-    response.cookies.delete('__Secure-next-auth.session-token'); // Secure version used in HTTPS
-    response.cookies.delete('next-auth.csrf-token');
-    response.cookies.delete('__Secure-next-auth.csrf-token');
-
+    clearSessionCookies(response);
     return response;
   }
 
@@ -79,7 +62,32 @@ export async function proxy(request: NextRequest & NextRequestWithAuth) {
     return NextResponse.next();
   }
 
-  // console.log("token : ", token)
+  if (token && (
+    token.isApproved === false ||
+    token.needsApproval ||
+    token.limitedAccess
+  )) {
+    if (isPublicRoute(url.pathname)) {
+      const response = NextResponse.next();
+      clearSessionCookies(response);
+      return response;
+    }
+
+    if (url.pathname.startsWith('/api/')) {
+      const response = NextResponse.json(
+        { success: false, message: 'Account approval is required' },
+        { status: 403 }
+      );
+      clearSessionCookies(response);
+      return response;
+    }
+
+    const response = NextResponse.redirect(
+      new URL('/sign-in?error=AccountNotApproved', request.url)
+    );
+    clearSessionCookies(response);
+    return response;
+  }
 
   // Public pages should be accessible without authentication.
   if (!token && isPublicRoute(url.pathname)) {
@@ -90,22 +98,6 @@ export async function proxy(request: NextRequest & NextRequestWithAuth) {
   if (token) {
     // Allow public pages for signed-in users too, unless they're auth pages that should redirect.
     if (isPublicRoute(url.pathname) && !['/sign-in', '/sign-up', '/verify'].includes(url.pathname)) {
-      return NextResponse.next();
-    }
-
-    // Check if token represents an unapproved user
-    if (!token.isApproved || token.needsApproval || token.limitedAccess) {
-      console.log("Unapproved user detected in middleware");
-
-      // Don't redirect if already on approved pages
-      if (!url.pathname.startsWith('/waiting-approval') &&
-        !url.pathname.startsWith('/sign-in') &&
-        !url.pathname.startsWith('/sign-out') &&
-        !url.pathname.startsWith('/api/auth/signout')) {
-
-        return NextResponse.redirect(new URL("/waiting-approval", request.url));
-      }
-
       return NextResponse.next();
     }
 
@@ -137,7 +129,10 @@ export async function proxy(request: NextRequest & NextRequestWithAuth) {
     if (url.pathname.startsWith("/sign-in") ||
       url.pathname.startsWith("/sign-up") ||
       url.pathname.startsWith("/verify")) {
-      return NextResponse.redirect(new URL(`/${token.role}/dashboard`, request.url));
+      const dashboard = getDashboardPath(token.role);
+      if (dashboard) {
+        return NextResponse.redirect(new URL(dashboard, request.url));
+      }
     }
   }
 
@@ -156,11 +151,7 @@ export async function proxy(request: NextRequest & NextRequestWithAuth) {
   }
 
   // Redirect unauthenticated users to sign-in
-  if (!token && (
-    url.pathname.startsWith('/admin') ||
-    url.pathname.startsWith('/superAdmin') ||
-    url.pathname.startsWith('/customer')
-  )) {
+  if (!token && url.pathname.startsWith('/admin')) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
@@ -168,28 +159,12 @@ export async function proxy(request: NextRequest & NextRequestWithAuth) {
   if (token) {
     const userRole = token.role;
 
-    // If no role or invalid role, restrict access
-    if (!userRole || !['admin', 'superAdmin', 'customer'].includes(userRole)) {
-      console.error("Invalid or missing role:", userRole);
-      return NextResponse.redirect(new URL("/403", request.url));
+    if (userRole !== 'transporter') {
+      const response = NextResponse.redirect(new URL("/sign-in", request.url));
+      clearSessionCookies(response);
+      return response;
     }
 
-    if (url.pathname.startsWith('/admin') && userRole !== 'admin') {
-      return NextResponse.redirect(new URL("/403", request.url));
-    }
-
-    if (url.pathname.startsWith('/superAdmin') && userRole !== 'superAdmin') {
-      return NextResponse.redirect(new URL("/403", request.url));
-    }
-
-    if (url.pathname.startsWith('/customer') && userRole !== 'customer') {
-      return NextResponse.redirect(new URL("/403", request.url));
-    }
-
-    // 🚫 block just the notifications route for students
-    if (userRole === 'customer' && url.pathname === '/customer/notifications') {
-      return NextResponse.redirect(new URL("/403", request.url));
-    }
   }
 
   return NextResponse.next();
@@ -216,11 +191,8 @@ export const config = {
     "/sign-in",
     "/sign-up",
     "/verify",
-    "/waiting-approval",
     "/complete-registration",
     "/admin/:path*",
-    "/superAdmin/:path*",
-    "/customer/:path*",
     "/api/:path*",
   ],
 };
